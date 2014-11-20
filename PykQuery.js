@@ -31,7 +31,6 @@ PykQuery.init = function(mode, _scope, divid) {
       cols = [],
       sort = {},
       limit = 2000,
-      impacted_by =[],
       impacts =[],
       offset = 0;
 
@@ -127,17 +126,6 @@ PykQuery.init = function(mode, _scope, divid) {
     },
     set: function(value) {
        impacts.push(value)
-    }
-  });
-
-  //Used internally but not accessible to the user
-
-  Object.defineProperty(this, '__impacted_by', {
-    get: function() {
-      return impacted_by;
-    },
-    set: function(value) { 
-       impacted_by.push(value)
     }
   });
 
@@ -270,17 +258,13 @@ PykQuery.init = function(mode, _scope, divid) {
      var temp_global = global;
      var mydiv_id = findQueryByDivid(div_id);
      console.log(temp_global)
-     if (!util.isBlank(temp_global['id']) && (temp_global['impacted_by'] == true || temp_global['impacts'] == true)) {
+     if (!util.isBlank(temp_global['id']) && (temp_global['impacts'] == true)) {
        if (_scope == "local") {
          var id = findQueryByDivid(temp_global['id']);
          if (!util.isBlank(id)) {
            if (temp_global['impacts'] == true) {
              impacts.push(id);
              console.log('added to impacts');
-           }
-           if (temp_global["impacted_by"] == true) {
-             window[id].__impacted_by = mydiv_id;
-             console.log("added to impacted_by");
            }
          }
          else {
