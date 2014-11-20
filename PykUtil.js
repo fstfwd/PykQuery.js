@@ -2,6 +2,16 @@ PykUtil = {}
 
 PykUtil.init = function() {
 
+    this.pushToArray = function(a1, o1){
+        if( a1.length == 0 ){
+            a1 = [o1]
+        }
+        else{
+            a1.push(o1);
+        }
+        return a1
+    }
+
     //TODO - Change all _ ruby like names to CamelCase for all PykUtil Functions
     this.concat_and_uniq = function(a1, a2) {
         if (a1 != undefined && a2 != undefined){
@@ -26,7 +36,7 @@ PykUtil.init = function() {
     }
 
     this.subtract_array = function(a1, a2) {
-        if (a2 != undefined) {
+        if (a1 != undefined && a2 != undefined){
             for (var i = 0; i < a2.length; i++) {
                 var index = a1.indexOf(a2[i]);
                 if (index > -1) {

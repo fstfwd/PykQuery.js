@@ -3,7 +3,7 @@ PykQuery.init = function(mode, _scope, divid) {
 
   that = this;
   var div_id;
-  var available_mode = ["aggregation", "unique", "select", "datatype"];
+  var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var util = new PykUtil.init();
   //TODO Check if divid exists in DOM.
@@ -11,6 +11,10 @@ PykQuery.init = function(mode, _scope, divid) {
     mode = mode;
     _scope = _scope;
     div_id = divid;
+    if (mode == "global" && _scope != "global"){
+        console.error(divid + ": scope and mode both should be global.");
+        return false;
+    }
   } else {
     if (available_mode.indexOf(mode) == -1){
       console.error(divid + ": available_mode has invalid value. It should be one of " + available_mode);
@@ -20,6 +24,9 @@ PykQuery.init = function(mode, _scope, divid) {
     }
     if (util.isBlank(divid)){
       console.error(divid + ": DivID cannot be undefined.");
+    }
+    if (mode == "global" && _scope != "global"){
+        console.error(divid + ": scope and mode both should be global.");
     }
     return false;
   }
@@ -150,13 +157,18 @@ PykQuery.init = function(mode, _scope, divid) {
     Object.defineProperty(this, 'filters', {
       get: function() {
         return addfilter;
+      },
+      set:function(name){
+        addFilterPropagate(name)
       }
     });
     var obj = {
       add: function(name) {
         if (filterValidation(name)) {
           addFilterInQuery(name)
-          addFilterPropagate(name)
+          if (_scope == "local"){
+            addFilterPropagate(name)
+          }
         }
       },
       remove: function(column_name, condition_type, params) {
@@ -216,7 +228,7 @@ PykQuery.init = function(mode, _scope, divid) {
       var len = impacts.length;
       for (var j = 0; j < len; j++) {
         var global_filter = window[impacts[j]];
-        global_filter.addFilterInQuery(new_filter)
+        global_filter.filters = new_filter;
       }
     }
   }
@@ -250,17 +262,33 @@ PykQuery.init = function(mode, _scope, divid) {
       }
     }
   }
+  
+  this.addLocals = function(listOfLocals){
+      if( listOfLocals != undefined && listOfLocals.length > 0){
+          len = listOfLocals.length;
+          for(var i = 0; i < len; i++){
+              var l = findQueryByDivid(listOfLocals[i]);
+              var local = window[l];
+              if (local == undefined){
+                  console.error("You are trying to addLocal " + listOfLocals[i] + " whose DIV does not exist.");
+                  return false;
+              }
+              local.__impacts = util.pushToArray(local.__impacts, div_id);
+              impacts = util.pushToArray(impacts, listOfLocals[i]);
+          }
+      }
+  }
 
-  //structure of global {id:divid,impact:true,impact:false}
-   this.addGlobal = function(global) {
-     var temp_global = global;
+  //structure of global {id:divid,impact:true}
+   this.addGlobal = function(params) {
+     var temp_params = params;
      var mydiv_id = findQueryByDivid(div_id);
-     console.log(temp_global)
-     if (!util.isBlank(temp_global['id']) && (temp_global['impacts'] == true)) {
+     console.log(temp_params)
+     if (!util.isBlank(temp_params['id']) && (temp_params['impacts'] == true)) {
        if (_scope == "local") {
-         var id = findQueryByDivid(temp_global['id']);
+         var id = findQueryByDivid(temp_params['id']);
          if (!util.isBlank(id)) {
-           if (temp_global['impacts'] == true) {
+           if (temp_params['impacts'] == true) {
              impacts.push(id);
              console.log('added to impacts');
            }
@@ -274,7 +302,7 @@ PykQuery.init = function(mode, _scope, divid) {
        }
      }
      else {
-       console.error("error in " + temp_global['id']);
+       console.error("error in " + temp_params['id']);
      }
    }
 
@@ -412,12 +440,13 @@ PykQuery.init = function(mode, _scope, divid) {
 //     return data;
 //   }
 
-//   var findQueryByDivid = function(id) {
-//     var obj_name = $("#" + id).attr("pyk_object");
-//     if(obj_name == undefined)
-//      console.log("div not exit "+id);
-//     return obj_name;
-//   }
+var findQueryByDivid = function(id) {
+    var obj_name = $("#" + id).attr("pyk_object");
+    if(obj_name == undefined){
+        console.log("div not exit "+id);
+    }
+    return obj_name;
+}
   
 //   // filter data with underscore
 // }

@@ -12,13 +12,22 @@
       <div id="c"></div>
     </div>
     <script type="text/javascript">
-      var d2 = new PykQuery.init("select", "local", "a");
-      d2.storeObjectInMemory('d2');
-      z = d2.filter()
+      var a = new PykQuery.init("select", "local", "a");
+      a.storeObjectInMemory('a');
+      var b = new PykQuery.init("aggregation", "local", "b");
+      b.dimensions = ["day", "das", "sdsd"];
+      b.metrics = [{"": ["min"]}, {"sd": ["min"]}, {"sd": ["min"]}];
+      b.storeObjectInMemory('b');
+      var g1 = new PykQuery.init("global", "global", "g1");
+      g1.storeObjectInMemory('g1');
+      g1.addLocals(["a", "b"]);
+      z = a.filter()
       z.add({"column_name": "Day", "condition_type": "range", "condition": {"min": 10, "max": 10000, "not": false}, "next": "OR"});
-      z.add({"column_name": "Day", "condition_type": "values", "in": [10, 11, 12], "next": "OR"});
-      z.add({"column_name": "Day", "condition_type": "values", "in": [10, 13, 12], "next": "OR"});
-      console.log(d2.getConfig());
+      z = b.filter()
+      z.add({"column_name": "Daysdsd", "condition_type": "range", "condition": {"min": 10000, "max": 210000, "not": false}, "next": "OR"});
+      z = g1.filter()
+      z.add({"column_name": "Name", "condition_type": "values", "in": ["Darpan", "Ronak"], "next": "OR"});
+      console.log(g1.getConfig());
     </script>
   </body>
 </html>
