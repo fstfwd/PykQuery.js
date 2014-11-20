@@ -1,0 +1,55 @@
+<html>
+<body>
+  <div id='div1'></div>
+  <div id="divg"></div>
+  <div id="div2"></div>
+  <div id="div3"></div>
+
+  <script src="http://code.jquery.com/jquery-2.0.0.js"></script>
+  <script src='underscore-min.js'></script>
+  <script src="PykQuery.js"></script>
+<script type="text/javascript">
+console.log("----------");
+  var d2 = new PykQuery.init("select", "local", "div2");
+  d2.storeObjectInMemory('d2');
+z = d2.filter()
+
+z.add( {
+  "column_name": "Day",
+  "condition_type": "range",
+  "condition": {
+    "min": 10,
+    "max": 10000,
+    "not": false
+  },
+  "next": "OR"
+});
+
+z.add( {
+  "column_name": "Day",
+  "condition_type": "values",
+  "in": [10, 11, 12],
+  "next": "OR"
+});
+
+z.add( {
+  "column_name": "Day",
+  "condition_type": "values",
+  "not_in": [10, 11, 13],
+  "next": "OR"
+});
+
+z.add( {
+  "column_name": "Day",
+  "condition_type": "range",
+  "condition": {
+    "min": 11,
+    "max": 10000,
+    "not": false
+  },
+  "next": "OR"
+});
+console.log(d2.getConfig());
+</script>
+</body>
+</html>
