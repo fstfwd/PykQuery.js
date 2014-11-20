@@ -12,7 +12,7 @@
       <div id="c"></div>
     </div>
     <script type="text/javascript">
-      var d2 = new PykQuery.init("select", "local", "a");
+      var d2 = new PykQuery.init("select", "local", "a", "inbrowser");
       d2.storeObjectInMemory('d2');
       z = d2.filter()
       z.add({"column_name": "Day", "condition_type": "range", "condition": {"min": 10, "max": 10000, "not": false}, "next": "OR"});

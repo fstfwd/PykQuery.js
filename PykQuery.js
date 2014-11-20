@@ -1,15 +1,20 @@
+//TODO - Isha if PykQuery object related to PykChart changes its filterdata then re-render the chart
+
 var PykQuery = {} 
-PykQuery.init = function(mode, _scope, divid) {
+PykQuery.init = function(mode, _scope, divid, adapter) {
 
   that = this;
   var div_id;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
+  var available_adapters = ["inbrowser", "rumi"];
   var util = new PykUtil.init();
   //TODO Check if divid exists in DOM.
-  if (available_mode.indexOf(mode) > -1 && available_scope.indexOf(_scope) > -1 && !util.isBlank(divid)) {
+    
+  if (available_mode.indexOf(mode) > -1 && available_scope.indexOf(_scope) > -1 && !util.isBlank(divid) && available_adapters.indexOf(adapter) > -1) {
     mode = mode;
     _scope = _scope;
+    adapter = adapter;
     div_id = divid;
     if (mode == "global" && _scope != "global"){
         console.error(divid + ": scope and mode both should be global.");
@@ -21,6 +26,9 @@ PykQuery.init = function(mode, _scope, divid) {
     }
     if (available_scope.indexOf(_scope) == -1){
       console.error(divid + ": available_scope has invalid value. It should be one of " + available_scope);
+    }
+    if (available_adapters.indexOf(adapter) == -1){
+      console.error(divid + ": available_adapters has invalid value. It should be one of " + available_adapters);
     }
     if (util.isBlank(divid)){
       console.error(divid + ": DivID cannot be undefined.");
@@ -38,8 +46,29 @@ PykQuery.init = function(mode, _scope, divid) {
       sort = {},
       limit = 2000,
       impacts =[],
-      offset = 0;
-
+      offset = 0,
+      filter_data,raw_data,global_divid_for_rawdata;
+  // set the global data to pykquery
+  if(mode == "global" && _scope == "global" && adapter == "inbrowser") {
+    Object.defineProperty(this, 'rawdata', {
+      get: function() {
+        return raw_data;
+      },
+      set: function(mydata) {
+        raw_data = mydata;
+      }
+    });
+  }
+  if( _scope == "local" && adapter == "inbrowser") {
+    Object.defineProperty(this, 'global_divid_for_raw_data', {
+      get: function() {
+        return global_divid_for_rawdata;
+      },
+      set: function(my_global_div_id) {
+        global_divid_for_rawdata = my_global_div_id;
+      }
+    });
+  }
   // if select - columns name
   // if aggregation - metrics, dimensions
   // if unique - column name
@@ -93,13 +122,22 @@ PykQuery.init = function(mode, _scope, divid) {
       return;
       break;
   }
-
+  
   Object.defineProperty(this, 'div_id', {
     get: function() {
       return div_id;
     }
   });
-
+  
+  Object.defineProperty(this, 'filterdata', {
+    get: function() {
+      return filter_data;
+    },
+    set: function(mydata) {
+      filter_data = mydata;
+    }
+  });
+  
   Object.defineProperty(this, 'limit', {
     get: function() {
       return limit
@@ -262,7 +300,8 @@ PykQuery.init = function(mode, _scope, divid) {
       }
     }
   }
-  
+
+  //this function is only called on Global
   this.addLocals = function(listOfLocals){
       if( listOfLocals != undefined && listOfLocals.length > 0){
           len = listOfLocals.length;
@@ -274,121 +313,124 @@ PykQuery.init = function(mode, _scope, divid) {
                   return false;
               }
               local.__impacts = util.pushToArray(local.__impacts, div_id);
+              //in most scenarios there will be only one global hence a smart pre-set
+              if(local.__impacts.length == 1 && adapter == "inbrowser"){ 
+                local.global_divid_for_raw_data = div_id;
+              }  
               impacts = util.pushToArray(impacts, listOfLocals[i]);
           }
       }
   }
 
-  //structure of global {id:divid,impact:true}
-   this.addGlobal = function(params) {
-     var temp_params = params;
-     var mydiv_id = findQueryByDivid(div_id);
-     console.log(temp_params)
-     if (!util.isBlank(temp_params['id']) && (temp_params['impacts'] == true)) {
-       if (_scope == "local") {
-         var id = findQueryByDivid(temp_params['id']);
-         if (!util.isBlank(id)) {
-           if (temp_params['impacts'] == true) {
-             impacts.push(id);
-             console.log('added to impacts');
-           }
-         }
-         else {
-           console.error("div-id not exit");
-         }
-       }
-       else {
-         console.warn("you cant enter global filter to global query");
-       }
-     }
-     else {
-       console.error("error in " + temp_params['id']);
-     }
-   }
-
-    //code for validation before adding filter
-    var filterValidation = function(f) { 
-      //var filter1 = [{
-        //}, {
-          //"column_name": "col1",
-          //"condition_type": "data_types",
-          //"IN": ["integer", "float"],
-          //"NOT IN": ["blank"],
-          //"next": "OR",
-        //}]
-        
-      if (Object.keys(f).length == 0) {
-        console.error("Empty filter object is not allowed.")
-        return false;
-      }
-      if(util.isBlank(f["column_name"])){
-        console.error("column_name cannot be empty.")
+  //code for validation before adding filter
+  var filterValidation = function(f) { 
+    //var filter1 = [{
+      //}, {
+        //"column_name": "col1",
+        //"condition_type": "data_types",
+        //"IN": ["integer", "float"],
+        //"NOT IN": ["blank"],
+        //"next": "OR",
+      //}]
+  
+    if (Object.keys(f).length == 0) {
+      console.error("Empty filter object is not allowed.")
+      return false;
+    }
+    if(util.isBlank(f["column_name"])){
+      console.error("column_name cannot be empty.")
+      return false;  
+    }
+    if(!util.isBlank(f["next"]) && f["next"] != "OR" && f["next"] != "AND"){
+      console.error("next must either be empty or OR or AND.")
+      return false;  
+    }
+    if (f["condition_type"] == "range") {
+      if(util.isBlank(f["condition"])){
+        console.error("condition cannot be empty.")
         return false;  
-      }
-      if(!util.isBlank(f["next"]) && f["next"] != "OR" && f["next"] != "AND"){
-        console.error("next must either be empty or OR or AND.")
-        return false;  
-      }
-      if (f["condition_type"] == "range") {
-        if(util.isBlank(f["condition"])){
-          console.error("condition cannot be empty.")
-          return false;  
-        }
-        else{
-          if(util.isBlank(f["condition"]["min"]) && util.isBlank(f["condition"]["max"])){
-            console.error("Either min or max or both must always be present.")
-            return false;  
-          }
-        }
-        return true;
-      } else if (f["condition_type"] == "values") {
-        if(util.isBlank(f["not_in"]) && util.isBlank(f["in"])){
-          console.error("Either in or not_in or both must always be present.")
-          return false;  
-        }
-        if(f["not_in"] != undefined && f["in"] != undefined){
-          if(f["not_in"].length == 0 && f["in"].length == 0 ){
-            console.error("Either in or not_in or both must always be present.")
-            return false;  
-          }
-        }
-        return true;
       }
       else{
-        console.error(div_id + ": condition_type must be one of " + ["range", "values"])
-        return false;  
-      }
-    }
-
-    //[{"col1": ["min", "max"]}]
-    var metricsValidation = function(m) {
-      var metric_functions = ['min', 'max', 'avg', 'sum', 'median', 'count'];
-      if (Object.keys(m).length == 0) {
-        console.error("Metrics object cannot be empty.")
-        return false;
-      }
-      for (var prop in m) {
-        if(util.isBlank(prop)){
-          console.error("Column name is undefined in metrics.")
-          return false;
-        }
-        if (util.isBlank(m[prop]) || m[prop].length == 0) {
-          console.error("Please pass an Array of metric functions for column name" + prop)
-          return false; 
-        }
-        else{
-          var len = m[prop].length;
-          for(var i = 0; i < len; i++){
-            if (metric_functions.indexOf(m[prop][i]) <= -1) {
-              console.error("Wrong metric function passed for column name" + prop);
-              return false;
-            }
-          }
+        if(util.isBlank(f["condition"]["min"]) && util.isBlank(f["condition"]["max"])){
+          console.error("Either min or max or both must always be present.")
+          return false;  
         }
       }
       return true;
-    }  
+    } else if (f["condition_type"] == "values") {
+      if(util.isBlank(f["not_in"]) && util.isBlank(f["in"])){
+        console.error("Either in or not_in or both must always be present.")
+        return false;  
+      }
+      if(f["not_in"] != undefined && f["in"] != undefined){
+        if(f["not_in"].length == 0 && f["in"].length == 0 ){
+          console.error("Either in or not_in or both must always be present.")
+          return false;  
+        }
+      }
+      return true;
+    }
+    else{
+      console.error(div_id + ": condition_type must be one of " + ["range", "values"])
+      return false;  
+    }
+  }
 
+  //[{"col1": ["min", "max"]}]
+  var metricsValidation = function(m) {
+    var metric_functions = ['min', 'max', 'avg', 'sum', 'median', 'count'];
+    if (Object.keys(m).length == 0) {
+      console.error("Metrics object cannot be empty.")
+      return false;
+    }
+    for (var prop in m) {
+      if(util.isBlank(prop)){
+        console.error("Column name is undefined in metrics.")
+        return false;
+      }
+      if (util.isBlank(m[prop]) || m[prop].length == 0) {
+        console.error("Please pass an Array of metric functions for column name" + prop)
+        return false; 
+      }
+      else{
+        var len = m[prop].length;
+        for(var i = 0; i < len; i++){
+          if (metric_functions.indexOf(m[prop][i]) <= -1) {
+            console.error("Wrong metric function passed for column name" + prop);
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }  
+  
+  this.call = function(){
+    if (_scope == "local"){
+      filterdata = invoke_call(getConfig())
+    }
+    else{
+      filterdata = invoke_call(getConfig())
+      var len = impacts.length;
+      for(var j =0;j<len;j++) {
+        var local_filter = window[impacts[j]];
+         local_filter.filterdata =local_filter.call();
+      }
+    }
+  }
+  
+  var invoke_call = function(pykquery_json){
+    if(adapter == "inbrowser"){
+      var adapter = new PykQuery.adapter.inbrowser.init(pykquery_json);
+    }
+    else{
+      var adapter = new PykQuery.adapter.rumi.init(pykquery_json);
+    }
+    var response = adapter.call();
+    //TODO to delete instance of adapter adapter.delete();
+    return response;
+  }
+  
   // getConfig is use generate whole query and return data
   this.getConfig = function() {
     var filter_obj = {};
