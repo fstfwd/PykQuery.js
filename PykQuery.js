@@ -1,19 +1,27 @@
-var PykQuery = {}
-
-PykQuery.init = function(mode, _scope, divid ) {
+var PykQuery = {} 
+PykQuery.init = function(mode, _scope, divid) {
 
   that = this;
   var div_id;
   var available_mode = ["aggregation", "unique", "select", "datatype"];
   var available_scope = ["local", "global"];
-
-  if (available_mode.indexOf(mode) > -1 && available_scope.indexOf(_scope) > -1 && divid != undefined) {
+  var util = new PykUtil.init();
+  //TODO Check if divid exists in DOM.
+  console.log(util);
+  if (available_mode.indexOf(mode) > -1 && available_scope.indexOf(_scope) > -1 && !util.isBlank(divid)) {
     mode = mode;
     _scope = _scope;
     div_id = divid;
   } else {
-    //Later - the error code should mention which particular data point is wrong
-    console.error("error in cofiguration");
+    if (available_mode.indexOf(mode) == -1){
+      console.error(divid + ": available_mode has invalid value. It should be one of " + available_mode);
+    }
+    if (available_scope.indexOf(_scope) == -1){
+      console.error(divid + ": available_scope has invalid value. It should be one of " + available_scope);
+    }
+    if (util.isBlank(divid)){
+      console.error(divid + ": DivID cannot be undefined.");
+    }
     return false;
   }
 
@@ -139,11 +147,11 @@ PykQuery.init = function(mode, _scope, divid ) {
     },
     set: function(name) { //"[{"col1": "asc"}, ]"
       for (var prop in name) {
-        if(prop == undefined){
+        if(util.isBlank(prop)){
           console.error("Column name is undefined in sort.")
           return;
         }
-        if (name[prop] == undefined || (name[prop] != "asc" && name[prop] != "desc")) {
+        if (util.isBlank(name[prop]) || (name[prop] != "asc" && name[prop] != "desc")) {
           name[prop] = "asc";
         }
       }
@@ -165,43 +173,12 @@ PykQuery.init = function(mode, _scope, divid ) {
         }
       },
       remove: function(column_name, condition_type, params) {
-        editFilter(column_name, condition_type, params, false);
+        removeFilterInQuery(column_name, condition_type, params);
+        removeFilterPropagate(column_name, condition_type, params);
       },
     };
     return obj;
   }
-
-  // --------- Generic Functions on Array
-  
-  // Util function - concat 2 arrays and return uniq
-  var concat_and_uniq = function(a1, a2){
-    a1 = a1.concat(a2)
-      .filter(function(item, i, ar) {
-        return ar.indexOf(item) === i;
-    });
-    return a1;
-  }
-
-  var is_exactly_same = function(a1, a2) {
-    var is_same2 = (a1.length == a2.length) && a1.every(function(element, index) {
-      return element === a2[index];
-    });
-    return is_same2;
-  }
-
-  var subtract_array = function(a1, a2){
-    if(a2 != undefined){
-      for(var i =0;i<a2.length;i++){
-        var index = a1.indexOf(a2[i]);
-        if(index >-1 ) {
-          a1.splice(index,1);
-        }
-      }
-    }
-    return a1;
-  }
-
-  //--------------
 
   var addFilterInQuery = function(new_filter) {
     var is_new_filter = true;
@@ -212,15 +189,16 @@ PykQuery.init = function(mode, _scope, divid ) {
         //INPUT - IN(A, B), IN(A, C)
         //OUTPUT -- IN (A, B, C)
         if (old_filter['condition_type'] == "values") {
-          var is_same1 = is_exactly_same(new_filter['in'], old_filter['in']);
-          var is_same2 = is_exactly_same(new_filter['not_in'], old_filter['not_in']);
+          var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']);
+          console.log(new_filter['in'],old_filter['in'])
+          var is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
           if (is_same2 == true && is_same1 == true) {
             console.warn('Clean up your JS: Same filter cannot add');
             return false;
           }
           else {
-            old_filter['in'] = concat_and_uniq(old_filter['in'], new_filter['in']);
-            old_filter['not_in'] = concat_and_uniq(old_filter['not_in'], new_filter['not_in']);
+            old_filter['in'] = util.concat_and_uniq(old_filter['in'], new_filter['in']);
+            old_filter['not_in'] = util.concat_and_uniq(old_filter['not_in'], new_filter['not_in']);
             addfilter[i] = old_filter;
             is_new_filter = false;
             break;
@@ -257,38 +235,33 @@ PykQuery.init = function(mode, _scope, divid ) {
     }
   }
 
-  var editFilter = function(column_name, condition_type, params, is_propagated_change) {
+  var removeFilterInQuery = function(column_name, condition_type, params) {
     var len = addfilter.length;
     for (var x = 0; x < len; x++) {
       if (addfilter[x]['column_name'] == column_name && addfilter[x]['condition_type'] == condition_type) {
         if (condition_type == "values") {
-          addfilter[x]['in'] = subtract_array(addfilter[x]['in'], params['in']);
-          addfilter[x]['not_in'] = subtract_array(addfilter[x]['not_in'], params['not_in']); 
+          addfilter[x]['in'] = util.subtract_array(addfilter[x]['in'], params['in']);
+          addfilter[x]['not_in'] = util.subtract_array(addfilter[x]['not_in'], params['not_in']); 
         } 
         else if (condition_type == "range") {
           var __min = params['min'];
           var __max = params['max'];
-          if(__min != undefined && __max != undefined)
+          if(!util.isBlank(__min) && !util.isBlank(__max))
             if(__min == addfilter[x]['condition']['min'] && __max == addfilter[x]['condition']['max']) {
               addfilter.splice(x,1);
             }
         }
-        if(_scope == "local") {
-            for(var j =0;j<impacts.length;j++) {
-              var obj = impacts[j];
-              var temp_obj = window[obj];
-              temp_obj.editFilter(column_name, condition_type, params);
-            }
-          }
-          if(_scope == "global") {
-            for(var j =0;j<impacted_by.length;j++) {
-              var obj = impacted_by[j];
-              var temp_obj = window[obj];
-              temp_obj.editFilter(column_name, condition_type, params);
-            }
-          }
+      }
+    }
+  }
 
-      }    
+  var removeFilterPropagate = function(column_name, condition_type, params) {
+    if(_scope == "local") {
+      var len = impacts.length;
+      for(var j =0;j<len;j++) {
+        var global_filter = window[impacts[j]];
+        global_filter.removeFilterInQuery(column_name, condition_type, params);
+      }
     }
   }
 
@@ -297,10 +270,10 @@ PykQuery.init = function(mode, _scope, divid ) {
      var temp_global = global;
      var mydiv_id = findQueryByDivid(div_id);
      console.log(temp_global)
-     if (temp_global['id'] != undefined && (temp_global['impacted_by'] == true || temp_global['impacts'] == true)) {
+     if (!util.isBlank(temp_global['id']) && (temp_global['impacted_by'] == true || temp_global['impacts'] == true)) {
        if (_scope == "local") {
          var id = findQueryByDivid(temp_global['id']);
-         if (id != undefined) {
+         if (!util.isBlank(id)) {
            if (temp_global['impacts'] == true) {
              impacts.push(id);
              console.log('added to impacts');
@@ -324,101 +297,87 @@ PykQuery.init = function(mode, _scope, divid ) {
    }
 
     //code for validation before adding filter
-    var filterValidation = function(name) { 
-      var filter1 = [{
-          "column_name": "tablename.col1",
-          "condition_type": "range",
-          "condition": {
-            "min": 10,
-            "max": 100,
-            "not": false
-          },
-          "next": "AND"
-        }, {
-          "column_name": true,
-          "condition_type": true,
-          "in": true,
-          "not_in": true,
-          "next": true,
-        }, {
-          "column_name": "col1",
-          "condition_type": "data_types",
-          "IN": ["integer", "float"],
-          "NOT IN": ["blank"],
-          "next": "OR",
-        }]
+    var filterValidation = function(f) { 
+      //var filter1 = [{
+        //}, {
+          //"column_name": "col1",
+          //"condition_type": "data_types",
+          //"IN": ["integer", "float"],
+          //"NOT IN": ["blank"],
+          //"next": "OR",
+        //}]
         
-      if (Object.keys(name).length == 0) {
-        console.log("empty object not allowed")
+      if (Object.keys(f).length == 0) {
+        console.error("Empty filter object is not allowed.")
         return false;
       }
-      if (name["condition_type"] == "range") {
-        for (prop in filter1[0]) {
-          if (name["next"] == undefined) {
-            name["next"] = "OR";
-          }
-          if (name[prop] == undefined) {
-            console.log("not define ", prop);
-            if (name[prop] == "condition") {
-              var con = name[prop];
-              if (con["min"] == undefined && con["max"] == undefined)
-                return false;
-            }
-            return false;
+      if(util.isBlank(f["column_name"])){
+        console.error("column_name cannot be empty.")
+        return false;  
+      }
+      if(!util.isBlank(f["next"]) && f["next"] != "OR" && f["next"] != "AND"){
+        console.error("next must either be empty or OR or AND.")
+        return false;  
+      }
+      if (f["condition_type"] == "range") {
+        if(util.isBlank(f["condition"])){
+          console.error("condition cannot be empty.")
+          return false;  
+        }
+        else{
+          if(util.isBlank(f["condition"]["min"]) && util.isBlank(f["condition"]["max"])){
+            console.error("Either min or max or both must always be present.")
+            return false;  
           }
         }
         return true;
-      } else if (name["condition_type"] == "values") {
-          var temp_obj = filter1[1];
-          if (name["not_in"] == undefined && name['in'] == undefined) {
-            console.log("in and not_in are not define");
-            return false;
-          } else {
-             if(name["not_in"] == undefined ) name["not_in"]=[];
-             if(name['in'] == undefined) name["in"] =[];
+      } else if (f["condition_type"] == "values") {
+        if(util.isBlank(f["not_in"]) && util.isBlank(f["in"])){
+          console.error("Either in or not_in or both must always be present.")
+          return false;  
+        }
+        if(f["not_in"] != undefined && f["in"] != undefined){
+          if(f["not_in"].length == 0 && f["in"].length == 0 ){
+            console.error("Either in or not_in or both must always be present.")
+            return false;  
           }
-          if (name['column_name'] == undefined) {
-            console.log("column_name is not define ");
-            return false;
-          }
-          if (name["not_in"].length == 0 && name['in'].length == 0) {
-            console.log("in and not_in both cant be empty");
-            return false;
-          }
-          if (name["next"] == undefined) {
-            name["next"] = "OR";
-          }
-          return true;
-      } else {
-        console.log("condition_type is not defined");
-        return false;
+        }
+        return true;
       }
-
+      else{
+        console.error(div_id + ": condition_type must be one of " + ["range", "values"])
+        return false;  
+      }
     }
 
-    var metricsValidation = function(name) {
-      var data = ['min', 'max', 'avg', 'sum', 'median', 'count'];
-      
-      if (Object.keys(name).length == 0) {
-        console.log("empty object not allowed")
+    //[{"col1": ["min", "max"]}]
+    var metricsValidation = function(m) {
+      var metric_functions = ['min', 'max', 'avg', 'sum', 'median', 'count'];
+      if (Object.keys(m).length == 0) {
+        console.error("Metrics object cannot be empty.")
         return false;
       }
-      for (prop in name) {
-        var temp_arr = name[prop];
-        if (name[prop] == undefined || temp_arr.length == 0) {
-          console.log("not define ", prop);
+      for (var prop in m) {
+        if(util.isBlank(prop)){
+          console.error("Column name is undefined in metrics.")
           return false;
         }
-        for (var i = 0; i < temp_arr.length; i++) {
-          if (data.indexOf(temp_arr[i]) <= -1) {
-            console.log("matrix is not available");
-            return false;
+        if (util.isBlank(m[prop]) || m[prop].length == 0) {
+          console.error("Please pass an Array of metric functions for column name" + prop)
+          return false; 
+        }
+        else{
+          var len = m[prop].length;
+          for(var i = 0; i < len; i++){
+            if (metric_functions.indexOf(m[prop][i]) <= -1) {
+              console.error("Wrong metric function passed for column name" + prop);
+              return false;
+            }
           }
         }
       }
       return true;
-    }
-  
+    }  
 
   // getConfig is use generate whole query and return data
   this.getConfig = function() {

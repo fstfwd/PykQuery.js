@@ -1,0 +1,37 @@
+
+var d2 = new PykQuery.init("select", "local", "div2");
+z = d2.filter()
+z.add( {
+  "column_name": "Day",
+  "condition_type": "range",
+  "condition": {
+    "min": 10,
+    "max": 10000,
+    "not": false
+  },
+  "next": "OR"
+});
+d2.select = ['Ozone','Temp','Day'];
+
+d2.storeObjectInMemory('d2');
+
+
+var g1 = new PykQuery.init("select", "global", "divg");
+g1.storeObjectInMemory('g1');
+d2.addGlobal({"id": "divg", "impacts": true, "impacted_by": false});
+
+  z.filters = {
+          "column_name": "total_number_of_works",
+          "condition_type": "values",
+          "in": [1700, 43928],
+          "not_in": [],
+          "next": false
+        }
+
+z.filters = {
+        "column_name": "total_number_of_works",
+        "condition_type": "values",
+        "in": [1800, 44928],
+        "not_in": [],
+        "next": false
+      }
