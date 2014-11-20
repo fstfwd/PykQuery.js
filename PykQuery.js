@@ -7,7 +7,6 @@ PykQuery.init = function(mode, _scope, divid) {
   var available_scope = ["local", "global"];
   var util = new PykUtil.init();
   //TODO Check if divid exists in DOM.
-  console.log(util);
   if (available_mode.indexOf(mode) > -1 && available_scope.indexOf(_scope) > -1 && !util.isBlank(divid)) {
     mode = mode;
     _scope = _scope;
@@ -178,7 +177,6 @@ PykQuery.init = function(mode, _scope, divid) {
         //OUTPUT -- IN (A, B, C)
         if (old_filter['condition_type'] == "values") {
           var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']);
-          console.log(new_filter['in'],old_filter['in'])
           var is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
           if (is_same2 == true && is_same1 == true) {
             console.warn('Clean up your JS: Same filter cannot add');

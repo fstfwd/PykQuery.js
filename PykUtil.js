@@ -4,19 +4,25 @@ PykUtil.init = function() {
 
     //TODO - Change all _ ruby like names to CamelCase for all PykUtil Functions
     this.concat_and_uniq = function(a1, a2) {
-        a1 = a1.concat(a2)
-            .filter(function(item, i, ar) {
-                return ar.indexOf(item) === i;
+        if (a1 != undefined && a2 != undefined){
+            a1 = a1.concat(a2)
+                .filter(function(item, i, ar) {
+                    return ar.indexOf(item) === i;
             });
+        }
         return a1;
     }
 
     this.is_exactly_same = function(a1, a2) {
-        console.log(a1, a2)
-        var is_same2 = (a1.length == a2.length) && a1.every(function(element, index) {
-            return element === a2[index];
-        });
-        return is_same2;
+        if (a1 != undefined && a2 != undefined){
+            var is_same2 = (a1.length == a2.length) && a1.every(function(element, index) {
+                return element === a2[index];
+            });
+            return is_same2;
+        }
+        else{
+            return false;
+        }
     }
 
     this.subtract_array = function(a1, a2) {
@@ -34,5 +40,4 @@ PykUtil.init = function() {
     this.isBlank = function(a) {
         (a == undefined || a == "") ? true : false
     }
-    console.log("finish")
 }
