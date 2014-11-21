@@ -1,6 +1,6 @@
 //TODO - Isha if PykQuery object related to PykChart changes its filterdata then re-render the chart
 
-var PykQuery = {} 
+var PykQuery = {}
 PykQuery.init = function(mode, _scope, divid, adapter) {
 
   that = this;
@@ -10,7 +10,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
   var available_adapters = ["inbrowser", "rumi"];
   var util = new PykUtil.init();
   //TODO Check if divid exists in DOM.
-    
+
   if (available_mode.indexOf(mode) > -1 && available_scope.indexOf(_scope) > -1 && !util.isBlank(divid) && available_adapters.indexOf(adapter) > -1) {
     mode = mode;
     _scope = _scope;
@@ -59,13 +59,23 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       }
     });
   }
-  if( _scope == "local" && adapter == "inbrowser") {
+  if(_scope == "local" && adapter == "inbrowser") {
     Object.defineProperty(this, 'global_divid_for_raw_data', {
       get: function() {
         return global_divid_for_rawdata;
       },
       set: function(my_global_div_id) {
         global_divid_for_rawdata = my_global_div_id;
+      }
+    });
+  }
+  if(adapter == "rumi") {
+    Object.defineProperty(this, 'datastoreurl', {
+      get: function() {
+        return data_store_url;
+      },
+      set: function(url) {
+        data_store_url = url;
       }
     });
   }
@@ -122,13 +132,13 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       return;
       break;
   }
-  
+
   Object.defineProperty(this, 'div_id', {
     get: function() {
       return div_id;
     }
   });
-  
+
   Object.defineProperty(this, 'filterdata', {
     get: function() {
       return filter_data;
@@ -137,7 +147,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       filter_data = mydata;
     }
   });
-  
+
   Object.defineProperty(this, 'limit', {
     get: function() {
       return limit
@@ -145,7 +155,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
     set: function(value) {
       limit = value;
     }
-  }); 
+  });
 
   Object.defineProperty(this, 'mode', {
     get: function() {
@@ -277,8 +287,8 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       if (addfilter[x]['column_name'] == column_name && addfilter[x]['condition_type'] == condition_type) {
         if (condition_type == "values") {
           addfilter[x]['in'] = util.subtract_array(addfilter[x]['in'], params['in']);
-          addfilter[x]['not_in'] = util.subtract_array(addfilter[x]['not_in'], params['not_in']); 
-        } 
+          addfilter[x]['not_in'] = util.subtract_array(addfilter[x]['not_in'], params['not_in']);
+        }
         else if (condition_type == "range") {
           var __min = params['min'];
           var __max = params['max'];
@@ -314,16 +324,16 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
               }
               local.__impacts = util.pushToArray(local.__impacts, div_id);
               //in most scenarios there will be only one global hence a smart pre-set
-              if(local.__impacts.length == 1 && adapter == "inbrowser"){ 
+              if(local.__impacts.length == 1 && adapter == "inbrowser"){
                 local.global_divid_for_raw_data = div_id;
-              }  
+              }
               impacts = util.pushToArray(impacts, listOfLocals[i]);
           }
       }
   }
 
   //code for validation before adding filter
-  var filterValidation = function(f) { 
+  var filterValidation = function(f) {
     //var filter1 = [{
       //}, {
         //"column_name": "col1",
@@ -332,47 +342,47 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
         //"NOT IN": ["blank"],
         //"next": "OR",
       //}]
-  
+
     if (Object.keys(f).length == 0) {
       console.error("Empty filter object is not allowed.")
       return false;
     }
     if(util.isBlank(f["column_name"])){
       console.error("column_name cannot be empty.")
-      return false;  
+      return false;
     }
     if(!util.isBlank(f["next"]) && f["next"] != "OR" && f["next"] != "AND"){
       console.error("next must either be empty or OR or AND.")
-      return false;  
+      return false;
     }
     if (f["condition_type"] == "range") {
       if(util.isBlank(f["condition"])){
         console.error("condition cannot be empty.")
-        return false;  
+        return false;
       }
       else{
         if(util.isBlank(f["condition"]["min"]) && util.isBlank(f["condition"]["max"])){
           console.error("Either min or max or both must always be present.")
-          return false;  
+          return false;
         }
       }
       return true;
     } else if (f["condition_type"] == "values") {
       if(util.isBlank(f["not_in"]) && util.isBlank(f["in"])){
         console.error("Either in or not_in or both must always be present.")
-        return false;  
+        return false;
       }
       if(f["not_in"] != undefined && f["in"] != undefined){
         if(f["not_in"].length == 0 && f["in"].length == 0 ){
           console.error("Either in or not_in or both must always be present.")
-          return false;  
+          return false;
         }
       }
       return true;
     }
     else{
       console.error(div_id + ": condition_type must be one of " + ["range", "values"])
-      return false;  
+      return false;
     }
   }
 
@@ -390,7 +400,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       }
       if (util.isBlank(m[prop]) || m[prop].length == 0) {
         console.error("Please pass an Array of metric functions for column name" + prop)
-        return false; 
+        return false;
       }
       else{
         var len = m[prop].length;
@@ -403,8 +413,8 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       }
     }
     return true;
-  }  
-  
+  }
+
   this.call = function(){
     if (_scope == "local"){
       filterdata = invoke_call(getConfig())
@@ -418,19 +428,20 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       }
     }
   }
-  
+
   var invoke_call = function(pykquery_json){
     if(adapter == "inbrowser"){
       var adapter = new PykQuery.adapter.inbrowser.init(pykquery_json);
     }
     else{
       var adapter = new PykQuery.adapter.rumi.init(pykquery_json);
+
     }
     var response = adapter.call();
     //TODO to delete instance of adapter adapter.delete();
     return response;
   }
-  
+
   // getConfig is use generate whole query and return data
   this.getConfig = function() {
     var filter_obj = {};
@@ -453,7 +464,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
 
   this.storeObjectInMemory = function(obj_name) {
     $("#"+div_id).attr("pyk_object", obj_name);
-     
+
   }
 
 //   var databaseQuery = function(filter_obj){
@@ -468,7 +479,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
 //           if (res.status == "200") {
 //             data = res.data;
 //             console.log('data recived');
-            
+
 //           }
 //           else {
 //             console.log("error");
@@ -489,19 +500,19 @@ var findQueryByDivid = function(id) {
     }
     return obj_name;
 }
-  
+
 //   // filter data with underscore
 // }
 
 // PykQuery.browserdata = function(filterObj){
 //     that = this;
 
-//     $.getJSON( "test1data.json", function(dat) { 
+//     $.getJSON( "test1data.json", function(dat) {
 //       that.data = dat;
 //       console.log(that.data)
 //       var mode = filterObj.mode;
-//       // checking whether filter is exit in query or not 
-//       // if(filterObj.filters.length > 0) { 
+//       // checking whether filter is exit in query or not
+//       // if(filterObj.filters.length > 0) {
 //       //   console.log('start filter');
 //       //   startFilterData(filterObj); //call to start filter
 //       // }
@@ -513,7 +524,7 @@ var findQueryByDivid = function(id) {
 //           break;
 //           case "datatype":
 //           break;
-//           defaultkey: "value", 
+//           defaultkey: "value",
 //           console.log('wrong condition type');
 //         }
 //     });
@@ -535,7 +546,7 @@ var findQueryByDivid = function(id) {
 //       console.log(filterObj.select,temp_obj);
 //       for(var i=0;i<temp_obj.length;i++) {
 //         //var obj = {columnname:['count']}
-//         //checking which type of filter exit 
+//         //checking which type of filter exit
 //         switch(temp_obj[i]["condition_type"]) {
 //           case "values":
 //           valueFilter(temp_obj[i],filterObj.select)
@@ -569,13 +580,13 @@ var findQueryByDivid = function(id) {
 //       temp_data = _.filter(temp_data ,function(obj){
 //                     if(_in.indexOf(obj[column_name]) > -1){
 //                       return obj;
-//                     } 
+//                     }
 //                   });
 //       if(columns.length != 0){
-//         temp_data = _.map(temp_data ,function(obj){ 
+//         temp_data = _.map(temp_data ,function(obj){
 //                       return _.pick(obj,columns);
 //                     });
-//       }  
+//       }
 
 //       console.log(temp_data);
 //     }
@@ -590,13 +601,13 @@ var findQueryByDivid = function(id) {
 //                       return obj;
 //                     }
 //                   });
-//       //return perticular columns data 
+//       //return perticular columns data
 //       if(columns.length != 0){
-//         temp_data = _.map(temp_data ,function(obj){ 
+//         temp_data = _.map(temp_data ,function(obj){
 //                       return _.pick(obj,columns);
 //                     });
 //       }
 //       console.log(temp_data);
 //     }
-    
+
   }
