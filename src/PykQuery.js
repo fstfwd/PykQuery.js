@@ -229,7 +229,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
     return obj;
   }
   
-  var addImpacts = function(array_of_div_ids, is_cyclical) {
+  this.addImpacts = function(array_of_div_ids, is_cyclical) {
     if (impactValidation(array_of_div_ids)) {
       len = array_of_div_ids.length;
       for(var i=0; i<len; i++){
@@ -288,7 +288,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
   // If a local filter is changed and it impacts a global then append to global
   var addFilterPropagate = function(new_filter) {
     if (_scope == "local") {
-      var len = impacts.length;
+      var len = __impacts.length;
       for (var j = 0; j < len; j++) {
         var global_filter = window[impacts[j]];
         global_filter.filters = new_filter;
