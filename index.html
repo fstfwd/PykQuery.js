@@ -1,9 +1,9 @@
 <html>
   <head>
     <script src='lib/underscore-min.js'></script>
-    <script src="src/PykUtil.js"></script>
-    <script src="src/PykQuery.js"></script>  
-    <script src="src/PykQuery.adapter.inbrowser.js"></script> 
+    <script src="src/PykUtil.js"></script>  
+    <script src="src/PykQuery.js"></script> 
+    <script src="src/PykQuery.adapter.inbrowser.js"></script>
   </head>
   <body>
     <div id="g1">
@@ -20,7 +20,7 @@
       b.storeObjectInMemory('b');
       var g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
       g1.storeObjectInMemory('g1');
-      g1.addLocals(["a", "b"]);
+      g1.addImpacts(["a", "b"], false);
       g1.rawdata = "alskndalskndals"
       z = a.filter();
       z.add({"column_name": "price", "condition_type": "range", "condition": {"min": 59222, "max": 110700, "not": false}, "next": "OR"});

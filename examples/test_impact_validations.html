@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <script src="http://code.jquery.com/jquery-2.0.0.js"></script>
+    <script src='../lib/underscore-min.js'></script>
+    <script src="../src/PykUtil.js"></script>
+    <script src="../src/PykQuery.js"></script>
+  </head>
+  <body>
+    <h3>Objective is to test functions available_mode, sort, filterValidation and metricsValidation</h3>
+    <div id='available_mode'></div>
+    <div id='sort1'></div>
+    <div id='sort2'></div>
+    <div id='aggregation'></div>
+    <div id='filterValidation_range'></div>
+
+    <script type="text/javascript">
+      //var d2 = new PykQuery.init("blabla", "local", "available_mode");
+      //var d2 = new PykQuery.init("select", "blabla", "available_mode");
+      //var d2 = new PykQuery.init("select", "local");
+
+
+      //var d2 = new PykQuery.init("select", "local", "filterValidation_range");
+      //d2.storeObjectInMemory('d2');
+      //z = d2.filter()
+      //z.add( {
+        //"column_name": "Day",
+        //"condition_type": "range",
+        //"condition": {"min": 100, "not": false},
+        //"next": "darpan"
+      //});
+
+      var d2 = new PykQuery.init("aggregation", "local", "aggregation", "inbrowser");
+      d2.storeObjectInMemory('d2');
+
+      var g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
+      g1.storeObjectInMemory('g1');
+
+      d2.dimensions = ["day", "das", "sdsd"];
+      d2.metrics = [{"": ["min"]}, {"sd": ["min"]}, {"sd": ["min"]}];
+      z = d2.filter();
+      g1.addImpacts(["d2","g1"]);
+      z.add({"column_name": "Day", "condition_type": "range", "condition": {"min": 10, "max": 10000, "not": false}, "next": "OR"});
+    </script>
+  </body>
+</html>

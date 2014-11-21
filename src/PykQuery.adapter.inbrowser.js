@@ -1,6 +1,6 @@
 PykQuery.adapter = {};
 PykQuery.adapter.inbrowser = {};
-
+//PykQuery.adapter.inbrowser.init(pykquery_json);
 PykQuery.adapter.inbrowser.init = function(pykquery){
   var query_object = pykquery,
       raw_data;
@@ -92,8 +92,8 @@ PykQuery.adapter.inbrowser.init = function(pykquery){
     _.map(local_data, function(values,key){ 
       var sum;
         _.map(values, function(value,key){
-          //if()
-          console.log(NaN(value[column_name]));
+          // if()
+          console.log(value[column_name]);
         });
     });
   }
