@@ -82,13 +82,13 @@ function filterDbQueryString(options) {
 			if (next_op) {
 				query_where += next_op + " ";
 			}
-			query_where += d["column_name"] + " ";
+			// query_where += d["column_name"] + " ";
 			switch (d["condition_type"]) {				
 				case "values" :
 					vals = [];
 					if (d["in"] && d["in"].length !== 0) {
 						is_IN = true;
-						query_where += "IN (";
+						query_where += d["column_name"] + " IN (";
 						_.each(d["in"], function (k) {
 							query_where += k + ", ";
 						});
@@ -96,10 +96,10 @@ function filterDbQueryString(options) {
 					}
 					if (d["not_in"] && d["not_in"].length !== 0) {
 						if (is_IN) {
-							query_where += "AND NOT IN (";
+							query_where += "AND " + d["column_name"] + " NOT IN (";
 						}
 						else {
-							query_where += "NOT IN (";
+							query_where += d["column_name"] + " NOT IN (";
 						}
 						_.each(d["not_in"], function (a) {
 							query_where += a + ", ";
@@ -114,8 +114,9 @@ function filterDbQueryString(options) {
 					}
 					break;
 				case "range":
-					if (d["condition"] && _.isEmpty(d["condition"]) === false) {
-						query_where += "NOT " + d["condition"]["not"] + " ";
+					query_where += d["column_name"] + " ";
+					if (d["condition"]["not"]) {
+						query_where += "NOT ";
 					}
 					query_where += "BETWEEN " + d["condition"]["min"] + " AND " + d["condition"]["max"] + " ";
 					if (d["next"]) {
