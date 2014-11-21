@@ -79,6 +79,11 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       }
     });
   }
+  Object.defineProperty(this, 'scope', {
+    get: function () {
+      return _scope;
+    }
+  });
   // if select - columns name
   // if aggregation - metrics, dimensions
   // if unique - column name
@@ -179,12 +184,12 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       return __impacts;
     },
     set: function(val) { //APPEND
-      if (impactValidation([val])){
+      if (impactValidation(val)){
         __impacts.push(val);
       }
     }
   });
-  
+
   Object.defineProperty(this, 'sort', {
     get: function() {
       return sort
@@ -228,7 +233,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
     };
     return obj;
   }
-  
+
   var addImpacts = function(array_of_div_ids, is_cyclical) {
     if (impactValidation(array_of_div_ids)) {
       len = array_of_div_ids.length;
@@ -288,9 +293,10 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
   // If a local filter is changed and it impacts a global then append to global
   var addFilterPropagate = function(new_filter) {
     if (_scope == "local") {
-      var len = impacts.length;
+      var len = __impacts.length;
       for (var j = 0; j < len; j++) {
-        var global_filter = window[impacts[j]];
+        console.log(__impacts[j]);
+        var global_filter = window[__impacts[j]];
         global_filter.filters = new_filter;
       }
     }
@@ -327,8 +333,20 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
   }
 
   var impactValidation = function(array_of_div_ids){
-    //IF I AM LOCAL then array_of_div_ids contains only GLOBAL DIV IDs
-    //IF I AM GLOBAL then array_of_div_ids contains only LOCAL DIV IDs
+    var len = array_of_div_ids.length,
+        impacts_allowed_on;
+    if (_scope === "local") {
+      impacts_allowed_on = "global";
+    } else {
+      impacts_allowed_on = "local";
+    }
+    for (var i = 0; i < len; i++) {
+      var query_object = window[array_of_div_ids[i]];
+      if (query_object && query_object.scope === _scope) {
+        console.error("A " + _scope + " can only impact " + impacts_allowed_on + ".")
+        return false;
+      }
+    }
     return true;
   }
 
