@@ -312,6 +312,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
   }
 
   //this function is only called on Global
+  //listOfLocals is a list of divid of locals
   this.addLocals = function(listOfLocals){
       if( listOfLocals != undefined && listOfLocals.length > 0){
           len = listOfLocals.length;
@@ -417,10 +418,10 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
 
   this.call = function(){
     if (_scope == "local"){
-      filterdata = invoke_call(getConfig())
+      filterdata = invoke_call(this.getConfig())
     }
     else{
-      filterdata = invoke_call(getConfig())
+      filterdata = invoke_call(this.getConfig())
       var len = impacts.length;
       for(var j =0;j<len;j++) {
         var local_filter = window[impacts[j]];
@@ -450,6 +451,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
     for (var i in arr) {
       if (this.propertyIsEnumerable(arr[i]) == false) {
         filter_obj[arr[i]] = this[arr[i]];
+        //console.log(arr);
       }
     }
     //filter_obj['filter'] = this.filters;
