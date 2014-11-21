@@ -1,24 +1,43 @@
 //TODO - Isha if PykQuery object related to PykChart changes its filterdata then re-render the chart
 
-var PykQuery = {}
-PykQuery.init = function(mode, _scope, divid, adapter) {
+var PykQuery = {};
+PykQuery.global_names = [];
+PykQuery.local_names = [];
+
+PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   that = this;
-  var div_id;
+  var div_id, mode, _scope, adapter, global_exists, local_exists;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var available_adapters = ["inbrowser", "rumi"];
   var util = new PykUtil.init();
-  //TODO Check if divid exists in DOM.
 
-  if (available_mode.indexOf(mode) > -1 && available_scope.indexOf(_scope) > -1 && !util.isBlank(divid) && available_adapters.indexOf(adapter) > -1) {
-    mode = mode;
-    _scope = _scope;
-    adapter = adapter;
-    div_id = divid;
+  if (available_mode.indexOf(mode_param) > -1 && available_scope.indexOf(_scope_param) > -1 && !util.isBlank(divid_param) && available_adapters.indexOf(adapter_param) > -1) {
+    mode = mode_param;
+    _scope = _scope_param;
+    adapter = adapter_param;
+    div_id = (_scope == "local") ? divid_param.replace("#","") : divid_param;
+    global_exists = (_scope == "global") ? _.find(PykQuery.global_names,function(d){ return (d == div_id); }) : null;
+    local_exists = (_scope == "local") ? _.find(PykQuery.local_names,function(d){ return (d == div_id); }) : null;
+
     if (mode == "global" && _scope != "global"){
-        console.error(divid + ": scope and mode both should be global.");
+        console.error(div_id + ": scope and mode both should be global.");
         return false;
+    }
+
+    //Checks if div_id exists in DOM
+    if(global_exists == undefined && _scope == "global") {
+      PykQuery.global_names.push(div_id);
+      flag = true;
+    }
+    else if (local_exists == undefined && _scope == "local") {
+      PykQuery.local_names.push(div_id);
+      flag = true;
+    }
+    else {
+      flag = false;
+      return false;
     }
   } else {
     if (available_mode.indexOf(mode) == -1){
@@ -229,7 +248,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
     return obj;
   }
   
-  var addImpacts = function(array_of_div_ids, is_cyclical) {
+  this.addImpacts = function(array_of_div_ids, is_cyclical) {
     if (impactValidation(array_of_div_ids)) {
       len = array_of_div_ids.length;
       for(var i=0; i<len; i++){
@@ -288,7 +307,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
   // If a local filter is changed and it impacts a global then append to global
   var addFilterPropagate = function(new_filter) {
     if (_scope == "local") {
-      var len = impacts.length;
+      var len = __impacts.length;
       for (var j = 0; j < len; j++) {
         var global_filter = window[impacts[j]];
         global_filter.filters = new_filter;
@@ -611,4 +630,47 @@ var findQueryByDivid = function(id) {
 //       console.log(temp_data);
 //     }
 
-  }
+
+  /* -------------- URL params ------------ */
+  // var filters = ["Pykih","mumbai","startup"];
+  var urlParams = function (attr,filter,the_change) {
+    // console.log(url,"***",params,"***",filters,filters.length);
+    var url_params = "", index;
+
+    if(the_change == 0) { // Add to URL
+      params = (_.isEmpty(filters)) ? "?"+attr+"="+filter : params+"&"+attr+"="+filter;
+      url_params = url +""+ params;
+      filters.push(filter);
+    }
+    else if(the_change == 1) { // Remove from URL
+      if(filters.length == 1) { // Only 1 filter ==> Empty
+        params = "";
+        url_params = url;
+      }
+      else if(filters.length > 1) {
+        params = params.replace(attr+"="+filter+"&","");
+        url_params = url + params;
+      }
+      index = _.indexOf(filters,filter);
+      filters.splice(index,1);
+    };
+    // console.log("URL STring: ",url_params,"****"/*,filters,params*/);
+  };
+  // urlParams("name","Pykih",0);
+  // urlParams("location","Mumbai",0);
+  // urlParams("type","startup",0);
+  // urlParams("location","Mumbai",1);
+  // urlParams("name","Pykih",1);
+  // urlParams("type","startup",1);
+
+
+  /* ---------- Chart Filtering ----------- */
+  var domChartFiltering = function (id) {
+    for(var i=0 ; i<PykCharts.charts.length ; i++) {
+      if (PykCharts.charts[i].selector != "#"+id) {
+        PykCharts.charts[i].refresh();
+      }
+    }
+  };
+  // (div_id == "pieContainer") ? domChartFiltering("pieContainer") : null;
+};
