@@ -38,9 +38,8 @@
       d2.dimensions = ["day", "das", "sdsd"];
       d2.metrics = [{"": ["min"]}, {"sd": ["min"]}, {"sd": ["min"]}];
       z = d2.filter();
-      g1.impacts = ["d2","g1"];
+      g1.addImpacts(["d2","g1"]);
       z.add({"column_name": "Day", "condition_type": "range", "condition": {"min": 10, "max": 10000, "not": false}, "next": "OR"});
-      console.log(d2.getConfig());
     </script>
   </body>
 </html>
