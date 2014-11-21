@@ -31,9 +31,15 @@
 
       var d2 = new PykQuery.init("aggregation", "local", "aggregation", "inbrowser");
       d2.storeObjectInMemory('d2');
+
+      var g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
+      g1.storeObjectInMemory('g1');
+
       d2.dimensions = ["day", "das", "sdsd"];
       d2.metrics = [{"": ["min"]}, {"sd": ["min"]}, {"sd": ["min"]}];
-      console.log(d2.getConfig());
+      z = d2.filter();
+      g1.addImpacts(["d2","g1"]);
+      z.add({"column_name": "Day", "condition_type": "range", "condition": {"min": 10, "max": 10000, "not": false}, "next": "OR"});
     </script>
   </body>
 </html>
