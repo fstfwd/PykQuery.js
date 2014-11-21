@@ -45,7 +45,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       cols = [],
       sort = {},
       limit = 2000,
-      impacts =[],
+      __impacts =[],
       offset = 0,
       filter_data,raw_data,global_divid_for_rawdata;
   // set the global data to pykquery
@@ -176,18 +176,15 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
 
   Object.defineProperty(this, 'impacts', {
     get: function() {
-      return impacts;
+      return __impacts;
     },
-    set: function(array_of_div_ids, is_cyclical) { //APPEND
-      if (impactValidation(array_of_div_ids)) {
-        impacts = value;
-        if(is_cyclical){
-          
-        }
+    set: function(val) { //APPEND
+      if (impactValidation([val])){
+        __impacts.push(val);
       }
     }
   });
-
+  
   Object.defineProperty(this, 'sort', {
     get: function() {
       return sort
@@ -230,6 +227,19 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       },
     };
     return obj;
+  }
+  
+  var addImpacts = function(array_of_div_ids, is_cyclical) {
+    if (impactValidation(array_of_div_ids)) {
+      len = array_of_div_ids.length;
+      for(var i=0; i<len; i++){
+        __impacts.push(array_of_div_ids[i]);
+        if(is_cyclical){
+          related_pykquery = window[array_of_div_ids[i]];
+          related_pykquery.impacts = [this.div_id];
+        }
+      }
+    }
   }
 
   var addFilterInQuery = function(new_filter) {
