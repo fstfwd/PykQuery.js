@@ -1,10 +1,33 @@
 <html>
 <head><title>Debugging DB Query String</title></head>
 <body>
-	<div id="ase"></div>
-
 	<script src="http://code.jquery.com/jquery-2.0.0.js"></script>
-    <script src="underscore-min.js"></script>
-    <script src="filter.js"></script>
+    <script src="../lib/underscore-min.js"></script>
+    <script src="../src/filter.js"></script>
+    <script type="text/javascript">
+	    var q = filterDbQueryString({
+	    	dimensions: ["state","zip"],
+	    	select_columns: ["city","beds"],
+	    	metrics: {
+	    		state: ["count"],
+	    		beds: ["avg","sum"]
+	    	},
+	    	filter: [{
+	    		"column_name": "beds",
+				"condition_type": "values",
+				"in": [1, 2, 5],
+				// "not_in": [5],
+				"next": "OR"
+	    	}],
+	    	sort: {
+	    		"city": "asc",
+	    		"street": "desc"
+	    	},
+	    	limit: 1000,
+	    	offset: 10
+	    });
+
+	    console.log(q);
+    </script>
 </body>
 </html>
