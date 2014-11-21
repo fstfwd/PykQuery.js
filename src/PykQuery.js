@@ -174,12 +174,17 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
 
   //Used internally but not accessible to the user
 
-  Object.defineProperty(this, '__impacts', {
+  Object.defineProperty(this, 'impacts', {
     get: function() {
       return impacts;
     },
-    set: function(value) {
-       impacts.push(value)
+    set: function(array_of_div_ids, is_cyclical) { //APPEND
+      if (impactValidation(array_of_div_ids)) {
+        impacts = value;
+        if(is_cyclical){
+          
+        }
+      }
     }
   });
 
@@ -323,14 +328,20 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
                   console.error("You are trying to addLocal " + listOfLocals[i] + " whose DIV does not exist.");
                   return false;
               }
-              local.__impacts = util.pushToArray(local.__impacts, div_id);
+              local.impacts = util.pushToArray(local.impacts, div_id);
               //in most scenarios there will be only one global hence a smart pre-set
-              if(local.__impacts.length == 1 && adapter == "inbrowser"){
+              if(local.impacts.length == 1 && adapter == "inbrowser"){
                 local.global_divid_for_raw_data = div_id;
               }
               impacts = util.pushToArray(impacts, listOfLocals[i]);
           }
       }
+  }
+
+  var impactValidation = function(array_of_div_ids){
+    //IF I AM LOCAL then array_of_div_ids contains only GLOBAL DIV IDs
+    //IF I AM GLOBAL then array_of_div_ids contains only LOCAL DIV IDs
+    return true;
   }
 
   //code for validation before adding filter
