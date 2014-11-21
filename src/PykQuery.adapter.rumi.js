@@ -1,6 +1,10 @@
-PykQuery-adapter.rumi = {}
+PykQueryAdapterRumi = {}
 
-PykQuery.adapter.rumi.init = function(pykquery_json) {
+PykQueryAdapterRumi.init = function(pykquery_json) {
 
+  
 
+  console.log(pykquery_json);
+  return;
+  
 }
