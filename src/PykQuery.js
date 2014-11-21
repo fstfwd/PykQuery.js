@@ -66,6 +66,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       limit = 2000,
       __impacts =[],
       offset = 0,
+      alias = [],
       filter_data, raw_data, global_divid_for_rawdata;
   // set the global data to pykquery
   if(mode == "global" && _scope == "global" && adapter == "inbrowser") {
@@ -200,6 +201,24 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     set: function(val) { //APPEND
       if (impactValidation([val])){
         __impacts.push(val);
+      }
+    }
+  });
+
+  Object.defineProperty(this, 'alias', {
+    get: function() {
+      return alias;
+    },
+    set: function(vals) { 
+      //Input Format -- vals = [{"col_name": "alias_name"}, {"col_name1": "alias_name1"}, ...]
+      var len = vals.length
+      if (len < 1) {
+        console.warn("Need atleast 1 alias name to add");
+        return;
+      }
+
+      for (var i=0; i < len; i++) {
+        alias.push(vals[i]);
       }
     }
   });
