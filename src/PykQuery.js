@@ -490,10 +490,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var connector = new PykQuery.adapter.inbrowser.init(pykquery_json);
     }
     else{
-      var connector = new PykQuery.adapter.rumi.init(pykquery_json);
-
+      var connector = new PykQueryAdapterRumi.init(pykquery_json);
     }
-    var response = connector.call();
+    var response = connector;
     //TODO to delete instance of adapter adapter.delete();
     return response;
   }
