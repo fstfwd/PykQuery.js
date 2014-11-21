@@ -47,7 +47,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
       limit = 2000,
       __impacts =[],
       offset = 0,
-      filter_data,raw_data,global_divid_for_rawdata;
+      filter_data, raw_data, global_divid_for_rawdata;
   // set the global data to pykquery
   if(mode == "global" && _scope == "global" && adapter == "inbrowser") {
     Object.defineProperty(this, 'rawdata', {
@@ -324,28 +324,6 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
         global_filter.removeFilterInQuery(column_name, condition_type, params);
       }
     }
-  }
-
-  //this function is only called on Global
-  //listOfLocals is a list of divid of locals
-  this.addLocals = function(listOfLocals){
-      if( listOfLocals != undefined && listOfLocals.length > 0){
-          len = listOfLocals.length;
-          for(var i = 0; i < len; i++){
-              var l = findQueryByDivid(listOfLocals[i]);
-              var local = window[l];
-              if (local == undefined){
-                  console.error("You are trying to addLocal " + listOfLocals[i] + " whose DIV does not exist.");
-                  return false;
-              }
-              local.impacts = util.pushToArray(local.impacts, div_id);
-              //in most scenarios there will be only one global hence a smart pre-set
-              if(local.impacts.length == 1 && adapter == "inbrowser"){
-                local.global_divid_for_raw_data = div_id;
-              }
-              impacts = util.pushToArray(impacts, listOfLocals[i]);
-          }
-      }
   }
 
   var impactValidation = function(array_of_div_ids){
