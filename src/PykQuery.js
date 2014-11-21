@@ -418,10 +418,10 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
 
   this.call = function(){
     if (_scope == "local"){
-      filterdata = invoke_call(this.getConfig())
+      filterdata = invoke_call(getConfig(this))
     }
     else{
-      filterdata = invoke_call(this.getConfig())
+      filterdata = invoke_call(getConfig(this))
       var len = impacts.length;
       for(var j =0;j<len;j++) {
         var local_filter = window[impacts[j]];
@@ -432,29 +432,28 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
 
   var invoke_call = function(pykquery_json){
     if(adapter == "inbrowser"){
-      var adapter = new PykQuery.adapter.inbrowser.init(pykquery_json);
+      var adapter_initializer = new PykQuery.adapter.inbrowser.init(pykquery_json);
     }
     else{
-      var adapter = new PykQuery.adapter.rumi.init(pykquery_json);
-
+      var adapter_initializer = new PykQuery.adapter.rumi.init(pykquery_json);
     }
-    var response = adapter.call();
+    var response = adapter_initializer.call();
     //TODO to delete instance of adapter adapter.delete();
     return response;
   }
 
-  // getConfig is use generate whole query and return data
-  this.getConfig = function() {
+  // getConfig is use generate whole query 
+  var getConfig = function(that) {
     var filter_obj = {};
     var querydata;
-    var arr = Object.getOwnPropertyNames(this);
+    var arr = Object.getOwnPropertyNames(that);
     for (var i in arr) {
-      if (this.propertyIsEnumerable(arr[i]) == false) {
-        filter_obj[arr[i]] = this[arr[i]];
+      if (that.propertyIsEnumerable(arr[i]) == false) {
+        filter_obj[arr[i]] = that[arr[i]];
         //console.log(arr);
       }
     }
-    //filter_obj['filter'] = this.filters;
+    //filter_obj['filters'] = addfilter;
     // if(myadapter == "database") {
     //   querydata = databaseQuery(filter_obj);
     //   return querydata;
@@ -465,7 +464,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
   };
 
   this.storeObjectInMemory = function(obj_name) {
-    $("#"+div_id).attr("pyk_object", obj_name);
+    document.getElementById(div_id).pyk_object = obj_name;
 
   }
 
@@ -496,7 +495,7 @@ PykQuery.init = function(mode, _scope, divid, adapter) {
 //   }
 
 var findQueryByDivid = function(id) {
-    var obj_name = $("#" + id).attr("pyk_object");
+    var obj_name = document.getElementById(id).pyk_object;
     if(obj_name == undefined){
         console.log("div not exit "+id);
     }
