@@ -494,6 +494,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
     }
     var response = connector.call();
+    response = processAlias(response);
     //TODO to delete instance of adapter adapter.delete();
     return response;
   }
@@ -549,6 +550,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 //       });
 //     return data;
 //   }
+
+var processAlias = function(res) {
+  //TO-DO -- replace all occurences of column_names with aliases if any
+  //waiting for -- response format
+  return res
+}
 
 var findQueryByDivid = function(id) {
     var obj_name = $("#" + id).attr("pyk_object");
