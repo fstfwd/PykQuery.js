@@ -79,9 +79,9 @@ function filterDbQueryString(options) {
 		query_where = "WHERE ";
 		next_op = false;			
 		_.each(filter, function (d) {
-			// if (next_op) {
-
-			// }
+			if (next_op) {
+				query_where += next_op + " ";
+			}
 			query_where += d["column_name"] + " ";
 			switch (d["condition_type"]) {				
 				case "values" :
@@ -115,7 +115,7 @@ function filterDbQueryString(options) {
 					break;
 				case "range":
 					if (d["condition"] && _.isEmpty(d["condition"]) === false) {
-						query_where += d["column"] + "NOT " + d["condition"]["not"] + " ";
+						query_where += "NOT " + d["condition"]["not"] + " ";
 					}
 					query_where += "BETWEEN " + d["condition"]["min"] + " AND " + d["condition"]["max"] + " ";
 					if (d["next"]) {

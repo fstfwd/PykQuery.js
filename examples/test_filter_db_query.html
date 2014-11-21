@@ -15,14 +15,18 @@
 	    	},
 	    	filter: [{
 	    		"column_name": "beds",
+				"condition_type": "range",
+				"condition": {
+					"min": 1,
+					"max": 5,
+					"not": 3
+				},
+				"next": "OR"
+	    	},{
+	    		"column_name": "city",
 				"condition_type": "values",
-				// "condition": {
-				// 	"min": 1,
-				// 	"max": 5,
-				// 	"not": 3
-				// },
-				"in": [1, 2, 5],
-				"not_in": [5],
+				"in": ['SACRAMENTO','ELK GROVE'],
+				"not_in": ['NORTH HIGHLANDS'],
 				"next": "OR"
 	    	}],
 	    	sort: {
