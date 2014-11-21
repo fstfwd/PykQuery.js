@@ -1,6 +1,7 @@
 <html>
 <head><title>Debugging DB Query String</title></head>
 <body>
+	<code id="query-string"></code>
 	<script src="http://code.jquery.com/jquery-2.0.0.js"></script>
     <script src="../lib/underscore-min.js"></script>
     <script src="../src/filter.js"></script>
@@ -15,8 +16,13 @@
 	    	filter: [{
 	    		"column_name": "beds",
 				"condition_type": "values",
+				// "condition": {
+				// 	"min": 1,
+				// 	"max": 5,
+				// 	"not": 3
+				// },
 				"in": [1, 2, 5],
-				// "not_in": [5],
+				"not_in": [5],
 				"next": "OR"
 	    	}],
 	    	sort: {
@@ -27,7 +33,8 @@
 	    	offset: 10
 	    });
 
-	    console.log(q);
+	    console.log(q[0]);
+	    $("#query-string").html(q[1]);
     </script>
 </body>
 </html>

@@ -15,7 +15,7 @@ function filterDbQueryString(options) {
 			raw_data = [],
 			final_data = [];
 
-	var query_string = "",
+	var query_string = [],
 			query_select = "",
 			query_from = "FROM "+table_name+" ",
 			query_where = "",
@@ -82,9 +82,8 @@ function filterDbQueryString(options) {
 			// if (next_op) {
 
 			// }
-
-			switch (d["condition_type"]) {
-				
+			query_where += d["column_name"] + " ";
+			switch (d["condition_type"]) {				
 				case "values" :
 					vals = [];
 					if (d["in"] && d["in"].length !== 0) {
@@ -114,8 +113,21 @@ function filterDbQueryString(options) {
 						next_op = false;
 					}
 					break;
-
-				// case "range":
+				case "range":
+					if (d["condition"] && _.isEmpty(d["condition"]) === false) {
+						query_where += d["column"] + "NOT " + d["condition"]["not"] + " ";
+					}
+					query_where += "BETWEEN " + d["condition"]["min"] + " AND " + d["condition"]["max"] + " ";
+					if (d["next"]) {
+						next_op = d["next"];
+					}
+					else {
+						next_op = false;
+					}
+					break;
+				case "data_types":
+					// yet to be coded
+					break;					
 			}
 		});
 	}
@@ -145,7 +157,14 @@ function filterDbQueryString(options) {
 	query_offset = (offset) ? ("OFFSET " + offset + " ") : query_limit;
 
 	// FINAL DB QUERY STRING
-	query_string = query_select + query_from + query_where + query_group_by + query_order_by + query_limit + query_offset;
+	query_string[0] = query_select + query_from + query_where + query_group_by + query_order_by + query_limit + query_offset;
+	query_string[1] = query_select + "<br/>"
+								+ query_from + "<br/>"
+								+ query_where + "<br/>"
+								+ query_group_by + "<br/>"
+								+ query_order_by + "<br/>"
+								+ query_limit + "<br/>"
+								+ query_offset;
 	// console.log(query_string,"***");
 	
 	return query_string;
