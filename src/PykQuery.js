@@ -126,7 +126,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           return dimensions;
         },
         set: function(name) {
-          dimensions.push(name);
+          _.each(name, function (d) {
+            dimensions.push(d);
+          });
         }
       });
       Object.defineProperty(this, 'metrics', {
@@ -148,7 +150,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           return cols;
         },
         set: function(name) {
-          cols.push(name);
+          _.each(name, function (d) {
+            cols.push(d);
+          });
         }
       });
       break;
@@ -214,7 +218,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     get: function() {
       return alias;
     },
-    set: function(vals) { 
+    set: function(vals) {
       //Input Format -- vals = [{"col_name": "alias_name"}, {"col_name1": "alias_name1"}, ...]
       var len = vals.length
       if (len < 1) {
@@ -227,7 +231,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
     }
   });
-  
+
   Object.defineProperty(this, 'sort', {
     get: function() {
       return sort
@@ -498,7 +502,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     return response;
   }
 
-  // getConfig is use generate whole query 
+  // getConfig is use generate whole query
   var getConfig = function(that) {
     var filter_obj = {};
     var querydata;

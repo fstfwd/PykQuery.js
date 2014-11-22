@@ -7,7 +7,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
   // data whis is used for filtering data is in global_divid_for_raw_data
   global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
   //raw_data = global_divid_for_raw_data.rawdata;
-  console.log(raw_data,query_object);
 
   // function call by adapter from pykquery.js
   this.call = function () {
@@ -22,7 +21,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
         //console.log(data,pykquery);
         var mode = pykquery.mode;
         //checking whether filter is exit in query or not
-        console.log(query_object.filters);
         if(query_object.filters != undefined){
           if(query_object.filters.length > 0) {
             console.log('start filter');
@@ -51,14 +49,11 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
 
   }
 
-
-
   var startAggregation = function (filter_obj){
     var metrics = filter_obj.metrics,
         local_data;
     // matrics_column_name = objectkeymatrics;
-    local_data = _.groupBy(raw_data,filter_obj.dimensions[0][0]);
-    console.log(filter_obj,local_data)
+    local_data = _.groupBy(raw_data,filter_obj.dimensions[0]);
     //metrices
     for (var prop in metrics) {
       switch (metrics[prop][0]) {
@@ -103,6 +98,50 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       local_obj[column_name] = key;
       local_filter_array.push(local_obj);
       local_obj["sum"] = _.sum(values, function (value) {
+        return value[column_name];
+      });
+      local_filter_array.push(local_obj);
+    });
+    return local_filter_array;
+  }
+
+  var metricsMin = function (local_data,column_name) {
+    var local_filter_array = []
+    _.map(local_data, function (values,key) {
+      var local_obj = {};
+      local_obj[column_name] = key;
+      local_filter_array.push(local_obj);
+      local_obj["min"] = _.min(values, function (value) {
+        return value[column_name];
+      });
+      local_filter_array.push(local_obj);
+    });
+    console.log(local_filter_array);
+    return local_filter_array;
+  }
+
+  var metricsMax = function (local_data,column_name) {
+    var local_filter_array = []
+    _.map(local_data, function (values,key) {
+      var local_obj = {};
+      local_obj[column_name] = key;
+      local_filter_array.push(local_obj);
+      local_obj["max"] = _.max(values, function (value) {
+        return value[column_name];
+      });
+      local_filter_array.push(local_obj);
+    });
+    console.log(local_filter_array);
+    return local_filter_array;
+  }
+
+  var metricsExtent = function (local_data,column_name) {
+    var local_filter_array = []
+    _.map(local_data, function (values,key) {
+      var local_obj = {};
+      local_obj[column_name] = key;
+      local_filter_array.push(local_obj);
+      local_obj["extent"] = _.extent(values, function (value) {
         return value[column_name];
       });
       local_filter_array.push(local_obj);
