@@ -227,7 +227,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
 
       for (var column_name in vals) {
-        if (p.hasOwnProperty(column_name)) {
+        if (vals.hasOwnProperty(column_name)) {
           alias[column_name] = vals[column_name];
         }
       }
