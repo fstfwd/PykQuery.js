@@ -8,13 +8,14 @@
     <script type="text/javascript">
 	    var q = filterDbQueryString({
 	    	mode: "select",
+	    	columns: ["street","city","zip","state","beds","baths","sq__ft","type","sale_date","price","latitude","longitude"],
 	    	dimensions: ["state","zip"],
 	    	select_columns: ["city","beds"],
 	    	metrics: {
 	    		state: ["count"],
 	    		beds: ["avg","sum"]
 	    	},
-	    	filter: [/*{
+	    	filter: [{
 	    		"column_name": "beds",
 				"condition_type": "range",
 				"condition": {
@@ -23,7 +24,7 @@
 					"not": true
 				},
 				"next": "OR"
-	    	},*/{
+	    	},{
 	    		"column_name": "city",
 				"condition_type": "values",
 				"in": ['SACRAMENTO','ELK GROVE'],
@@ -33,9 +34,9 @@
 	    	sort: {
 	    		"city": "asc",
 	    		"street": "desc"
-	    	}/*,
+	    	},
 	    	limit: 1000,
-	    	offset: 10*/
+	    	offset: 10
 	    });
 
 	    console.log(q[0]);
