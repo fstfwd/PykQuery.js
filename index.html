@@ -1,9 +1,9 @@
 <html>
   <head>
-    <script src="http://code.jquery.com/jquery-2.0.0.js"></script>
-    <script src="lib/underscore-min.js"></script>
-    <script src="src/PykUtil.js"></script>
-    <script src="src/PykQuery.js"></script>  
+    <script src='lib/underscore-min.js'></script>
+    <script src="src/PykUtil.js"></script>  
+    <script src="src/PykQuery.js"></script> 
+    <script src="src/PykQuery.adapter.inbrowser.js"></script>
   </head>
   <body>
     <div id="g1">
@@ -15,20 +15,21 @@
       var a = new PykQuery.init("select", "local", "a", "inbrowser");
       a.storeObjectInMemory('a');
       var b = new PykQuery.init("aggregation", "local", "b", "inbrowser");
-      b.dimensions = ["day", "das", "sdsd"];
-      b.metrics = [{"": ["min"]}, {"sd": ["min"]}, {"sd": ["min"]}];
+      b.dimensions = ["city", "das", "sdsd"];
+      b.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
       b.storeObjectInMemory('b');
       var g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
       g1.storeObjectInMemory('g1');
       g1.addImpacts(["a", "b"], false);
       g1.rawdata = "alskndalskndals"
-      z = a.filter()
-      z.add({"column_name": "Day", "condition_type": "range", "condition": {"min": 10, "max": 10000, "not": false}, "next": "OR"});
-      z = b.filter()
-      z.add({"column_name": "Daysdsd", "condition_type": "range", "condition": {"min": 10000, "max": 210000, "not": false}, "next": "OR"});
+      z = a.filter();
+      z.add({"column_name": "price", "condition_type": "range", "condition": {"min": 59222, "max": 110700, "not": false}, "next": "OR"});
+      // z = b.filter()
+      // z.add({"column_name": "Daysdsd", "condition_type": "range", "condition": {"min": 10000, "max": 210000, "not": false}, "next": "OR"});
       z = g1.filter()
       z.add({"column_name": "Name", "condition_type": "values", "in": ["Darpan", "Ronak"], "next": "OR"});
-      console.log(g1.getConfig());
+      b.call();
+      //console.log(g1.getConfig());
     </script>
   </body>
 </html>

@@ -1,6 +1,8 @@
-PykQueryAdapterRumi = {}
 
-PykQueryAdapterRumi.init = function(pykquery_json) {
+PykQuery.adapter = {};
+PykQuery.adapter.rumi = {};
+
+PykQuery.adapter.rumi.init = function(pykquery_json) {
 
   response = ajax_query_pykquery(pykquery_json);
   //might have to do JSON.parse(response) 
