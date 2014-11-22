@@ -1,0 +1,53 @@
+<html>
+  <head>
+    <script src="http://code.jquery.com/jquery-2.0.0.js"></script>
+    <script src='../lib/underscore-min.js'></script>
+    <script src='../lib/underscoreAddon.js'></script>
+    <script src="../src/PykUtil.js"></script>
+    <script src="../src/PykQuery.js"></script>
+    <script src="../src/PykQuery.adapter.inbrowser.js"></script>
+  </head>
+  <body>
+    <h3>Testing #1: Filters with two tables</h3>
+    <div id="g1">
+      <div id='table1'></div>
+      <div id='table2'></div>
+    </div>
+    <script type="text/javascript">
+
+      var a = new PykQuery.init("aggregation", "local", "table1", "inbrowser");
+      a.storeObjectInMemory('a');
+      a.dimensions = ["city",];
+      a.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+
+      var b = new PykQuery.init("aggregation", "local", "table2", "inbrowser");
+      b.storeObjectInMemory('b');
+      b.dimensions = ["zip"];
+      b.metrics = {"beds":["count"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+
+      var g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
+      g1.storeObjectInMemory('g1');
+      g1.addImpacts(["a", "b"], false);
+
+      var xmlhttp = new XMLHttpRequest();
+      var url = "data/test1data.json";
+      xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+          g1.rawdata = JSON.parse(xmlhttp.response);
+        }
+      }
+      xmlhttp.open("GET", url, true);
+      xmlhttp.send();
+
+      // z = a.filter();
+      // z.add({"column_name": "price", "condition_type": "range", "condition": {"min": 59222, "max": 110700, "not": false}, "next": "OR"});
+      // // z = b.filter()
+      // // z.add({"column_name": "Daysdsd", "condition_type": "range", "condition": {"min": 10000, "max": 210000, "not": false}, "next": "OR"});
+      // z = g1.filter()
+      // z.add({"column_name": "Name", "condition_type": "values", "in": ["Darpan", "Ronak"], "next": "OR"});
+      var d = a.call().getData();
+      b.call();
+      console.log(d);
+    </script>
+  </body>
+</html>
