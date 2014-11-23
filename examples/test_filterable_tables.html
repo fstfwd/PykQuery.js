@@ -1,6 +1,6 @@
 <html>
   <head>
-    <script src="http://code.jquery.com/jquery-2.0.0.js"></script>
+    <script src="lib/jquery-1.11.1.min.js"></script>
     <script src='../lib/underscore-min.js'></script>
     <script src='../lib/underscoreAddon.js'></script>
     <script src="../src/PykUtil.js"></script>
@@ -15,6 +15,39 @@
     </div>
     <script type="text/javascript">
 
+      var filter1 = function (value) {
+        x = a.filter();
+        x.add({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR"});
+        var dd = a.call().getData();
+        var ee = b.call().getData();
+
+        render(dd,ee)
+      };
+      var filter2 = function (value) {
+        y = b.filter();
+        y.add({"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR"});
+        var dd = a.call().getData();
+        var ee = b.call().getData();
+
+        render(dd,ee)
+      };
+      function render (obj1,obj2) {
+        var html1 = "<table><tr><td>City</td><td>Price</td></tr>";
+        for (var i = 0; i< obj1.length; i++) {
+          html1 += "<tr><td><a class='filter1' onclick=filter1('"+obj1[i].city+"');>"+obj1[i].city+"</a></td><td>"+obj1[i].price+"</td></tr>"
+        }
+        html1 += "</table>";
+
+        var html2 = "<table><tr><td>Zip</td><td>Beds</td></tr>";
+        for (var i = 0; i< obj2.length; i++) {
+          html2 += "<tr><td><a class='filter2' onclick=filter2('"+obj2[i].zip+"');>"+obj2[i].zip+"</a></td><td>"+obj2[i].beds+"</td></tr>"
+        }
+        html2 += "</table>";
+
+        document.getElementById(a.div_id).innerHTML = html1;
+        document.getElementById(b.div_id).innerHTML = html2;
+      }
+
       var xmlhttp = new XMLHttpRequest();
       var url = "data/test1data.json";
       xmlhttp.onreadystatechange = function () {
@@ -27,21 +60,8 @@
 
           var d = a.call().getData();
           var e = b.call().getData();
-          console.log(d,e,"FFFFFFFFFFFF");
-          var html1 = "<table><tr><td>City</td><td>Price</td></tr>";
-          for (var i = 0; i< d.length; i++) {
-            html1 += "<tr><td>"+d[i].city+"</td><td>"+d[i].price+"</td></tr>"
-          }
-          html1 += "</table>";
 
-          var html2 = "<table><tr><td>City</td><td>Price</td></tr>";
-          for (var i = 0; i< e.length; i++) {
-            html2 += "<tr><td>"+e[i].zip+"</td><td>"+e[i].beds+"</td></tr>"
-          }
-          html2 += "</table>";
-
-          document.getElementById(a.div_id).innerHTML = html1;
-          document.getElementById(b.div_id).innerHTML = html2;
+          render(d,e);
         }
       }
       xmlhttp.open("GET", url, true);
@@ -57,12 +77,6 @@
       b.dimensions = ["zip"];
       b.metrics = {"beds":["count"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
 
-      // z = a.filter();
-      // z.add({"column_name": "price", "condition_type": "range", "condition": {"min": 59222, "max": 110700, "not": false}, "next": "OR"});
-      // // z = b.filter()
-      // // z.add({"column_name": "Daysdsd", "condition_type": "range", "condition": {"min": 10000, "max": 210000, "not": false}, "next": "OR"});
-      // z = g1.filter()
-      // z.add({"column_name": "Name", "condition_type": "values", "in": ["Darpan", "Ronak"], "next": "OR"});
     </script>
   </body>
 </html>

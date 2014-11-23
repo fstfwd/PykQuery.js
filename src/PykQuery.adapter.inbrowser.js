@@ -1,4 +1,4 @@
-PykQuery.adapter = {};
+PykQuery.adapter = PykQuery.adapter || {};
 PykQuery.adapter.inbrowser = {};
 //PykQuery.adapter.inbrowser.init(pykquery_json);
 PykQuery.adapter.inbrowser.init = function (pykquery){
@@ -141,7 +141,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
   }
 
   var startFilterData = function (filter_obj) {
-    var filters_array =  filter_obj.filters;
+    var filters_array = filter_obj.filters;
     console.log(filter_obj.select,filters_array);
     var len = filters_array.length;
     for(var i = 0; i < len; i++) {
@@ -150,11 +150,11 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       switch(filters_array[i]["condition_type"]) {
         case "values":
           console.log('---- value code');
-          return valueFilter(filters_array[i],filter_obj.select);
+          return valueFilter(filters_array[i],filter_obj.dimensions); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "range":
           console.log('---- range code');
-          return rangeFilter(filters_array[i],filter_obj.select);
+          return rangeFilter(filters_array[i],filter_obj.dimensions); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "datatype":
           break;
@@ -170,21 +170,23 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
         not_in = filter_obj['not_in'],
         column_name = filter_obj['column_name'],
         local_data, col;
-    local_data = _.filter(data ,function (obj) {
-      if(not_in.indexOf(obj[column_name]) < 0) {
+    local_data = _.filter(raw_data ,function (obj) {
+      if(!not_in || not_in.indexOf(obj[column_name]) < 0) {
         return obj;
       }
     });
     local_data = _.filter(local_data ,function (obj) {
-      if(_in.indexOf(obj[column_name]) > -1) {
+      if(_in && _in.indexOf(obj[column_name]) > -1) {
         return obj;
       }
     });
-    if(columns.length != 0) {
-      local_data = _.map(local_data ,function (obj) {
-        return _.pick(obj,columns);
-      });
-    }
+    console.log(local_data);
+    // Why is the below code written. It returns the data with only one column. Ideally, the where clause should return all the columns with aggregation hapenning later ---> AUTHOR RONAK
+    // if(columns.length != 0) {
+    //   local_data = _.map(local_data ,function (obj) {
+    //     return _.pick(obj,columns);
+    //   });
+    // }
 
     console.log("value filter completed");
     return local_data;
