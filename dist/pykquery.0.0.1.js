@@ -120,7 +120,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       limit = 2000,
       __impacts =[],
       offset = 0,
-      alias = [],
+      alias = {},
       filter_data, raw_data, global_divid_for_rawdata;
   // set the global data to pykquery
   if(mode == "global" && _scope == "global" && adapter == "inbrowser") {
@@ -180,7 +180,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           return dimensions;
         },
         set: function(name) {
-          dimensions.push(name);
+          _.each(name, function (d) {
+            dimensions.push(d);
+          });
         }
       });
       Object.defineProperty(this, 'metrics', {
@@ -202,7 +204,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           return cols;
         },
         set: function(name) {
-          cols.push(name);
+          _.each(name, function (d) {
+            cols.push(d);
+          });
         }
       });
       break;
@@ -251,8 +255,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   });
 
-  //Used internally but not accessible to the user
-
+  // The end user must not be using it. Its used internally to set the impact of another global for handling cyclical loops.
   Object.defineProperty(this, 'impacts', {
     get: function() {
       return __impacts;
@@ -269,19 +272,21 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       return alias;
     },
     set: function(vals) { 
-      //Input Format -- vals = [{"col_name": "alias_name"}, {"col_name1": "alias_name1"}, ...]
-      var len = vals.length
-      if (len < 1) {
+      //Input Format -- vals = {"col_name": "alias_name", "col_name1": "alias_name1", ...}
+      columns = Object.keys(vals);
+      if (columns.length < 1) {
         console.warn("Need atleast 1 alias name to add");
         return;
       }
 
-      for (var i=0; i < len; i++) {
-        alias.push(vals[i]);
+      for (var column_name in vals) {
+        if (vals.hasOwnProperty(column_name)) {
+          alias[column_name] = vals[column_name];
+        }
       }
     }
   });
-  
+
   Object.defineProperty(this, 'sort', {
     get: function() {
       return sort
@@ -525,18 +530,28 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     return true;
   }
 
-  this.call = function(){
-    if (_scope == "local"){
-      filterdata = invoke_call(this.getConfig())
-    }
-    else{
-      filterdata = invoke_call(this.getConfig())
-      var len = impacts.length;
-      for(var j =0;j<len;j++) {
-        var local_filter = window[impacts[j]];
-         local_filter.filterdata =local_filter.call();
+  this.call = function() {
+    var that = this;
+    var access_filtered_data = {
+      getData: function () {
+        if (_scope == "local"){
+          filterdata = invoke_call(getConfig(that))
+          return filterdata;
+        }
+        else{
+          filterdata = invoke_call(getConfig(that))
+          var len = impacts.length;
+          for(var j = 0; j < len; j++) {
+            var local_filter = window[impacts[j]];
+            local_filter.filterdata = local_filter.call();
+          }
+        }
+      },
+      flushData: function () {
+        filterdata = "";
       }
-    }
+    };
+    return access_filtered_data;
   }
 
   var invoke_call = function(pykquery_json){
@@ -545,25 +560,26 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
     else{
       var connector = new PykQuery.adapter.rumi.init(pykquery_json);
-
     }
     var response = connector.call();
+    console.log(response);
+    //response = processAlias(response);
     //TODO to delete instance of adapter adapter.delete();
     return response;
   }
 
-  // getConfig is use generate whole query and return data
-  this.getConfig = function() {
+  // getConfig is use generate whole query
+  var getConfig = function(that) {
     var filter_obj = {};
     var querydata;
-    var arr = Object.getOwnPropertyNames(this);
+    var arr = Object.getOwnPropertyNames(that);
     for (var i in arr) {
-      if (this.propertyIsEnumerable(arr[i]) == false) {
-        filter_obj[arr[i]] = this[arr[i]];
+      if (that.propertyIsEnumerable(arr[i]) == false) {
+        filter_obj[arr[i]] = that[arr[i]];
         //console.log(arr);
       }
     }
-    //filter_obj['filter'] = this.filters;
+    //filter_obj['filters'] = addfilter;
     // if(myadapter == "database") {
     //   querydata = databaseQuery(filter_obj);
     //   return querydata;
@@ -574,8 +590,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   };
 
   this.storeObjectInMemory = function(obj_name) {
-    $("#"+div_id).attr("pyk_object", obj_name);
-
+    document.getElementById(div_id).setAttribute("pyk_object", obj_name);
   }
 
 //   var databaseQuery = function(filter_obj){
@@ -604,123 +619,19 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 //     return data;
 //   }
 
+var processAlias = function(res) {
+  //TO-DO -- replace all occurences of column_names with aliases if any
+  //waiting for -- response format
+  return res
+}
+
 var findQueryByDivid = function(id) {
-    var obj_name = $("#" + id).attr("pyk_object");
+    var obj_name = document.getElementById(id).getAttribute("pyk_object");
     if(obj_name == undefined){
         console.log("div not exit "+id);
     }
     return obj_name;
 }
-
-//   // filter data with underscore
-// }
-
-// PykQuery.browserdata = function(filterObj){
-//     that = this;
-
-//     $.getJSON( "test1data.json", function(dat) {
-//       that.data = dat;
-//       console.log(that.data)
-//       var mode = filterObj.mode;
-//       // checking whether filter is exit in query or not
-//       // if(filterObj.filters.length > 0) {
-//       //   console.log('start filter');
-//       //   startFilterData(filterObj); //call to start filter
-//       // }
-//       switch(mode) {
-//           case "aggregation":
-//           startAggration(filterObj);
-//           break;
-//           case "unique":
-//           break;
-//           case "datatype":
-//           break;
-//           defaultkey: "value",
-//           console.log('wrong condition type');
-//         }
-//     });
-
-//     var startAggration = function(filterObj){
-//       var temp_data = data;
-//       var matrics = filterObj.matrics;
-//       temp_data = _.groupBy(data,filterObj.dimensions[0]);
-//        _.map(temp_data,function(obj){
-
-//          return console.log(obj)
-//       // })
-//       console.log(temp_data)
-
-//     }
-
-//     var startFilterData = function(filterObj) {
-//       var temp_obj =  filterObj.filters;
-//       console.log(filterObj.select,temp_obj);
-//       for(var i=0;i<temp_obj.length;i++) {
-//         //var obj = {columnname:['count']}
-//         //checking which type of filter exit
-//         switch(temp_obj[i]["condition_type"]) {
-//           case "values":
-//           valueFilter(temp_obj[i],filterObj.select)
-//           console.log('---- value code')
-//           break;
-//           case "range":
-//           rangeFilter(temp_obj[i],filterObj.select);
-//           console.log('---- range code');
-//           break;
-//           case "datatype":
-//           break;
-//           default:
-//           console.log('wrong condition type');
-//         }
-//       }
-
-//     }
-
-//     var valueFilter = function(obj_name,columns) {
-//       console.log(obj_name,columns);
-//       var _in = obj_name['in'],
-//           not_in = obj_name['not_in'],
-//           column_name = obj_name['column_name'],
-//           temp_data, col;
-//       console.log(not_in,_in,column_name);
-//       temp_data = _.filter(data ,function(obj){
-//                     if(not_in.indexOf(obj[column_name]) < 0){
-//                       return obj;
-//                     }
-//                   });
-//       temp_data = _.filter(temp_data ,function(obj){
-//                     if(_in.indexOf(obj[column_name]) > -1){
-//                       return obj;
-//                     }
-//                   });
-//       if(columns.length != 0){
-//         temp_data = _.map(temp_data ,function(obj){
-//                       return _.pick(obj,columns);
-//                     });
-//       }
-
-//       console.log(temp_data);
-//     }
-//     var rangeFilter = function(obj_name,columns){
-//       var min = obj_name['condition']['min'],
-//           max = obj_name['condition']['max'],
-//           column_name = obj_name['column_name'],
-//           temp_data, col;
-//       console.log(min,max);
-//       temp_data = _.filter(data ,function(obj){
-//                     if(obj[column_name] <= max && obj[column_name] >=min){
-//                       return obj;
-//                     }
-//                   });
-//       //return perticular columns data
-//       if(columns.length != 0){
-//         temp_data = _.map(temp_data ,function(obj){
-//                       return _.pick(obj,columns);
-//                     });
-//       }
-//       console.log(temp_data);
-//     }
-
 
   /* -------------- URL params ------------ */
   // var filters = ["Pykih","mumbai","startup"];
@@ -766,132 +677,434 @@ var findQueryByDivid = function(id) {
   // (div_id == "pieContainer") ? domChartFiltering("pieContainer") : null;
 };
 
-PykQuery-adapter.rumi = {}
+
+PykQuery.adapter = {};
+PykQuery.adapter.rumi = {};
 
 PykQuery.adapter.rumi.init = function(pykquery_json) {
 
+  response = ajax_query_pykquery(pykquery_json);
+  //might have to do JSON.parse(response) 
+  console.log(pykquery_json);
+  return response;
+  
+}
+
+var ajax_query_pykquery = function(pykquery_json) {
+  var xmlhttp;
+
+  if (window.XMLHttpRequest) {
+    // code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp = new XMLHttpRequest();
+  } else {
+    // code for IE6, IE5
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+  }
+
+  xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState == 4 ) {
+      if(xmlhttp.status == 200){
+        return xmlhttp.responseText;
+      }
+      else if(xmlhttp.status == 400) {
+        console.error('There was an error 400');
+      }
+      else {
+        console.error('something else other than 200 was returned');
+      }
+    }
+  }
+
+  xmlhttp.open("POST", "filter/get_data", false);
+  xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  xmlhttp.send(JSON.stringify(pykquery_json));
+  xmlhttp.send();
+}
+
+PykQuery.adapter = {};
+PykQuery.adapter.inbrowser = {};
+//PykQuery.adapter.inbrowser.init(pykquery_json);
+PykQuery.adapter.inbrowser.init = function (pykquery){
+  var query_object = pykquery,
+      raw_data;
+  // data which is used for filtering data is in global_divid_for_raw_data
+  global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
+  raw_data = global_divid_for_raw_data.rawdata;
+
+  // function call by adapter from pykquery.js
+  this.call = function () {
+
+    var filtered_data;
+    var mode = pykquery.mode;
+    //checking whether filter is exit in query or not
+    if(query_object.filters != undefined){
+      if(query_object.filters.length > 0) {
+        console.log('start filter');
+        raw_data = startFilterData(query_object); //call to start filter
+
+      }
+    }
+    switch(mode) {
+      case "aggregation":
+        filtered_data = startAggregation(query_object);
+        break;
+      case "unique":
+        break;
+      case "datatype":
+        break;
+      default:
+        // key: "value",
+        console.log('wrong condition type');
+    }
+    return filtered_data;
+  }
+
+  var startAggregation = function (filter_obj){
+    var metrics = filter_obj.metrics,
+        local_data;
+    // matrics_column_name = objectkeymatrics;
+    local_data = _.groupBy(raw_data,filter_obj.dimensions[0]);
+    //metrices
+    for (var prop in metrics) {
+      switch (metrics[prop][0]) {
+        case "count":
+          local_data = metricsCount(local_data,prop);//prop is property which is actually a column name
+        break;
+        case "sum":
+          local_data = metricsSum(local_data,prop);//prop is property which is actually a column name
+        break;
+        case "min":
+          local_data = metricsMin(local_data,prop);//prop is property which is actually a column name
+        break;
+        case "max":
+          local_data = metricsMax(local_data,prop);//prop is property which is actually a column name
+        break;
+        case "extent":
+          local_data = metricsExtent(local_data,prop);//prop is property which is actually a column name
+          break;
+
+        default:
+        //other cases is remaning
+      }
+      return local_data;
+    }
+  }
+
+  var metricsCount = function (local_data,column_name) {
+    var local_filter_array = []
+    _.map(local_data, function (value,key) {
+      var local_obj = {};
+      local_obj[column_name] = key;
+      local_obj["count"] = value.length;
+      local_filter_array.push(local_obj);
+    });
+    console.log(local_filter_array);
+    return local_filter_array;
+  }
+
+  var metricsSum = function (local_data,column_name) {
+    var local_filter_array = []
+    _.map(local_data, function (values,key) {
+      var local_obj = {};
+      local_obj[pykquery.dimensions[0]] = key;
+      local_filter_array.push(local_obj);
+      local_obj[column_name] = _.sum(values, function (value) {
+        return value[column_name];
+      });
+      local_filter_array.push(local_obj);
+    });
+    console.log(local_filter_array);
+    return local_filter_array;
+  }
+
+  var metricsMin = function (local_data,column_name) {
+    var local_filter_array = []
+    _.map(local_data, function (values,key) {
+      var local_obj = {};
+      local_obj[column_name] = key;
+      local_filter_array.push(local_obj);
+      local_obj["min"] = _.min(values, function (value) {
+        return value[column_name];
+      });
+      local_filter_array.push(local_obj);
+    });
+    console.log(local_filter_array);
+    return local_filter_array;
+  }
+
+  var metricsMax = function (local_data,column_name) {
+    var local_filter_array = []
+    _.map(local_data, function (values,key) {
+      var local_obj = {};
+      local_obj[column_name] = key;
+      local_filter_array.push(local_obj);
+      local_obj["max"] = _.max(values, function (value) {
+        return value[column_name];
+      });
+      local_filter_array.push(local_obj);
+    });
+    console.log(local_filter_array);
+    return local_filter_array;
+  }
+
+  var metricsExtent = function (local_data,column_name) {
+    var local_filter_array = []
+    _.map(local_data, function (values,key) {
+      var local_obj = {};
+      local_obj[column_name] = key;
+      local_filter_array.push(local_obj);
+      local_obj["extent"] = _.extent(values, function (value) {
+        return value[column_name];
+      });
+      local_filter_array.push(local_obj);
+    });
+    console.log(local_filter_array);
+    return local_filter_array;
+  }
+
+  var startFilterData = function (filter_obj) {
+    var filters_array =  filter_obj.filters;
+    console.log(filter_obj.select,filters_array);
+    var len = filters_array.length;
+    for(var i = 0; i < len; i++) {
+      //var obj = {columnname:['count']}
+      //checking condition_type of filter exit
+      switch(filters_array[i]["condition_type"]) {
+        case "values":
+          console.log('---- value code');
+          return valueFilter(filters_array[i],filter_obj.select);
+          break;
+        case "range":
+          console.log('---- range code');
+          return rangeFilter(filters_array[i],filter_obj.select);
+          break;
+        case "datatype":
+          break;
+        default:
+          console.log('wrong condition type');
+      }
+    }
+
+  }
+
+  var valueFilter = function (filter_obj,columns) {
+    var _in = filter_obj['in'],
+        not_in = filter_obj['not_in'],
+        column_name = filter_obj['column_name'],
+        local_data, col;
+    local_data = _.filter(data ,function (obj) {
+      if(not_in.indexOf(obj[column_name]) < 0) {
+        return obj;
+      }
+    });
+    local_data = _.filter(local_data ,function (obj) {
+      if(_in.indexOf(obj[column_name]) > -1) {
+        return obj;
+      }
+    });
+    if(columns.length != 0) {
+      local_data = _.map(local_data ,function (obj) {
+        return _.pick(obj,columns);
+      });
+    }
+
+    console.log("value filter completed");
+    return local_data;
+  }
+  var rangeFilter = function (filter_obj,columns){
+     console.log(columns);
+    var min = filter_obj['condition']['min'],
+        max = filter_obj['condition']['max'],
+        column_name = filter_obj['column_name'],
+        local_data, col;
+    console.log(min,max);
+    local_data = _.filter(raw_data ,function (obj){
+      if(obj[column_name] <= max && obj[column_name] >=min){
+        return obj;
+      }
+    });
+    //return perticular columns data
+    if(columns.length != 0){
+      local_data = _.map(local_data ,function (obj){
+        return _.pick(obj,columns);
+      });
+    }
+    console.log("rangeFilter done----");
+    return local_data;
+  }
 
 }
 
-PykQuery.adapter.inbrowser = {}
+function filterDbQueryString(options) {
+			
+	var filter = options.filter,
+			mode = options.mode,
+			metrics = options.metrics,
+			select_columns = options.select_columns,
+			sort = options.sort,
+			dimensions = options.dimensions,
+			limit  = options.limit,
+			offset = options.offset;
 
-PykQuery.adapter.inbrowser.init = function(pykquery){
-    global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data]
-    raw_data = global_divid_for_raw_data.rawdata;
-    console.log(raw_data,global_divid_for_raw_data);
-    
-    //     $.getJSON( "test1data.json", function(dat) { 
-//       that.data = dat;
-//       console.log(that.data)
-//       var mode = filterObj.mode;
-//       // checking whether filter is exit in query or not 
-//       // if(filterObj.filters.length > 0) { 
-//       //   console.log('start filter');
-//       //   startFilterData(filterObj); //call to start filter
-//       // }
-//       switch(mode) {
-//           case "aggregation":
-//           startAggration(filterObj);
-//           break;
-//           case "unique":
-//           break;
-//           case "datatype":
-//           break;
-//           defaultkey: "value", 
-//           console.log('wrong condition type');
-//         }
-//     });
-
-//     var startAggration = function(filterObj){
-//       var temp_data = data;
-//       var matrics = filterObj.matrics;
-//       temp_data = _.groupBy(data,filterObj.dimensions[0]);
-//        _.map(temp_data,function(obj){
-
-//          return console.log(obj)
-//       // })
-//       console.log(temp_data)
-
-//     }
-
-//     var startFilterData = function(filterObj) {
-//       var temp_obj =  filterObj.filters;
-//       console.log(filterObj.select,temp_obj);
-//       for(var i=0;i<temp_obj.length;i++) {
-//         //var obj = {columnname:['count']}
-//         //checking which type of filter exit 
-//         switch(temp_obj[i]["condition_type"]) {
-//           case "values":
-//           valueFilter(temp_obj[i],filterObj.select)
-//           console.log('---- value code')
-//           break;
-//           case "range":
-//           rangeFilter(temp_obj[i],filterObj.select);
-//           console.log('---- range code');
-//           break;
-//           case "datatype":
-//           break;
-//           default:
-//           console.log('wrong condition type');
-//         }
-//       }
-
-//     }
-
-//     var valueFilter = function(obj_name,columns) {
-//       console.log(obj_name,columns);
-//       var _in = obj_name['in'],
-//           not_in = obj_name['not_in'],
-//           column_name = obj_name['column_name'],
-//           temp_data, col;
-//       console.log(not_in,_in,column_name);
-//       temp_data = _.filter(data ,function(obj){
-//                     if(not_in.indexOf(obj[column_name]) < 0){
-//                       return obj;
-//                     }
-//                   });
-//       temp_data = _.filter(temp_data ,function(obj){
-//                     if(_in.indexOf(obj[column_name]) > -1){
-//                       return obj;
-//                     } 
-//                   });
-//       if(columns.length != 0){
-//         temp_data = _.map(temp_data ,function(obj){ 
-//                       return _.pick(obj,columns);
-//                     });
-//       }  
-
-//       console.log(temp_data);
-//     }
-//     var rangeFilter = function(obj_name,columns){
-//       var min = obj_name['condition']['min'],
-//           max = obj_name['condition']['max'],
-//           column_name = obj_name['column_name'],
-//           temp_data, col;
-//       console.log(min,max);
-//       temp_data = _.filter(data ,function(obj){
-//                     if(obj[column_name] <= max && obj[column_name] >=min){
-//                       return obj;
-//                     }
-//                   });
-//       //return perticular columns data 
-//       if(columns.length != 0){
-//         temp_data = _.map(temp_data ,function(obj){ 
-//                       return _.pick(obj,columns);
-//                     });
-//       }
-//       console.log(temp_data);
-//     }
-    
-}
-function filterDbQueryString () {
 	var table_name = "test1data",
-		columns = ["street","city","zip","state","beds",""],
-		query_string = "",
-		query_select = "",
-		query_from = "FROM" + table_name;
+			columns = options.columns,
+			required_columns = [];
+			raw_data = [],
+			final_data = [];
 
-	$.getJSON("../data/test1data.json", function(e, data) {
+	var query_string = [],
+			query_select = "",
+			query_from = "FROM "+table_name+" ",
+			query_where = "",
+			query_group_by = "",
+			query_order_by = "",
+			query_limit = "",
+			query_offset = "",
+			next_op,
+			vals,
+			is_IN = false;
+	
+	//START -- SELECT COLUMN NAMES clause
+	if (dimensions && mode === "aggregation") {
+		if (_.intersection(columns,dimensions).length !== 0) {
+			required_columns = dimensions.slice();
+		}
+		else {
+			return false; // dimension(s) not found
+		}
+	}
+	else {
+		dimensions = false;
+	}
 
-	});
-}
+	if (select_columns && mode !== "aggregation") {
+		if (_.intersection(columns,select_columns).length !== 0) {
+			_.each(select_columns, function(d) {
+				required_columns.push(d);
+			});
+		}
+		else {
+			return false; // column(s) not found
+		}
+	}
+
+	if (metrics && mode === "aggregation") {
+		for (key in metrics) {
+			if (_.intersection(columns,[key]).length !== 0 && metrics[key].length !== 0) {
+				var aggregation_column_name = "";
+				_.each(metrics[key], function (d) {
+					aggregation_column_name = d + "(" + key + ")";
+					required_columns.push(aggregation_column_name);
+				});
+			}
+		}
+	}
+
+	if (_.isEmpty(required_columns) == true && _.isEmpty(dimensions) == true) {
+		query_select = "SELECT * ";
+	}
+	else {
+		query_select = "SELECT " + required_columns.join(", ") + " ";
+	}
+	// END -- SELECT COLUMN NAMES clause
+
+
+	// START -- WHERE clause
+	if (filter) {
+		query_where = "WHERE ";
+		next_op = false;			
+		_.each(filter, function (d) {
+			if (next_op) {
+				query_where += next_op + " ";
+			}
+			// query_where += d["column_name"] + " ";
+			switch (d["condition_type"]) {				
+				case "values" :
+					vals = [];
+					if (d["in"] && d["in"].length !== 0) {
+						is_IN = true;
+						query_where += d["column_name"] + " IN (";
+						_.each(d["in"], function (k) {
+							query_where += k + ", ";
+						});
+						query_where = query_where.slice(0,-2) + ") ";
+					}
+					if (d["not_in"] && d["not_in"].length !== 0) {
+						if (is_IN) {
+							query_where += "AND " + d["column_name"] + " NOT IN (";
+						}
+						else {
+							query_where += d["column_name"] + " NOT IN (";
+						}
+						_.each(d["not_in"], function (a) {
+							query_where += a + ", ";
+						});
+						query_where = query_where.slice(0,-2) + ") ";
+					}
+					if (d["next"]) {
+						next_op = d["next"];
+					}
+					else {
+						next_op = false;
+					}
+					break;
+				case "range":
+					query_where += d["column_name"] + " ";
+					if (d["condition"]["not"]) {
+						query_where += "NOT ";
+					}
+					query_where += "BETWEEN " + d["condition"]["min"] + " AND " + d["condition"]["max"] + " ";
+					if (d["next"]) {
+						next_op = d["next"];
+					}
+					else {
+						next_op = false;
+					}
+					break;
+				case "data_types":
+					// yet to be coded
+					break;					
+			}
+		});
+	}
+	// END -- WHERE clause
+
+
+	// START -- GROUP BY clause
+	if (dimensions && mode === "aggregation") {
+		query_group_by = "GROUP BY " + dimensions.join(", ") + " ";
+	}
+	// END -- GROUP BY clause
+
+
+	// START -- ORDER BY clause
+	if (sort) {
+		query_order_by = "ORDER BY ";
+		for (key in sort) {
+			query_order_by += key + " " + sort[key] + ", ";
+		}
+		query_order_by = query_order_by.slice(0,-2) + " ";
+	}
+	else {
+		query_order_by = "ORDER BY " + dimensions[0] + " ";
+	}
+	// END -- ORDER clause
+
+
+	// Limit & offset to be added to the query
+	query_limit = (limit) ? ("LIMIT " + limit + " ") : query_limit;
+	query_offset = (offset) ? ("OFFSET " + offset + " ") : query_limit;
+
+	// FINAL DB QUERY STRING
+	query_string[0] = query_select + query_from + query_where + query_group_by + query_order_by + query_limit + query_offset;
+	query_string[1] = query_select + "<br/>"
+								+ query_from + "<br/>"
+								+ query_where + "<br/>"
+								+ query_group_by + "<br/>"
+								+ query_order_by + "<br/>"
+								+ query_limit + "<br/>"
+								+ query_offset;
+	// console.log(query_string[0],"***");
+	
+	return query_string;
+};

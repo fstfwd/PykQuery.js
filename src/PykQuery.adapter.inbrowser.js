@@ -4,49 +4,36 @@ PykQuery.adapter.inbrowser = {};
 PykQuery.adapter.inbrowser.init = function (pykquery){
   var query_object = pykquery,
       raw_data;
-  // data whis is used for filtering data is in global_divid_for_raw_data
+  // data which is used for filtering data is in global_divid_for_raw_data
   global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
-  //raw_data = global_divid_for_raw_data.rawdata;
+  raw_data = global_divid_for_raw_data.rawdata;
 
   // function call by adapter from pykquery.js
   this.call = function () {
 
-    // #1. TEMPORARY CODE TO GET THE DATA FOR TESTING.
-    var xmlhttp = new XMLHttpRequest();
-    var url = "examples/data/test1data.json";
-
-    xmlhttp.onreadystatechange = function () {
-      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-        raw_data = JSON.parse(xmlhttp.response);
-        //console.log(data,pykquery);
-        var mode = pykquery.mode;
-        //checking whether filter is exit in query or not
-        if(query_object.filters != undefined){
-          if(query_object.filters.length > 0) {
-            console.log('start filter');
-            raw_data = startFilterData(query_object); //call to start filter
-
-          }
-        }
-        switch(mode) {
-          case "aggregation":
-            startAggregation(query_object);
-            break;
-          case "unique":
-            break;
-          case "datatype":
-            break;
-          default:
-            // key: "value",
-            console.log('wrong condition type');
-        }
+    var filtered_data;
+    var mode = pykquery.mode;
+    //checking whether filter is exit in query or not
+    if(query_object.filters != undefined){
+      if(query_object.filters.length > 0) {
+        console.log('start filter');
+        raw_data = startFilterData(query_object); //call to start filter
 
       }
     }
-    xmlhttp.open("GET", url, true);
-    xmlhttp.send();
-    // #1 ENDS
-
+    switch(mode) {
+      case "aggregation":
+        filtered_data = startAggregation(query_object);
+        break;
+      case "unique":
+        break;
+      case "datatype":
+        break;
+      default:
+        // key: "value",
+        console.log('wrong condition type');
+    }
+    return filtered_data;
   }
 
   var startAggregation = function (filter_obj){
@@ -76,6 +63,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
         default:
         //other cases is remaning
       }
+      return local_data;
     }
   }
 
@@ -95,13 +83,14 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
     var local_filter_array = []
     _.map(local_data, function (values,key) {
       var local_obj = {};
-      local_obj[column_name] = key;
+      local_obj[pykquery.dimensions[0]] = key;
       local_filter_array.push(local_obj);
-      local_obj["sum"] = _.sum(values, function (value) {
+      local_obj[column_name] = _.sum(values, function (value) {
         return value[column_name];
       });
       local_filter_array.push(local_obj);
     });
+    console.log(local_filter_array);
     return local_filter_array;
   }
 
@@ -180,18 +169,18 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
         not_in = filter_obj['not_in'],
         column_name = filter_obj['column_name'],
         local_data, col;
-    local_data = _.filter(data ,function (obj){
-      if(not_in.indexOf(obj[column_name]) < 0){
+    local_data = _.filter(data ,function (obj) {
+      if(not_in.indexOf(obj[column_name]) < 0) {
         return obj;
       }
     });
-    local_data = _.filter(local_data ,function (obj){
-      if(_in.indexOf(obj[column_name]) > -1){
+    local_data = _.filter(local_data ,function (obj) {
+      if(_in.indexOf(obj[column_name]) > -1) {
         return obj;
       }
     });
-    if(columns.length != 0){
-      local_data = _.map(local_data ,function (obj){
+    if(columns.length != 0) {
+      local_data = _.map(local_data ,function (obj) {
         return _.pick(obj,columns);
       });
     }
