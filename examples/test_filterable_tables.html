@@ -32,6 +32,7 @@
         render(dd,ee)
       };
       function render (obj1,obj2) {
+        console.log(obj1,obj2)
         var html1 = "<table><tr><td>City</td><td>Price</td></tr>";
         for (var i = 0; i< obj1.length; i++) {
           html1 += "<tr><td><a class='filter1' onclick=filter1('"+obj1[i].city+"');>"+obj1[i].city+"</a></td><td>"+obj1[i].price+"</td></tr>"

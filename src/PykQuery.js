@@ -349,7 +349,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     if (_scope == "local") {
       var len = __impacts.length;
       for (var j = 0; j < len; j++) {
-        console.log(__impacts[j]);
+        console.log(window[__impacts[j]],new_filter);
         var global_filter = window[__impacts[j]];
         global_filter.filters = new_filter;
       }
@@ -514,12 +514,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   var invoke_call = function(pykquery_json){
     if(adapter == "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(pykquery_json);
+      console.log(pykquery_json);
     }
     else{
       var connector = new PykQuery.adapter.rumi.init(pykquery_json);
     }
     var response = connector.call();
-    console.log(response);
     //response = processAlias(response);
     //TODO to delete instance of adapter adapter.delete();
     return response;
