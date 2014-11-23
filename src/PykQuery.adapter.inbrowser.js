@@ -2,12 +2,16 @@ PykQuery.adapter = PykQuery.adapter || {};
 PykQuery.adapter.inbrowser = {};
 //PykQuery.adapter.inbrowser.init(pykquery_json);
 PykQuery.adapter.inbrowser.init = function (pykquery){
-  var query_object = pykquery,
-      raw_data;
   // data which is used for filtering data is in global_divid_for_raw_data
   global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
-  console.log(pykquery,window['g1'],global_divid_for_raw_data)
   raw_data = global_divid_for_raw_data.rawdata;
+
+  var query_object = pykquery,
+      raw_data;
+
+  if (global_divid_for_raw_data.filters && !query_object.filters) {
+    query_object.filters = global_divid_for_raw_data.filters;
+  }
 
   // function call by adapter from pykquery.js
   this.call = function () {
@@ -41,7 +45,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
     var metrics = filter_obj.metrics,
         local_data;
     // matrics_column_name = objectkeymatrics;
-    console.log(raw_data);
     local_data = _.groupBy(raw_data,filter_obj.dimensions[0]);
     //metrices
     for (var prop in metrics) {
@@ -142,7 +145,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
 
   var startFilterData = function (filter_obj) {
     var filters_array = filter_obj.filters;
-    console.log(filter_obj.select,filters_array);
     var len = filters_array.length;
     for(var i = 0; i < len; i++) {
       //var obj = {columnname:['count']}
@@ -180,7 +182,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
         return obj;
       }
     });
-    console.log(local_data);
     // Why is the below code written. It returns the data with only one column. Ideally, the where clause should return all the columns with aggregation hapenning later ---> AUTHOR RONAK
     // if(columns.length != 0) {
     //   local_data = _.map(local_data ,function (obj) {
@@ -192,12 +193,10 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
     return local_data;
   }
   var rangeFilter = function (filter_obj,columns){
-     console.log(columns);
     var min = filter_obj['condition']['min'],
         max = filter_obj['condition']['max'],
         column_name = filter_obj['column_name'],
         local_data, col;
-    console.log(min,max);
     local_data = _.filter(raw_data ,function (obj){
       if(obj[column_name] <= max && obj[column_name] >=min){
         return obj;
