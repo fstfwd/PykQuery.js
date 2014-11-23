@@ -217,7 +217,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     get: function() {
       return alias;
     },
-    set: function(vals) { 
+    set: function(vals) {
       //Input Format -- vals = {"col_name": "alias_name", "col_name1": "alias_name1", ...}
       columns = Object.keys(vals);
       if (columns.length < 1) {
@@ -278,14 +278,25 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   this.addImpacts = function(array_of_div_ids, is_cyclical) {
+    var query_object = window[array_of_div_ids[i]];
     if (impactValidation(array_of_div_ids)) {
       len = array_of_div_ids.length;
-      for(var i=0; i<len; i++){
+      for(var i = 0; i < len; i++) {
         __impacts.push(array_of_div_ids[i]);
+        setGlobalIdForRawData(this);
         if(is_cyclical){
+          setGlobalIdForRawData(window[array_of_div_ids[i]]);
           related_pykquery = window[array_of_div_ids[i]];
           related_pykquery.impacts = [this.div_id];
         }
+      }
+    }
+  }
+
+  var setGlobalIdForRawData = function (that) {
+    if (adapter === "inbrowser" && that.scope === "local") {
+      if (!that.global_divid_for_raw_data) {
+        that.global_divid_for_raw_data = that.div_id;
       }
     }
   }
