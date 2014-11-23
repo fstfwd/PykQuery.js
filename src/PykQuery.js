@@ -283,9 +283,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       len = array_of_div_ids.length;
       for(var i = 0; i < len; i++) {
         __impacts.push(array_of_div_ids[i]);
-        setGlobalIdForRawData(this);
+        setGlobalDivIdForRawData(this,array_of_div_ids[0]);
         if(is_cyclical){
-          setGlobalIdForRawData(window[array_of_div_ids[i]]);
+          setGlobalDivIdForRawData(window[array_of_div_ids[i]],this.div_id);
           related_pykquery = window[array_of_div_ids[i]];
           related_pykquery.impacts = [this.div_id];
         }
@@ -293,10 +293,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  var setGlobalIdForRawData = function (that) {
+  var setGlobalDivIdForRawData = function (that,id) {
     if (adapter === "inbrowser" && that.scope === "local") {
       if (!that.global_divid_for_raw_data) {
-        that.global_divid_for_raw_data = that.div_id;
+        that.global_divid_for_raw_data = id;
       }
     }
   }

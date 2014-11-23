@@ -6,6 +6,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       raw_data;
   // data which is used for filtering data is in global_divid_for_raw_data
   global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
+  console.log(pykquery,window['g1'],global_divid_for_raw_data)
   raw_data = global_divid_for_raw_data.rawdata;
 
   // function call by adapter from pykquery.js
@@ -40,6 +41,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
     var metrics = filter_obj.metrics,
         local_data;
     // matrics_column_name = objectkeymatrics;
+    console.log(raw_data);
     local_data = _.groupBy(raw_data,filter_obj.dimensions[0]);
     //metrices
     for (var prop in metrics) {
@@ -71,8 +73,8 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
     var local_filter_array = []
     _.map(local_data, function (value,key) {
       var local_obj = {};
-      local_obj[column_name] = key;
-      local_obj["count"] = value.length;
+      local_obj[pykquery.dimensions[0]] = key;
+      local_obj[column_name] = value.length;
       local_filter_array.push(local_obj);
     });
     console.log(local_filter_array);
@@ -84,7 +86,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
     _.map(local_data, function (values,key) {
       var local_obj = {};
       local_obj[pykquery.dimensions[0]] = key;
-      local_filter_array.push(local_obj);
       local_obj[column_name] = _.sum(values, function (value) {
         return value[column_name];
       });
