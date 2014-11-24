@@ -6,16 +6,18 @@
     <script src="../lib/underscore-min.js"></script>
     <script src="../src/filter.js"></script>
     <script type="text/javascript">
-	    var q = filterDbQueryString({
-	    	mode: "select",
+	    var q = toSql({
+	    	div_id: "g1",
+	    	mode: "aggregation",
 	    	columns: ["street","city","zip","state","beds","baths","sq__ft","type","sale_date","price","latitude","longitude"],
 	    	dimensions: ["state","zip"],
-	    	select_columns: ["city","beds"],
-	    	metrics: {
+	    	select: ["city","beds"],
+	    	unique: ["city","beds"],
+	    	metrics: {/*
 	    		state: ["count"],
-	    		beds: ["avg","sum"]
+	    		beds: ["avg","sum"]*/
 	    	},
-	    	filter: [{
+	    	filters: [{
 	    		"column_name": "beds",
 				"condition_type": "range",
 				"condition": {
@@ -24,23 +26,23 @@
 					"not": true
 				},
 				"next": "OR"
-	    	},{
+	    	}/*,{
 	    		"column_name": "city",
 				"condition_type": "values",
 				"in": ['SACRAMENTO','ELK GROVE'],
 				"not_in": ['NORTH HIGHLANDS'],
 				"next": "OR"
-	    	}],
+	    	}*/],
 	    	sort: {
-	    		"city": "asc",
-	    		"street": "desc"
+	   //  		"city": "asc",
+	   //  		"street": "desc"
 	    	},
 	    	limit: 1000,
 	    	offset: 10
 	    });
 
-	    console.log(q[0]);
-	    $("#query-string").html(q[1]);
+	    console.log(q);
+	    $("#query-string").html(q);
     </script>
 </body>
 </html>
