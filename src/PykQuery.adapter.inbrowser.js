@@ -1,7 +1,7 @@
 PykQuery.adapter = PykQuery.adapter || {};
 PykQuery.adapter.inbrowser = {};
 //PykQuery.adapter.inbrowser.init(pykquery_json);
-PykQuery.adapter.inbrowser.init = function (pykquery){
+PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
   // data which is used for filtering data is in global_divid_for_raw_data
   global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
   raw_data = global_divid_for_raw_data.rawdata;
@@ -9,9 +9,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
   var query_object = pykquery,
       raw_data;
 
-  if (global_divid_for_raw_data.filters && !query_object.filters) {
-    query_object.filters = global_divid_for_raw_data.filters;
-  }
+  query_object.filters = consolidated_filters;
 
   // function call by adapter from pykquery.js
   this.call = function () {
@@ -21,7 +19,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
     //checking whether filter is exit in query or not
     if(query_object.filters != undefined){
       if(query_object.filters.length > 0) {
-        console.log('start filter');
+        //console.log('start filter');
         raw_data = startFilterData(query_object); //call to start filter
 
       }
@@ -36,7 +34,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
         break;
       default:
         // key: "value",
-        console.log('wrong condition type');
+        //console.log('wrong condition type');
     }
     return filtered_data;
   }
@@ -80,7 +78,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       local_obj[column_name] = value.length;
       local_filter_array.push(local_obj);
     });
-    console.log(local_filter_array);
+    //console.log(local_filter_array);
     return local_filter_array;
   }
 
@@ -94,7 +92,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       });
       local_filter_array.push(local_obj);
     });
-    console.log(local_filter_array);
+    //console.log(local_filter_array);
     return local_filter_array;
   }
 
@@ -109,7 +107,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       });
       local_filter_array.push(local_obj);
     });
-    console.log(local_filter_array);
+    //console.log(local_filter_array);
     return local_filter_array;
   }
 
@@ -124,7 +122,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       });
       local_filter_array.push(local_obj);
     });
-    console.log(local_filter_array);
+    //console.log(local_filter_array);
     return local_filter_array;
   }
 
@@ -139,7 +137,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       });
       local_filter_array.push(local_obj);
     });
-    console.log(local_filter_array);
+    //console.log(local_filter_array);
     return local_filter_array;
   }
 
@@ -151,20 +149,19 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       //checking condition_type of filter exit
       switch(filters_array[i]["condition_type"]) {
         case "values":
-          console.log('---- value code');
+          //console.log('---- value code');
           return valueFilter(filters_array[i],filter_obj.dimensions); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "range":
-          console.log('---- range code');
+          //console.log('---- range code');
           return rangeFilter(filters_array[i],filter_obj.dimensions); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "datatype":
           break;
         default:
-          console.log('wrong condition type');
+          //console.log('wrong condition type');
       }
     }
-
   }
 
   var valueFilter = function (filter_obj,columns) {
@@ -189,7 +186,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
     //   });
     // }
 
-    console.log("value filter completed");
+    //console.log("value filter completed");
     return local_data;
   }
   var rangeFilter = function (filter_obj,columns){
@@ -208,7 +205,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
         return _.pick(obj,columns);
       });
     }
-    console.log("rangeFilter done----");
+    //console.log("rangeFilter done----");
     return local_data;
   }
 
