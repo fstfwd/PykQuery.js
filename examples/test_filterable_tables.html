@@ -26,36 +26,35 @@
         render(dd,ee)
       })
 
-      var filter1 = function (value) {
-        a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR"}, true);
+      var filter1 = function (value,id) {
+        a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}, true);
         g1.call();
-        var dd = a.flushToGet();
         var ee = b.flushToGet();
-        render(dd,ee)
+        render("",ee)
       };
-      var filter2 = function (value) {
-        b.addFilter({"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR"}, true);
+      var filter2 = function (value,id) {
+        b.addFilter({"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR", "selected_dom_id": id}, true);
         g1.call();
         var dd = a.flushToGet();
-        var ee = b.flushToGet();
-        render(dd,ee)
+        render(dd,"")
       };
       function render (obj1,obj2) {
-        //console.log(obj1,obj2)
-        var html1 = "<table><tr><td>City</td><td>Price</td></tr>";
-        for (var i = 0; i< obj1.length; i++) {
-          html1 += "<tr><td><a class='filter1' onclick=filter1('"+obj1[i].city+"');>"+obj1[i].city+"</a></td><td>"+obj1[i].price+"</td></tr>"
+        if (obj1) {
+          var html1 = "<table><tr><td>City</td><td>Price</td></tr>";
+          for (var i = 0; i< obj1.length; i++) {
+            html1 += "<tr><td><a id='table1-a"+i+"' class='filter1' onclick=filter1('"+obj1[i].city+"','table1-a"+i+"');>"+obj1[i].city+"</a></td><td>"+obj1[i].price+"</td></tr>"
+          }
+          html1 += "</table>";
+          document.getElementById(a.div_id).innerHTML = html1;
         }
-        html1 += "</table>";
-
-        var html2 = "<table><tr><td>Zip</td><td>Beds</td></tr>";
-        for (var i = 0; i< obj2.length; i++) {
-          html2 += "<tr><td><a class='filter2' onclick=filter2('"+obj2[i].zip+"');>"+obj2[i].zip+"</a></td><td>"+obj2[i].beds+"</td></tr>"
+        if (obj2) {
+          var html2 = "<table><tr><td>Zip</td><td>Beds</td></tr>";
+          for (var i = 0; i< obj2.length; i++) {
+            html2 += "<tr><td><a id='table2-a"+i+"' class='filter2' onclick=filter2('"+obj2[i].zip+"','table2-a"+i+"');>"+obj2[i].zip+"</a></td><td>"+obj2[i].beds+"</td></tr>"
+          }
+          html2 += "</table>";
+          document.getElementById(b.div_id).innerHTML = html2;
         }
-        html2 += "</table>";
-
-        document.getElementById(a.div_id).innerHTML = html1;
-        document.getElementById(b.div_id).innerHTML = html2;
       }
 
       var a = new PykQuery.init("aggregation", "local", "a", "inbrowser");
