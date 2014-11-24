@@ -30,11 +30,12 @@ var toSql = function(options) {
 		  vals,
 		  is_IN = false;
 
+
   //START -- SELECT COLUMN NAMES clause
-  if (dimensions && mode === "aggregation") {
+  if (dimensions && mode == "aggregation") {
     required_columns = _.flatten(dimensions);
 
-    if (metrics) {
+    if (metrics && _.isEmpty(metrics) == false) {
     	for(var i in metrics){
 	      len = metrics[i].length;
 	      for(var j = 0; j < len; j++){
@@ -66,7 +67,7 @@ var toSql = function(options) {
     }
   }
 
-  if (_.isEmpty(required_columns) == true && _.isEmpty(dimensions) == true) {
+  if (_.isEmpty(required_columns) == true && _.isEmpty(dimensions) == true && mode != "unique") {
     query_select = "SELECT * ";
   }
   else if (mode == "unique") {
@@ -167,9 +168,11 @@ var toSql = function(options) {
   query_limit = (limit) ? ("LIMIT " + limit + " ") : query_limit;
   query_offset = (offset) ? ("OFFSET " + offset + " ") : query_offset;
 
+
   // FINAL DB QUERY STRING
   query_string = div_id + ": " + query_select + query_from + query_where + query_group_by + query_order_by + query_limit + query_offset;
-  console.log(query_string," *****");
+  // query_string = query_where;
+  console.log(query_string);
 
   return query_string;
 };
