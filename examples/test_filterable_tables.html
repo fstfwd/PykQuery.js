@@ -15,7 +15,7 @@
       <div id='a' style="float:left;margin-left:100px;"></div>
       <div id='b' style="float:left;margin-left:100px;"></div>
     </div>
-    <div id="filter_element"></div>
+    <div id="list_of_filters"></div>
     <script type="text/javascript">
 
       $("#reset").click (function () {
@@ -80,14 +80,15 @@
           g1.addImpacts(["a", "b"], true);
 
           a.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
-          a.addFilter({"column_name": "tydfpe", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
-          a.addFilter({"column_name": "tyddddfpe", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
+          b.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
           a.call();
           b.call();
           a.toSql();
           var d = a.flushToGet();
           var e = b.flushToGet();
           render(d,e);
+
+          g1.filterList("list_of_filters");
         }
       }
       xmlhttp.open("GET", url, true);

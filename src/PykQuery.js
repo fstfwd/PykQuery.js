@@ -292,6 +292,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       } else if(is_interactive && _scope == "local"){
         name.local_div_id_triggering_event = div_id;
         addFilterPropagate(name);
+        showFilterList();
       } else if(!is_interactive && _scope == "global"){
         //not possible
       } else if(!is_interactive && _scope == "local"){ //onload
@@ -887,4 +888,33 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
     return query_string;
   };
+
+  this.filterList = function (div_element) {
+    $('#'+div_element).empty();
+    $('#'+div_element).append("<div class='filter_list'></div>");
+    showFilterList(where_clause,div_element);
+    $( ".filter_remove").unbind( "click" );
+    $(document).on('click','.filter_remove',function(){
+      var index  = $(this).attr("id").split("filter_remove_");
+      //var data
+
+      removeFilterFromList(index[1],where_clause,div_element);
+    });
+  }
+  var showFilterList = function() {
+    len = where_clause.length,
+    filter_values = "values in filter";
+    $('.filter_list').empty();
+    for(var i =0 ;i< len;i++){
+      //$('.filter_block').empty();
+      $('.filter_list').append("<div class='filter_block' id ='filter_block"+i+"'></div>");
+      $('#filter_block'+i).append("<div class ='filter_value"+i+"'>"+filter_values+"</div>");
+      $('#filter_block'+i).append("<div id ='filter_remove_"+i+"'class ='filter_remove'>remove</div>");
+      //return false;
+    }
+  }
+  var removeFilterFromList = function (index) {
+    where_clause.splice(index,1);
+    showFilterList();
+  }
 };
