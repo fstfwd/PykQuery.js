@@ -88,7 +88,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
   var metricsSum = function (local_data,column_name) {
     var local_filter_array = []
     _.map(local_data, function (values,key) {
-      console.log(key);
       var local_obj = {};
       local_obj[pykquery.dimensions[0]] = key;
       local_obj[column_name] = _.sum(values, function (value) {
@@ -163,21 +162,12 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
       //checking condition_type of filter exit
       switch(filters_array[i]["condition_type"]) {
         case "values":
-<<<<<<< HEAD
           console.log('---- value code');
           return valueFilter(filters_array[i],columns); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "range":
           console.log('---- range code');
           return rangeFilter(filters_array[i],columns); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
-=======
-          //console.log('---- value code');
-          valueFilter(filters_array[i],filter_obj.dimensions); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
-          break;
-        case "range":
-          //console.log('---- range code');
-          rangeFilter(filters_array[i],filter_obj.dimensions); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
->>>>>>> 01fc66d537b68d79a7590b761d45065d34f8dc7d
           break;
         case "datatype":
           break;
