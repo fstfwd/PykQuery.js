@@ -58,7 +58,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     return false;
   }
 
-  var addfilter = [],
+  var where_clause = [],
       dimensions = [],
       metrics = {},
       cols = [],
@@ -67,7 +67,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       __impacts =[],
       offset = 0,
       alias = {},
-      filter_data, raw_data, global_divid_for_rawdata;
+      filter_data,
+      raw_data,
+      global_divid_for_rawdata;
   // set the global data to pykquery
   if(mode == "global" && _scope == "global" && adapter == "inbrowser") {
     Object.defineProperty(this, 'rawdata', {
@@ -254,28 +256,138 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   this.filter = function() {
     Object.defineProperty(this, 'filters', {
       get: function() {
-        return addfilter;
+        return where_clause;
       },
-      set:function(name){
-        addFilterPropagate(name)
+      set: function(new_where_clause){ //used only by the adaptors!
+        where_clause = new_where_clause;
       }
     });
-    var obj = {
-      add: function(name) {
-        if (filterValidation(name)) {
-          addFilterInQuery(name)
-          if (_scope == "local"){
-            addFilterPropagate(name)
+  }
+
+  this.addFilter = function(name, is_interactive){
+    if(!this.filters){ //this is hacky code. ronak wrote it.
+      this.filter()
+    }
+    if (filterValidation(name)) {
+      if(is_interactive && _scope == "global"){
+        addFilterInQuery(name);
+      } else if(is_interactive && _scope == "local"){
+        addFilterPropagate(name)
+      } else if(!is_interactive && _scope == "global"){
+        //not possible
+      } else if(!is_interactive && _scope == "local"){ //onload
+        addFilterInQuery(name);
+      }
+    }
+  }
+
+  this.resetFilters = function(){
+    if(_scope == "global"){
+      where_clause = [];
+    } else {
+      console.error("You cannot reset a local. Please run it on a Global.")
+    }
+  }
+
+  this.removeFilter = function(column_name, condition_type, params, is_interactive){
+    if (filterValidation(name)) {
+      if(is_interactive && _scope == "global"){
+        removeFilterInQuery(column_name, condition_type, params);
+      } else if(is_interactive && _scope == "local"){
+        removeFilterPropagate(column_name, condition_type, params);
+      } else if(!is_interactive && _scope == "global"){
+        //not possible
+      } else if(!is_interactive && _scope == "local"){ //onload
+        removeFilterInQuery(column_name, condition_type, params);
+      }
+    }
+  }
+
+  var removeFilterInQuery = function(column_name, condition_type, params) {
+    var len = where_clause.length;
+    for (var x = 0; x < len; x++) {
+      if (where_clause[x]['column_name'] == column_name && where_clause[x]['condition_type'] == condition_type) {
+        if (condition_type == "values") {
+          where_clause[x]['in'] = util.subtract_array(where_clause[x]['in'], params['in']);
+          where_clause[x]['not_in'] = util.subtract_array(where_clause[x]['not_in'], params['not_in']);
+        }
+        else if (condition_type == "range") {
+          var __min = params['min'];
+          var __max = params['max'];
+          if(!util.isBlank(__min) && !util.isBlank(__max))
+            if(__min == where_clause[x]['condition']['min'] && __max == where_clause[x]['condition']['max']) {
+              where_clause.splice(x,1);
+            }
           }
         }
-      },
-      remove: function(column_name, condition_type, params) {
-        removeFilterInQuery(column_name, condition_type, params);
-        removeFilterPropagate(column_name, condition_type, params);
-      },
-    };
-    return obj;
+      }
+    }
+
+    var removeFilterPropagate = function(column_name, condition_type, params) {
+      if(_scope == "local") {
+        var len = impacts.length;
+        for(var j =0;j<len;j++) {
+          var global_filter = window[impacts[j]];
+          global_filter.removeFilterInQuery(column_name, condition_type, params);
+        }
+      }
+    }
+
+
+  var addFilterInQuery = function(new_filter) {
+    var is_new_filter = true;
+    for (var i = 0; i < where_clause.length; i++) {
+      var old_filter = where_clause[i];
+      if (old_filter['column_name'] == new_filter['column_name'] && old_filter['condition_type'] == new_filter['condition_type']){
+        //INPUT - old_filter, new_filter
+        //INPUT - IN(A, B), IN(A, C)
+        //OUTPUT -- IN (A, B, C)
+        if (old_filter['condition_type'] == "values") {
+          var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']);
+          var is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
+          if (is_same2 == true && is_same1 == true) {
+            console.warn('Clean up your JS: Same filter cannot add');
+            return false;
+          }
+          else {
+            old_filter['in'] = util.concat_and_uniq(old_filter['in'], new_filter['in']);
+            old_filter['not_in'] = util.concat_and_uniq(old_filter['not_in'], new_filter['not_in']);
+            where_clause[i] = old_filter;
+            is_new_filter = false;
+            break;
+          }
+        }
+        // INPUT - old_filter, new_filter
+        // INPUT - age > 13, age < 65
+        // OUTPUT - age > 13 or age < 65
+        else if(old_filter['condition_type'] == "range") {
+          var new_c = new_filter['condition'];
+          var old_c =old_filter['condition'];
+          if(new_c['min'] == old_c['min'] && new_c['max'] == old_c['max']  && new_c['not'] == old_c['not']){
+            console.warn('Clean up your JS: Same filter cannot add');
+            return false;
+          } else {
+            is_new_filter = true;
+          }
+        }
+      }
+    }
+    if (is_new_filter == true){
+      where_clause.push(new_filter);
+    }
   }
+
+  // If a local filter is changed and it impacts a global then append to global
+  var addFilterPropagate = function(new_filter) {
+    if (_scope == "local") {
+      var len = __impacts.length;
+      for (var j = 0; j < len; j++) {
+        var global_filter = window[__impacts[j]];
+        global_filter.addFilter(new_filter, true);
+      }
+    }
+  }
+
 
   this.addImpacts = function(array_of_div_ids, is_cyclical) {
     var query_object = window[array_of_div_ids[i]];
@@ -297,91 +409,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     if (adapter === "inbrowser" && that.scope === "local") {
       if (!that.global_divid_for_raw_data) {
         that.global_divid_for_raw_data = id;
-      }
-    }
-  }
-
-  var addFilterInQuery = function(new_filter) {
-    var is_new_filter = true;
-    for (var i = 0; i < addfilter.length; i++) {
-      var old_filter = addfilter[i];
-      if (old_filter['column_name'] == new_filter['column_name'] && old_filter['condition_type'] == new_filter['condition_type']){
-        //INPUT - old_filter, new_filter
-        //INPUT - IN(A, B), IN(A, C)
-        //OUTPUT -- IN (A, B, C)
-        if (old_filter['condition_type'] == "values") {
-          var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']);
-          var is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
-          if (is_same2 == true && is_same1 == true) {
-            console.warn('Clean up your JS: Same filter cannot add');
-            return false;
-          }
-          else {
-            old_filter['in'] = util.concat_and_uniq(old_filter['in'], new_filter['in']);
-            old_filter['not_in'] = util.concat_and_uniq(old_filter['not_in'], new_filter['not_in']);
-            addfilter[i] = old_filter;
-            is_new_filter = false;
-            break;
-          }
-        }
-        // INPUT - old_filter, new_filter
-        // INPUT - age > 13, age < 65
-        // OUTPUT - age > 13 or age < 65
-        else if(old_filter['condition_type'] == "range") {
-          var new_c = new_filter['condition'];
-          var old_c =old_filter['condition'];
-          if(new_c['min'] == old_c['min'] && new_c['max'] == old_c['max']  && new_c['not'] == old_c['not']){
-            console.warn('Clean up your JS: Same filter cannot add');
-            return false;
-          } else {
-            is_new_filter = true;
-          }
-        }
-      }
-    }
-    if (is_new_filter == true){
-      addfilter.push(new_filter);
-    }
-  }
-
-  // If a local filter is changed and it impacts a global then append to global
-  var addFilterPropagate = function(new_filter) {
-    if (_scope == "local") {
-      var len = __impacts.length;
-      for (var j = 0; j < len; j++) {
-        console.log(window[__impacts[j]],new_filter);
-        var global_filter = window[__impacts[j]];
-        global_filter.filters = new_filter;
-      }
-    }
-  }
-
-  var removeFilterInQuery = function(column_name, condition_type, params) {
-    var len = addfilter.length;
-    for (var x = 0; x < len; x++) {
-      if (addfilter[x]['column_name'] == column_name && addfilter[x]['condition_type'] == condition_type) {
-        if (condition_type == "values") {
-          addfilter[x]['in'] = util.subtract_array(addfilter[x]['in'], params['in']);
-          addfilter[x]['not_in'] = util.subtract_array(addfilter[x]['not_in'], params['not_in']);
-        }
-        else if (condition_type == "range") {
-          var __min = params['min'];
-          var __max = params['max'];
-          if(!util.isBlank(__min) && !util.isBlank(__max))
-            if(__min == addfilter[x]['condition']['min'] && __max == addfilter[x]['condition']['max']) {
-              addfilter.splice(x,1);
-            }
-        }
-      }
-    }
-  }
-
-  var removeFilterPropagate = function(column_name, condition_type, params) {
-    if(_scope == "local") {
-      var len = impacts.length;
-      for(var j =0;j<len;j++) {
-        var global_filter = window[impacts[j]];
-        global_filter.removeFilterInQuery(column_name, condition_type, params);
       }
     }
   }
@@ -487,34 +514,49 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     return true;
   }
 
+  this.flushToGet = function(){
+    if (_scope == "local") {
+      var t = filter_data;
+      filter_data = "";
+      return t;
+    } else {
+      console.error("Cannot call flushToGet to on a Global PykQuery.")
+    }
+  }
+
   this.call = function() {
     var that = this;
-    var access_filtered_data = {
-      getData: function () {
-        if (_scope == "local"){
-          filterdata = invoke_call(getConfig(that))
-          return filterdata;
-        }
-        else{
-          filterdata = invoke_call(getConfig(that))
-          var len = impacts.length;
-          for(var j = 0; j < len; j++) {
-            var local_filter = window[impacts[j]];
-            local_filter.filterdata = local_filter.call();
-          }
-        }
-      },
-      flushData: function () {
-        filterdata = "";
+    if (_scope == "local") {
+      filter_data = invoke_call(getConfig(that))
+    } else {
+      var len = __impacts.length;
+      for(var j = 0; j < len; j++) {
+        var local_filter = window[__impacts[j]];
+        local_filter.filter_data = local_filter.call();
       }
-    };
-    return access_filtered_data;
+    }
+    return true;
+  }
+
+  var generateConsolidatedFiltersArray = function(){
+    if (_scope == "local") {
+      var consolidated_filters = this.filters;
+      var len = __impacts.length;
+      for(var i = 0; i < len; i++) {
+        var global_filter = window[__impacts[i]];
+        consolidated_filters = _.flatten(global_filter.filters, consolidated_filters)
+      }
+      return consolidated_filters;
+    } else {
+      console.error("Cannot call generateConsolidatedFiltersArray to on a Global PykQuery.")
+    }
   }
 
   var invoke_call = function(pykquery_json){
+    var consolidated_filters = generateConsolidatedFiltersArray();
     if(adapter == "inbrowser"){
-      var connector = new PykQuery.adapter.inbrowser.init(pykquery_json);
-      console.log(pykquery_json);
+      var connector = new PykQuery.adapter.inbrowser.init(pykquery_json, consolidated_filters);
+      //console.log(pykquery_json);
     }
     else{
       var connector = new PykQuery.adapter.rumi.init(pykquery_json);
@@ -536,7 +578,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         //console.log(arr);
       }
     }
-    //filter_obj['filters'] = addfilter;
+    //filter_obj['filters'] = where_clause;
     // if(myadapter == "database") {
     //   querydata = databaseQuery(filter_obj);
     //   return querydata;
@@ -545,6 +587,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     //}
     return filter_obj;
   };
+
+
 
   this.storeObjectInMemory = function(obj_name) {
     document.getElementById(div_id).setAttribute("pyk_object", obj_name);
@@ -632,4 +676,157 @@ var findQueryByDivid = function(id) {
     }
   };
   // (div_id == "pieContainer") ? domChartFiltering("pieContainer") : null;
+
+
+  this.toSql = function() {
+    options = this;
+
+    var filters = options.filters,
+
+    mode = options.mode,
+    metrics = options.metrics,
+    select_columns = options.select_columns,
+    sort = options.sort,
+    dimensions = options.dimensions,
+    limit  = options.limit,
+    offset = options.offset;
+
+    var table_name = "__",
+    columns = options.columns,
+    required_columns = [];
+    raw_data = [],
+    final_data = [];
+
+    var query_string = [],
+    query_select = "",
+    query_from = "FROM "+table_name+" ",
+    query_where = "",
+    query_group_by = "",
+    query_order_by = "",
+    query_limit = "",
+    query_offset = "",
+    next_op,
+    vals,
+    is_IN = false;
+
+    //START -- SELECT COLUMN NAMES clause
+    if (dimensions && mode === "aggregation") {
+      required_columns = _.flatten(dimensions);
+      for(var i in metrics){
+        len = metrics[i].length;
+        for(var j = 0; j < len; j++){
+          required_columns.push(metrics[i][j] + "("+ i +")")
+        }
+      }
+    }
+
+    if (select_columns && mode !== "aggregation") {
+      if (_.intersection(columns,select_columns).length !== 0) {
+        _.each(select_columns, function(d) {
+          required_columns.push(d);
+        });
+      }
+      else {
+        return false; // column(s) not found
+      }
+    }
+
+    if (_.isEmpty(required_columns) == true && _.isEmpty(dimensions) == true) {
+      query_select = "SELECT * ";
+    }
+    else {
+      query_select = "SELECT " + required_columns.join(", ") + " ";
+    }
+    // END -- SELECT COLUMN NAMES clause
+
+
+    // START -- WHERE clause
+    if (filters) {
+      query_where = "WHERE ";
+      next_op = false;
+      _.each(filters, function (d) {
+        if (next_op) {
+          query_where += next_op + " ";
+        }
+        // query_where += d["column_name"] + " ";
+        switch (d["condition_type"]) {
+          case "values" :
+            vals = [];
+            if (d["in"] && d["in"].length !== 0) {
+              is_IN = true;
+              query_where += d["column_name"] + " IN (";
+              _.each(d["in"], function (k) {
+                query_where += k + ", ";
+              });
+              query_where = query_where.slice(0,-2) + ") ";
+            }
+            if (d["not_in"] && d["not_in"].length !== 0) {
+              if (is_IN) {
+                query_where += "AND " + d["column_name"] + " NOT IN (";
+              }
+              else {
+                query_where += d["column_name"] + " NOT IN (";
+              }
+              _.each(d["not_in"], function (a) {
+                query_where += a + ", ";
+              });
+              query_where = query_where.slice(0,-2) + ") ";
+            }
+            if (d["next"]) {
+              next_op = d["next"];
+            }
+            else {
+              next_op = false;
+            }
+            break;
+            case "range":
+              query_where += d["column_name"] + " ";
+              if (d["condition"]["not"]) {
+                query_where += "NOT ";
+              }
+              query_where += "BETWEEN " + d["condition"]["min"] + " AND " + d["condition"]["max"] + " ";
+              if (d["next"]) {
+                next_op = d["next"];
+              }
+              else {
+                next_op = false;
+              }
+              break;
+              case "data_types":
+                // yet to be coded
+                break;
+              }
+            });
+          }
+          // END -- WHERE clause
+
+
+          // START -- GROUP BY clause
+          if (dimensions && mode === "aggregation") {
+            query_group_by = "GROUP BY " + dimensions.join(", ") + " ";
+          }
+          // END -- GROUP BY clause
+
+
+          // START -- ORDER BY clause
+          if (sort) {
+            query_order_by = "ORDER BY ";
+            for (key in sort) {
+              query_order_by += key + " " + sort[key] + ", ";
+            }
+            query_order_by = query_order_by.slice(0,-2) + " ";
+          }
+          // END -- ORDER clause
+
+
+          // Limit & offset to be added to the query
+          query_limit = (limit) ? ("LIMIT " + limit + " ") : query_limit;
+          query_offset = (offset) ? ("OFFSET " + offset + " ") : query_offset;
+
+          // FINAL DB QUERY STRING
+          query_string = div_id + ": " + query_select + query_from + query_where + query_group_by + query_order_by + query_limit + query_offset;
+
+          return query_string;
+        };
+
 };

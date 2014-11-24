@@ -1,8 +1,9 @@
 PykQuery.adapter = PykQuery.adapter || {};
 PykQuery.adapter.inbrowser = {};
 //PykQuery.adapter.inbrowser.init(pykquery_json);
-PykQuery.adapter.inbrowser.init = function (pykquery){
+PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
   // data which is used for filtering data is in global_divid_for_raw_data
+
   global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
   console.log(pykquery)
   raw_data = global_divid_for_raw_data.rawdata;
@@ -10,9 +11,10 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
   var query_object = pykquery,
       raw_data;
 
-  if (global_divid_for_raw_data.filters && !query_object.filters) {
-    query_object.filters = global_divid_for_raw_data.filters;
-  }
+  global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
+  raw_data = global_divid_for_raw_data.rawdata;
+
+  query_object.filters = consolidated_filters;
 
   // function call by adapter from pykquery.js
   this.call = function () {
@@ -21,7 +23,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
     //checking whether filter is exit in query or not
     if(query_object.filters != undefined){
       if(query_object.filters.length > 0) {
-        console.log('start filter');
+        //console.log('start filter');
         raw_data = startFilterData(query_object); //call to start filter
 
       }
@@ -36,14 +38,13 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
         break;
       default:
         // key: "value",
-        console.log('wrong condition type');
+        //console.log('wrong condition type');
     }
     return filtered_data;
   }
 
   var startAggregation = function (filter_obj){
-    var metrics = filter_obj.metrics,
-        local_data;
+    var metrics = filter_obj.metrics;
     // matrics_column_name = objectkeymatrics;
     local_data = _.groupBy(raw_data,filter_obj.dimensions[0]);
     //metrices
@@ -80,7 +81,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       local_obj[column_name] = value.length;
       local_filter_array.push(local_obj);
     });
-    console.log(local_filter_array);
+    //console.log(local_filter_array);
     return local_filter_array;
   }
 
@@ -95,7 +96,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       });
       local_filter_array.push(local_obj);
     });
-    console.log(local_filter_array);
+    //console.log(local_filter_array);
     return local_filter_array;
   }
 
@@ -110,7 +111,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       });
       local_filter_array.push(local_obj);
     });
-    console.log(local_filter_array);
+    //console.log(local_filter_array);
     return local_filter_array;
   }
 
@@ -125,7 +126,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       });
       local_filter_array.push(local_obj);
     });
-    console.log(local_filter_array);
+    //console.log(local_filter_array);
     return local_filter_array;
   }
 
@@ -140,7 +141,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       });
       local_filter_array.push(local_obj);
     });
-    console.log(local_filter_array);
+    //console.log(local_filter_array);
     return local_filter_array;
   }
 
@@ -162,65 +163,73 @@ PykQuery.adapter.inbrowser.init = function (pykquery){
       //checking condition_type of filter exit
       switch(filters_array[i]["condition_type"]) {
         case "values":
+<<<<<<< HEAD
           console.log('---- value code');
           return valueFilter(filters_array[i],columns); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "range":
           console.log('---- range code');
           return rangeFilter(filters_array[i],columns); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
+=======
+          //console.log('---- value code');
+          valueFilter(filters_array[i],filter_obj.dimensions); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
+          break;
+        case "range":
+          //console.log('---- range code');
+          rangeFilter(filters_array[i],filter_obj.dimensions); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
+>>>>>>> 01fc66d537b68d79a7590b761d45065d34f8dc7d
           break;
         case "datatype":
           break;
         default:
-          console.log('wrong condition type');
+          //console.log('wrong condition type');
       }
     }
-
+    return raw_data;
   }
 
   var valueFilter = function (filter_obj,columns) {
+    // console.log(filter_obj);
     var _in = filter_obj['in'],
         not_in = filter_obj['not_in'],
         column_name = filter_obj['column_name'],
-        local_data, col;
-    local_data = _.filter(raw_data ,function (obj) {
+        col;
+    raw_data = _.filter(raw_data ,function (obj) {
       if(!not_in || not_in.indexOf(obj[column_name]) < 0) {
         return obj;
       }
     });
-    local_data = _.filter(local_data ,function (obj) {
+    raw_data = _.filter(raw_data ,function (obj) {
       if(_in && _in.indexOf(obj[column_name]) > -1) {
         return obj;
       }
     });
     // Why is the below code written. It returns the data with only one column. Ideally, the where clause should return all the columns with aggregation hapenning later ---> AUTHOR RONAK
     // if(columns.length != 0) {
-    //   local_data = _.map(local_data ,function (obj) {
+    //   raw_data = _.map(raw_data ,function (obj) {
     //     return _.pick(obj,columns);
     //   });
     // }
 
-    console.log("value filter completed");
-    return local_data;
+    //console.log("value filter completed");
   }
   var rangeFilter = function (filter_obj,columns){
     var min = filter_obj['condition']['min'],
         max = filter_obj['condition']['max'],
         column_name = filter_obj['column_name'],
-        local_data, col;
-    local_data = _.filter(raw_data ,function (obj){
+        col;
+    raw_data = _.filter(raw_data ,function (obj){
       if(obj[column_name] <= max && obj[column_name] >=min){
         return obj;
       }
     });
     //return perticular columns data
     if(columns.length != 0){
-      local_data = _.map(local_data ,function (obj){
+      raw_data = _.map(raw_data ,function (obj){
         return _.pick(obj,columns);
       });
     }
-    console.log("rangeFilter done----");
-    return local_data;
+    //console.log("rangeFilter done----");
   }
 
 }
