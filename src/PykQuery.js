@@ -527,7 +527,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   this.call = function() {
     var that = this;
     if (_scope == "local") {
-      filter_data = invoke_call(getConfig(that))
+      invoke_call(getConfig(that));
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
@@ -554,17 +554,20 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   var invoke_call = function(pykquery_json){
     var consolidated_filters = generateConsolidatedFiltersArray();
+    var response;
     if(adapter == "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(pykquery_json, consolidated_filters);
       //console.log(pykquery_json);
+      return filter_data = connector.call();
     }
     else{
       var connector = new PykQuery.adapter.rumi.init(pykquery_json);
+      return connector.call(function (response) {
+        return filter_data = response;
+      });
     }
-    var response = connector.call();
     //response = processAlias(response);
     //TODO to delete instance of adapter adapter.delete();
-    return response;
   }
 
   // getConfig is use generate whole query

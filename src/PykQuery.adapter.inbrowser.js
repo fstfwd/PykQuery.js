@@ -4,6 +4,10 @@ PykQuery.adapter.inbrowser = {};
 PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
   // data which is used for filtering data is in global_divid_for_raw_data
 
+  global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
+  console.log(pykquery)
+  raw_data = global_divid_for_raw_data.rawdata;
+
   var query_object = pykquery,
       raw_data;
 
@@ -14,7 +18,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
 
   // function call by adapter from pykquery.js
   this.call = function () {
-
     var filtered_data;
     var mode = pykquery.mode;
     //checking whether filter is exit in query or not
@@ -142,19 +145,29 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
   }
 
   var startFilterData = function (filter_obj) {
-    var filters_array = filter_obj.filters;
-    var len = filters_array.length;
+    var filters_array = filter_obj.filters,
+    len = filters_array.length, columns;
+      if(filter_obj.mode == 'select'){
+        columns = filter_obj.select;
+      } else if (filter_obj.mode == 'aggregation'){
+        columns = filter_obj.dimensions;
+        for(var prop in filter_obj.metrics){
+          columns.push(prop);
+        }
+      } else {
+        columns = [];
+      }
     for(var i = 0; i < len; i++) {
       //var obj = {columnname:['count']}
       //checking condition_type of filter exit
       switch(filters_array[i]["condition_type"]) {
         case "values":
-          //console.log('---- value code');
-          valueFilter(filters_array[i],filter_obj.dimensions); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
+          console.log('---- value code');
+          return valueFilter(filters_array[i],columns); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "range":
-          //console.log('---- range code');
-          rangeFilter(filters_array[i],filter_obj.dimensions); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
+          console.log('---- range code');
+          return rangeFilter(filters_array[i],columns); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "datatype":
           break;
