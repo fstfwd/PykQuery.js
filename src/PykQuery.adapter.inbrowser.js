@@ -148,11 +148,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
         len = filters_array.length, columns;
     if(filter_obj.mode == 'select'){
       columns = filter_obj.select;
-    } else if (filter_obj.mode == 'aggregation'){
-      columns = filter_obj.dimensions;
-      for(var prop in filter_obj.metrics){
-        columns.push(prop);
-      }
     } else {
       columns = [];
     }
