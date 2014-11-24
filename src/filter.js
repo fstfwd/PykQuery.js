@@ -20,7 +20,7 @@ this.toSql = function() {
   var query_string = [],
 		  query_select = "",
 		  query_from = "FROM "+table_name+" ",
-		  query_where = "",
+		  query_where = [],
 		  query_group_by = "",
 		  query_order_by = "",
 		  query_limit = "",
@@ -87,39 +87,40 @@ this.toSql = function() {
 
   // START -- WHERE clause
   if (filters && _.isEmpty(filters) == false) {
-    query_where = "WHERE ";
+    // query_where = "WHERE ";
     next_op = false;
     
-    _.each(filters, function (d) {      
-      if (next_op) {
-        query_where += next_op + " ";
-      }
-
+    _.each(filters, function (d,i) {      
+      // if (next_op) {
+      //   query_where += next_op + " ";
+      // }
+      query_where[i] = "";
       switch (d["condition_type"]) {
 
         case "values" :
           vals = [];
           if (d["in"] && d["in"].length !== 0) {
             is_IN = true;
-            query_where += d["column_name"] + " IN (";
+            query_where[i] += d["column_name"] + " IN (";
             _.each(d["in"], function (k) {
-              query_where += k + ", ";
+              query_where[i] += k + ", ";
             });
-            query_where = query_where.slice(0,-2) + ") ";
+            query_where[i] = query_where[i].slice(0,-2) + ") ";
           }
           if (d["not_in"] && d["not_in"].length !== 0) {
             if (is_IN) {
-              query_where += "AND " + d["column_name"] + " NOT IN (";
+              query_where[i] += "AND " + d["column_name"] + " NOT IN (";
             }
             else {
-              query_where += d["column_name"] + " NOT IN (";
+              query_where[i] += d["column_name"] + " NOT IN (";
             }
             _.each(d["not_in"], function (a) {
-              query_where += a + ", ";
+              query_where[i] += a + ", ";
             });
-            query_where = query_where.slice(0,-2) + ") ";
+            query_where[i] = query_where[i].slice(0,-2) + ") ";
           }
-          if (d["next"]) {
+          if (d["next"] && i != (filters.length - 1)) {
+          	query_where[i] = query_where[i] + d["next"];
             next_op = d["next"];
           }
           else {
@@ -129,12 +130,13 @@ this.toSql = function() {
 
         case "range":
         	if (_.isEmpty(d["condition"]) == false) {
-        		query_where += d["column_name"] + " ";
+        		query_where[i] += d["column_name"] + " ";
 	          if (d["condition"]["not"]) {
-	            query_where += "NOT ";
+	            query_where[i] += "NOT ";
 	          }
-	          query_where += "BETWEEN " + d["condition"]["min"] + " AND " + d["condition"]["max"] + " ";
-	          if (d["next"]) {
+	          query_where[i] += "BETWEEN " + d["condition"]["min"] + " AND " + d["condition"]["max"] + " ";
+	          if (d["next"] && i != (filters.length - 1)) {
+	          	query_where[i] = query_where[i] + d["next"];
 	            next_op = d["next"];
 	          }
 	          else {
@@ -176,8 +178,14 @@ this.toSql = function() {
 
 
   // FINAL DB QUERY STRING
-  query_string = div_id + ": " + query_select + query_from + query_where + query_group_by + query_order_by + query_limit + query_offset;
-  // query_string = query_where;
+  query_string = div_id + ": \n " + query_select + " \n " + query_from + " \n " + "WHERE";
+  
+  var query_where_length = query_where.length;
+  for(var i=0 ; i<query_where_length ; i++) {
+  	query_string = query_string + " \n\t " + query_where[i];
+  }
+
+	query_string =  query_string + " \n " + query_group_by + " \n " + query_order_by + " \n " + query_limit + " \n " + query_offset;
   console.log(query_string);
 
   return query_string;
