@@ -564,9 +564,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var len = __impacts.length;
       for(var i = 0; i < len; i++) {
         var global_filter = window[__impacts[i]].filters;
-        // if (global_filter && global_filter.localdividtriggeringevent !== div_id) {
+        if (global_filter && global_filter.localdividtriggeringevent !== div_id) {
           consolidated_filters = _.flatten(global_filter, consolidated_filters);
-        // }
+        }
       }
       return consolidated_filters;
     } else {
