@@ -560,7 +560,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   var generateConsolidatedFiltersArray = function(){
     if (_scope == "local") {
-      var consolidated_filters = this.filters;
+      var consolidated_filters = that.filters;
       var len = __impacts.length;
       for(var i = 0; i < len; i++) {
         var global_filter = window[__impacts[i]].filters;
