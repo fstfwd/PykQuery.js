@@ -83,6 +83,7 @@
 
           a.call();
           b.call();
+          a.toSql();
           var d = a.flushToGet();
           var e = b.flushToGet();
           render(d,e);
