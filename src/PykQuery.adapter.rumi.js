@@ -3,7 +3,7 @@ PykQuery.adapter.rumi = {};
 
 PykQuery.adapter.rumi.init = function(pykquery_json) {
 
-  this.call = function(pykquery_json) {
+  this.call = function(onComplete) {
     var xmlhttp, response;
 
     if (window.XMLHttpRequest) {
@@ -19,7 +19,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json) {
         if(xmlhttp.status == 201){
           response = xmlhttp.responseText;
           console.log(xmlhttp.responseText, response);
-          return response;
+          onComplete(response);
         }
         else if(xmlhttp.status == 400) {
           console.error('There was an error 400');
