@@ -23,8 +23,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
     if(query_object.filters != undefined){
       if(query_object.filters.length > 0) {
         //console.log('start filter');
-        raw_data = startFilterData(query_object); //call to start filter
-
+        startFilterData(query_object); //call to start filter
       }
     }
     switch(mode) {
@@ -144,29 +143,30 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
   }
 
   var startFilterData = function (filter_obj) {
-    var filters_array = filter_obj.filters,
-    len = filters_array.length, columns;
-      if(filter_obj.mode == 'select'){
-        columns = filter_obj.select;
-      } else if (filter_obj.mode == 'aggregation'){
-        columns = filter_obj.dimensions;
-        for(var prop in filter_obj.metrics){
-          columns.push(prop);
-        }
-      } else {
-        columns = [];
+    var mode = filter_obj.mode,
+        filters_array = filter_obj.filters,
+        len = filters_array.length, columns;
+    if(filter_obj.mode == 'select'){
+      columns = filter_obj.select;
+    } else if (filter_obj.mode == 'aggregation'){
+      columns = filter_obj.dimensions;
+      for(var prop in filter_obj.metrics){
+        columns.push(prop);
       }
+    } else {
+      columns = [];
+    }
     for(var i = 0; i < len; i++) {
       //var obj = {columnname:['count']}
       //checking condition_type of filter exit
       switch(filters_array[i]["condition_type"]) {
         case "values":
           console.log('---- value code');
-          return valueFilter(filters_array[i],columns); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
+          valueFilter(filters_array[i],columns,mode); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "range":
           console.log('---- range code');
-          return rangeFilter(filters_array[i],columns); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
+          rangeFilter(filters_array[i],columns); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "datatype":
           break;
@@ -177,8 +177,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
     return raw_data;
   }
 
-  var valueFilter = function (filter_obj,columns) {
-    // console.log(filter_obj);
+  var valueFilter = function (filter_obj,columns,mode) {
     var _in = filter_obj['in'],
         not_in = filter_obj['not_in'],
         column_name = filter_obj['column_name'],
@@ -194,15 +193,15 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
       }
     });
     // Why is the below code written. It returns the data with only one column. Ideally, the where clause should return all the columns with aggregation hapenning later ---> AUTHOR RONAK
-    // if(columns.length != 0) {
-    //   raw_data = _.map(raw_data ,function (obj) {
-    //     return _.pick(obj,columns);
-    //   });
-    // }
-
+    if(columns.length != 0 && mode === "select") {
+      raw_data = _.map(raw_data ,function (obj) {
+        // console.log(obj,columns);
+        return _.pick(obj,columns);
+      });
+    }
     //console.log("value filter completed");
   }
-  var rangeFilter = function (filter_obj,columns){
+  var rangeFilter = function (filter_obj,columns,mode){
     var min = filter_obj['condition']['min'],
         max = filter_obj['condition']['max'],
         column_name = filter_obj['column_name'],
@@ -213,7 +212,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
       }
     });
     //return perticular columns data
-    if(columns.length != 0){
+    if(columns.length != 0 && mode === "select"){
       raw_data = _.map(raw_data ,function (obj){
         return _.pick(obj,columns);
       });
