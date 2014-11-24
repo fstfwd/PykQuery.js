@@ -5,7 +5,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
   // data which is used for filtering data is in global_divid_for_raw_data
 
   global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
-  console.log(pykquery)
   raw_data = global_divid_for_raw_data.rawdata;
 
   var query_object = pykquery,

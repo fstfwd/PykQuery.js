@@ -682,21 +682,22 @@ var findQueryByDivid = function(id) {
 
 
   this.toSql = function() {
-    options = this;
+    that = this;
 
-    var filters = options.filters,
-
-    mode = options.mode,
-    metrics = options.metrics,
-    select_columns = options.select_columns,
-    sort = options.sort,
-    dimensions = options.dimensions,
-    limit  = options.limit,
-    offset = options.offset;
+    var filters = that.filters,
+    mode = that.mode,
+    unique = that.unique,
+    metrics = that.metrics,
+    select = that.select,
+    sort = that.sort,
+    dimensions = that.dimensions,
+    limit  = that.limit,
+    offset = that.offset,
+    div_id = that.div_id;
 
     var table_name = "__",
-    columns = options.columns,
-    required_columns = [];
+    columns = that.columns,
+    required_columns = [],
     raw_data = [],
     final_data = [];
 
@@ -715,17 +716,31 @@ var findQueryByDivid = function(id) {
     //START -- SELECT COLUMN NAMES clause
     if (dimensions && mode === "aggregation") {
       required_columns = _.flatten(dimensions);
-      for(var i in metrics){
-        len = metrics[i].length;
-        for(var j = 0; j < len; j++){
-          required_columns.push(metrics[i][j] + "("+ i +")")
+
+      if (metrics) {
+        for(var i in metrics){
+          len = metrics[i].length;
+          for(var j = 0; j < len; j++){
+            required_columns.push(metrics[i][j] + "("+ i +")")
+          }
         }
       }
     }
 
-    if (select_columns && mode !== "aggregation") {
-      if (_.intersection(columns,select_columns).length !== 0) {
-        _.each(select_columns, function(d) {
+    if (select && mode == "select") {
+      if (_.intersection(columns,select).length !== 0 || select.toString() === ["*"].toString()) {
+        _.each(select, function(d) {
+          required_columns.push(d);
+        });
+      }
+      else {
+        return false; // column(s) not found
+      }
+    }
+
+    if(unique && mode == "unique") {
+      if (_.intersection(columns,unique).length !== 0) {
+        _.each(unique, function(d) {
           required_columns.push(d);
         });
       }
@@ -737,6 +752,9 @@ var findQueryByDivid = function(id) {
     if (_.isEmpty(required_columns) == true && _.isEmpty(dimensions) == true) {
       query_select = "SELECT * ";
     }
+    else if (mode == "unique") {
+      query_select = "SELECT DISTINCT " + required_columns.join(", ") + " ";
+    }
     else {
       query_select = "SELECT " + required_columns.join(", ") + " ";
     }
@@ -744,15 +762,17 @@ var findQueryByDivid = function(id) {
 
 
     // START -- WHERE clause
-    if (filters) {
+    if (filters && _.isEmpty(filters) == false) {
       query_where = "WHERE ";
       next_op = false;
+
       _.each(filters, function (d) {
         if (next_op) {
           query_where += next_op + " ";
         }
-        // query_where += d["column_name"] + " ";
+
         switch (d["condition_type"]) {
+
           case "values" :
             vals = [];
             if (d["in"] && d["in"].length !== 0) {
@@ -782,19 +802,23 @@ var findQueryByDivid = function(id) {
               next_op = false;
             }
             break;
+
             case "range":
-              query_where += d["column_name"] + " ";
-              if (d["condition"]["not"]) {
-                query_where += "NOT ";
-              }
-              query_where += "BETWEEN " + d["condition"]["min"] + " AND " + d["condition"]["max"] + " ";
-              if (d["next"]) {
-                next_op = d["next"];
-              }
-              else {
-                next_op = false;
+              if (_.isEmpty(d["condition"]) == false) {
+                query_where += d["column_name"] + " ";
+                if (d["condition"]["not"]) {
+                  query_where += "NOT ";
+                }
+                query_where += "BETWEEN " + d["condition"]["min"] + " AND " + d["condition"]["max"] + " ";
+                if (d["next"]) {
+                  next_op = d["next"];
+                }
+                else {
+                  next_op = false;
+                }
               }
               break;
+
               case "data_types":
                 // yet to be coded
                 break;
@@ -812,7 +836,7 @@ var findQueryByDivid = function(id) {
 
 
           // START -- ORDER BY clause
-          if (sort) {
+          if (sort && _.isEmpty(sort) == false) {
             query_order_by = "ORDER BY ";
             for (key in sort) {
               query_order_by += key + " " + sort[key] + ", ";
@@ -828,8 +852,8 @@ var findQueryByDivid = function(id) {
 
           // FINAL DB QUERY STRING
           query_string = div_id + ": " + query_select + query_from + query_where + query_group_by + query_order_by + query_limit + query_offset;
+          console.log(query_string);
 
           return query_string;
         };
-
 };
