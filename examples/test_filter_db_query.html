@@ -10,12 +10,13 @@
 	    	div_id: "g1",
 	    	mode: "aggregation",
 	    	columns: ["street","city","zip","state","beds","baths","sq__ft","type","sale_date","price","latitude","longitude"],
-	    	dimensions: ["state","zip"],
+	    	dimensions: ["state","city"],
 	    	select: ["city","beds"],
 	    	unique: ["city","beds"],
 	    	metrics: {
-	    		state: ["count"],
-	    		beds: ["avg","sum"]
+	    		price: ["sum","avg"],
+	    		city: ["count"]
+	    		// beds: ["median"]
 	    	},
 	    	filters: [{
 	    		"column_name": "beds",
@@ -41,10 +42,10 @@
 	    	offset: 10
 	    });
 		
-		var readable_query = sqlQueryReadableString(q);
+		// var readable_query = sqlQueryReadableString(q);
+	    // console.log(q);
+	    // console.log("readable_query >>> ",readable_query);
 
-	    console.log(q);
-	    console.log("readable_query >>> ",readable_query);
 	    $("#query-string").html(q);
     </script>
 </body>
