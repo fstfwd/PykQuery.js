@@ -10,7 +10,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
       var data = { "config": pykquery_json,
         "filename":rumi_params["filename"],
         "username":rumi_params["username"],
-        "projectname":rumi_params["projectname"]};
+        "projectname":rumi_params["projectname"] };
     } else {
       return false;
     }
@@ -41,7 +41,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
     xmlhttp.open("POST", "http://192.168.0.121:9292/v1/filter/show", false);
     xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     console.log(response, "------response");
-    xmlhttp.send(JSON.stringify(data));
+    xmlhttp.send(data);
   }
 
   var rumiParameterValidation = function(params){
