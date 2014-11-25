@@ -61,7 +61,7 @@ PykQuery.local_names = [];
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   that = this;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, selected_dom_id, local_div_id_triggering_event, rumi_params;
+  var div_id, mode, _scope, adapter, global_exists, local_exists, selected_dom_id, local_div_id_triggering_event, rumi_params = adapter_param;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var available_adapters = ["inbrowser", "rumi"];
@@ -603,6 +603,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     var that = this;
     if (_scope == "local") {
       invoke_call(getConfig(that));
+      callLocalRenderOnFilter(that);
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
@@ -756,17 +757,22 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   // urlParams("type","startup",1);
 
 
-  /* ---------- Chart Filtering ----------- */
-  var callLocalRenderOnFilter = function () {
-    // console.log(window[div_id].);
-    // for(var i=0 ; i<PykCharts.charts.length ; i++) {
-    //   if (PykCharts.charts[i].selector != "#"+id) {
-    //     PykCharts.charts[i].refresh();
-    //   }
-    // }
+  var callLocalRenderOnFilter = function (that) {
+    var k = this,
+        len = __impacts.length,
+        global_filter = window[__impacts[0]].filters;
+    if (global_filter) {
+      if (global_filter.local_div_id_triggering_event !== div_id) {
+        if (k.hasOwnProperty("refresh")) {
+          k.refresh();
+        }
+      }
+    } else {
+      if (k.hasOwnProperty("execute")) {
+        k.execute();
+      }
+    }
   };
-  // (div_id == "pieContainer") ? callLocalRenderOnFilter("pieContainer") : null;
-
 
   this.toSql = function() {
     that = this;
@@ -1003,7 +1009,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
       var data = { "config": pykquery_json,
         "filename":rumi_params["filename"],
         "username":rumi_params["username"],
-        "projectname":rumi_params["projectname"]};
+        "projectname":rumi_params["projectname"] };
     } else {
       return false;
     }
@@ -1034,7 +1040,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
     xmlhttp.open("POST", "http://192.168.0.121:9292/v1/filter/show", false);
     xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     console.log(response, "------response");
-    xmlhttp.send(JSON.stringify(data));
+    xmlhttp.send(data);
   }
 
   var rumiParameterValidation = function(params){
