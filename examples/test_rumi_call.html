@@ -12,27 +12,27 @@
       <div id="b"></div>
     </div>
     <script type="text/javascript">
-      
+
       var a = new PykQuery.init("unique", "local", "a", "rumi");
       a.unique = ["District"]
       a.datastoreurl = "darpan/pykquery-testing/helloworld"
       a.storeObjectInMemory('a');
-      
+
       var b = new PykQuery.init("aggregation", "local", "b", "rumi");
       b.dimensions = ["Block"];
       b.metrics = [{"Kharif": ["count"]}, {"Rabi": ["sum"]}];
       b.datastoreurl = "darpan/pykquery-testing/helloworld"
       b.storeObjectInMemory('b');
-      
+
       var g1 = new PykQuery.init("global", "global", "g1", "rumi");
       g1.storeObjectInMemory('g1');
       g1.datastoreurl = "darpan/pykquery-testing/helloworld"
       g1.addImpacts(["a", "b"], true);
-      
+
       a.filter().add({"column_name": "Kharif", "condition_type": "range", "condition": {"min": 0, "max": 210000000, "not": false}, "next": "OR"});
       b.filter().add({"column_name": "Rabi", "condition_type": "range", "condition": {"min": 0, "max": 210000000, "not": false}, "next": "OR"});
       g1.filter().add({"column_name": "state", "condition_type": "values", "in": ["ANDHRA PRADESH"], "next": "OR"})
-      
+
       console.log(a.call());
       console.log(b.call());
     </script>
