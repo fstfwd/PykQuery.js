@@ -704,7 +704,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
 
   var callLocalRenderOnFilter = function (that) {
-    var k = window[div_id],
+    var k = this,
         len = __impacts.length,
         global_filter = window[__impacts[0]].filters;
     if (global_filter) {
