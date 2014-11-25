@@ -7,7 +7,7 @@ PykQuery.local_names = [];
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   that = this;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, selected_dom_id, local_div_id_triggering_event;
+  var div_id, mode, _scope, adapter, global_exists, local_exists, selected_dom_id, local_div_id_triggering_event, rumi_params = adapter_param;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var available_adapters = ["inbrowser", "rumi"];
@@ -593,7 +593,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       return filter_data = connector.call();
     }
     else{
-      var connector = new PykQuery.adapter.rumi.init(pykquery_json);
+      var connector = new PykQuery.adapter.rumi.init(pykquery_json, rumi_params);
       return connector.call(function (response) {
         return filter_data = response;
       });
