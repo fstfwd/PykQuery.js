@@ -41,10 +41,15 @@
 	    	limit: 1000,
 	    	offset: 10
 	    });
-		
-		// var readable_query = sqlQueryReadableString(q);
-	    // console.log(q);
-	    // console.log("readable_query >>> ",readable_query);
+			
+		var readable_query = returnsWhereClause({
+    		"column_name": "city",
+			"condition_type": "values",
+			"in": ['SACRAMENTO','ELK GROVE'],
+			"not_in": ['NORTH HIGHLANDS'],
+			"next": "OR"
+    	});
+	    console.log("readable_query >>> ",readable_query);
 
 	    $("#query-string").html(q);
     </script>
