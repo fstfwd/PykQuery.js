@@ -92,12 +92,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     });
   }
   if(adapter == "rumi") {
-    Object.defineProperty(this, 'datastoreurl', {
+    Object.defineProperty(this, 'rumiparams', {
       get: function() {
-        return data_store_url;
+        return rumi_params;
       },
-      set: function(url) {
-        data_store_url = url;
+      set: function(params) {
+        rumi_params = params;
       }
     });
   }
@@ -703,14 +703,15 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
 
   /* ---------- Chart Filtering ----------- */
-  var domChartFiltering = function (id) {
-    for(var i=0 ; i<PykCharts.charts.length ; i++) {
-      if (PykCharts.charts[i].selector != "#"+id) {
-        PykCharts.charts[i].refresh();
-      }
-    }
+  var callLocalRenderOnFilter = function () {
+    // console.log(window[div_id].);
+    // for(var i=0 ; i<PykCharts.charts.length ; i++) {
+    //   if (PykCharts.charts[i].selector != "#"+id) {
+    //     PykCharts.charts[i].refresh();
+    //   }
+    // }
   };
-  // (div_id == "pieContainer") ? domChartFiltering("pieContainer") : null;
+  // (div_id == "pieContainer") ? callLocalRenderOnFilter("pieContainer") : null;
 
 
   this.toSql = function() {
