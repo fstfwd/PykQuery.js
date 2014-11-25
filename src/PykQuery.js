@@ -7,7 +7,7 @@ PykQuery.local_names = [];
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   that = this;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, selected_dom_id, local_div_id_triggering_event, rumi_params;
+  var div_id, mode, _scope, adapter, global_exists, local_exists, selected_dom_id, local_div_id_triggering_event, rumi_params = adapter_param;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var available_adapters = ["inbrowser", "rumi"];
@@ -545,7 +545,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  this.callToDrawPykCharts = function() {
+  this.call = function() {
     var that = this;
     if (_scope == "local") {
       invoke_call(getConfig(that));
@@ -554,7 +554,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
         var local_filter = window[__impacts[j]];
-        local_filter.filter_data = local_filter.callToDrawPykCharts();
+        local_filter.filter_data = local_filter.call();
       }
     }
     return true;

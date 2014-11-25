@@ -22,7 +22,7 @@
         console.log(g1.filters);
         g1.resetFilters();
         console.log(g1.filters);
-        g1.callToDrawPykCharts();
+        g1.call();
         var dd = a.flushToGet();
         var ee = b.flushToGet();
         render(dd,ee)
@@ -30,13 +30,13 @@
 
       var filter1 = function (value,id) {
         a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}, true);
-        g1.callToDrawPykCharts();
+        g1.call();
         var ee = b.flushToGet();
         render("",ee)
       };
       var filter2 = function (value,id) {
         b.addFilter({"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR", "selected_dom_id": id}, true);
-        g1.callToDrawPykCharts();
+        g1.call();
         var dd = a.flushToGet();
         render(dd,"")
       };
@@ -81,8 +81,8 @@
 
           a.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
           b.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
-          a.callToDrawPykCharts();
-          b.callToDrawPykCharts();
+          a.call();
+          b.call();
           a.toSql();
           var d = a.flushToGet();
           var e = b.flushToGet();

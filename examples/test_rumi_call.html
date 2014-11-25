@@ -33,8 +33,8 @@
       b.filter().add({"column_name": "Rabi", "condition_type": "range", "condition": {"min": 0, "max": 210000000, "not": false}, "next": "OR"});
       g1.filter().add({"column_name": "state", "condition_type": "values", "in": ["ANDHRA PRADESH"], "next": "OR"})
 
-      console.log(a.callToDrawPykCharts());
-      console.log(b.callToDrawPykCharts());
+      console.log(a.call());
+      console.log(b.call());
     </script>
   </body>
 </html>
