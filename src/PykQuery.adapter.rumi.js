@@ -39,9 +39,9 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
     }
 
     xmlhttp.open("POST", "http://192.168.0.121:9292/v1/filter/show", false);
-    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlhttp.setRequestHeader("Content-Type", "text/plain");
     console.log(response, "------response");
-    xmlhttp.send(data);
+    xmlhttp.send(JSON.stringify(data));
   }
 
   var rumiParameterValidation = function(params){
