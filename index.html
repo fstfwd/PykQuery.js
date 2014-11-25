@@ -30,14 +30,14 @@
       // // z.add({"column_name": "Daysdsd", "condition_type": "range", "condition": {"min": 10000, "max": 210000, "not": false}, "next": "OR"});
       // z = g1.filter()
       // z.add({"column_name": "Name", "condition_type": "values", "in": ["Darpan", "Ronak"], "next": "OR"});
-      // b.call();
+      // b.callToDrawPykCharts();
       // //console.log(g1.getConfig());
       var a = new PykQuery.init("select", "local", "a", "rumi");
       a.storeObjectInMemory('a');
       z = a.filter();
       console.log(a);
       a.datastoreurl = 'sdbkfj';
-      console.log(a.call());
+      console.log(a.callToDrawPykCharts());
       console.log(a.flushToGet());
     </script>
   </body>

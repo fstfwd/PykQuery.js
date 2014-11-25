@@ -545,15 +545,16 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  this.call = function() {
+  this.callToDrawPykCharts = function() {
     var that = this;
     if (_scope == "local") {
       invoke_call(getConfig(that));
+      callLocalRenderOnFilter(that);
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
         var local_filter = window[__impacts[j]];
-        local_filter.filter_data = local_filter.call();
+        local_filter.filter_data = local_filter.callToDrawPykCharts();
       }
     }
     return true;
@@ -702,17 +703,22 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   // urlParams("type","startup",1);
 
 
-  /* ---------- Chart Filtering ----------- */
-  var callLocalRenderOnFilter = function () {
-    // console.log(window[div_id].);
-    // for(var i=0 ; i<PykCharts.charts.length ; i++) {
-    //   if (PykCharts.charts[i].selector != "#"+id) {
-    //     PykCharts.charts[i].refresh();
-    //   }
-    // }
+  var callLocalRenderOnFilter = function (that) {
+    var k = window[div_id],
+        len = __impacts.length,
+        global_filter = window[__impacts[0]].filters;
+    if (global_filter) {
+      if (global_filter.local_div_id_triggering_event !== div_id) {
+        if (k.hasOwnProperty("refresh")) {
+          k.refresh();
+        }
+      }
+    } else {
+      if (k.hasOwnProperty("execute")) {
+        k.execute();
+      }
+    }
   };
-  // (div_id == "pieContainer") ? callLocalRenderOnFilter("pieContainer") : null;
-
 
   this.toSql = function() {
     that = this;
