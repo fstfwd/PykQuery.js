@@ -48,6 +48,6 @@ PykUtil.init = function() {
     }
 
     this.isBlank = function(a) {
-        (a == undefined || a == "") ? true : false
+        return (a == undefined || a == "") ? true : false
     }
 }
