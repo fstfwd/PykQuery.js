@@ -16,11 +16,16 @@
 <body>
   <h3>Testing #1: Filters with two tables</h3>
   <div id="reset">Reset All</div>
-  <div id="g1">
+  <div id="g1" style='float:left;'>
     <div id='a' style="float:left;margin-left:100px;"></div>
     <div id='b' style="float:left;margin-left:100px;"></div>
   </div>
-  <div id="list_of_filters"></div>
+  <div id="list_of_filters" style='margin-left:50px;float:left;'>&nbsp;</div>
+  <div id="save_filters_form" style='margin-left:50px;float:left;'>
+    <textarea id="filters_json" cols=100 rows=20></textarea><br/>
+    <input id="save_filters" type="button" value="Save" />
+  </div>
+
   <script type="text/javascript">
     $(document).ready(function () {
 

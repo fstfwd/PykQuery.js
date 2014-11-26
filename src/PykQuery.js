@@ -932,27 +932,35 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   };
 
   this.filterList = function (div_element) {
-    $('#'+div_element).empty();
-    $('#'+div_element).append("<div class='filter_list'></div>");
-    showFilterList(where_clause,div_element);
-    $( ".filter_remove").unbind( "click" );
-    $(document).on('click','.filter_remove',function(){
-      var index  = $(this).attr("id").split("filter_remove_");
-      //var data
-
-      removeFilterFromList(index[1],where_clause,div_element);
-    });
+    document.getElementById(div_element).innerHTML = "";
+    document.getElementById(div_element).innerHTML = "<div class='filter_list'></div>";
+    showFilterList();
   }
   var showFilterList = function() {
+    console.log(where_clause);
     len = where_clause.length,
-    filter_values = "values in filter";
-    $('.filter_list').empty();
-    for(var i =0 ;i< len;i++){
-      //$('.filter_block').empty();
-      $('.filter_list').append("<div class='filter_block' id ='filter_block"+i+"'></div>");
-      $('#filter_block'+i).append("<div class ='filter_value"+i+"'>"+filter_values+"</div>");
-      $('#filter_block'+i).append("<div id ='filter_remove_"+i+"'class ='filter_remove'>remove</div>");
-      //return false;
+    document.getElementsByClassName('filter_list')[0].innerHTML = "";
+    for (var i = 0; i < len; i++) {
+      var filter_block = document.createElement("div");
+      filter_block.setAttribute("class","filter_block");
+      filter_block.setAttribute("id","filter_block"+i);
+      document.getElementsByClassName('filter_list')[0].appendChild(filter_block);
+      var filter_values = document.createElement("div");
+      filter_values.setAttribute("class","filter_value");
+      filter_values.innerHTML = "Filter by __";
+      document.getElementById('filter_block'+i).appendChild(filter_values);
+      var filter_remove = document.createElement("div");
+      filter_remove.setAttribute("class","filter_remove");
+      filter_remove.setAttribute("id","filter_remove_"+i);
+      filter_remove.innerHTML = "Remove"
+      document.getElementById('filter_block'+i).appendChild(filter_remove);
+    }
+    var divs = document.getElementsByClassName("filter_remove");
+    for (var i = 0; i< divs.length; i++) {
+      divs[i].onclick = function () {
+        var index = this.id.split("filter_remove_");
+        removeFilterFromList(index[1]);
+      }
     }
   }
   var removeFilterFromList = function (index) {
