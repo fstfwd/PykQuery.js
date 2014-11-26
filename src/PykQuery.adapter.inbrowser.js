@@ -3,14 +3,12 @@ PykQuery.adapter.inbrowser = {};
 //PykQuery.adapter.inbrowser.init(pykquery_json);
 PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
   // data which is used for filtering data is in global_divid_for_raw_data
-
-  global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
-  raw_data = global_divid_for_raw_data.rawdata;
-
   var query_object = pykquery,
-      raw_data;
+      raw_data,
+      global_divid_for_raw_data = pykquery.global_divid_for_raw_data,
+      query_scope = PykQuery.list_of_scopes[global_divid_for_raw_data];
 
-  global_divid_for_raw_data = window[pykquery.global_divid_for_raw_data];
+  global_divid_for_raw_data = query_scope[global_divid_for_raw_data];
   raw_data = global_divid_for_raw_data.rawdata;
 
   query_object.filters = consolidated_filters;

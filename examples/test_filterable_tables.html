@@ -1,98 +1,121 @@
 <html>
-  <head>
-    <script src="lib/jquery-1.11.1.min.js"></script>
-    <script src='../lib/underscore-min.js'></script>
-    <script src='../lib/underscoreAddon.js'></script>
-    <script src="../src/PykUtil.js"></script>
-    <script src="../src/PykQuery.js"></script>
-    <script src="../src/filterList.js"></script>
-    <script src="../src/PykQuery.adapter.inbrowser.js"></script>
-  </head>
-  <body>
-    <h3>Testing #1: Filters with two tables</h3>
-    <div id="reset">Reset All</div>
-    <div id="g1">
-      <div id='a' style="float:left;margin-left:100px;"></div>
-      <div id='b' style="float:left;margin-left:100px;"></div>
-    </div>
-    <div id="list_of_filters"></div>
-    <script type="text/javascript">
+<head>
+<script src="lib/jquery-1.11.1.min.js"></script>
+<script src='../lib/underscore-min.js'></script>
+<script src='../lib/underscoreAddon.js'></script>
+<script src="../src/PykUtil.js"></script>
+<script src="../src/PykQuery.js"></script>
+<script src="../src/filterList.js"></script>
+<script src="../src/PykQuery.adapter.inbrowser.js"></script>
+<style>
+.selected {
+  background-color: #f7b77f;
+}
+</style>
+</head>
+<body>
+  <h3>Testing #1: Filters with two tables</h3>
+  <div id="reset">Reset All</div>
+  <div id="g1">
+    <div id='a' style="float:left;margin-left:100px;"></div>
+    <div id='b' style="float:left;margin-left:100px;"></div>
+  </div>
+  <div id="list_of_filters"></div>
+  <script type="text/javascript">
+    $(document).ready(function () {
 
-      $("#reset").click (function () {
-        console.log(g1.filters);
-        g1.resetFilters();
-        console.log(g1.filters);
-        g1.call();
-        var dd = a.flushToGet();
-        var ee = b.flushToGet();
-        render(dd,ee)
-      })
+      var PykCharts = {}
+      PykCharts.table1 = function (options) {
+        var that = this;
 
-      var filter1 = function (value,id) {
-        a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}, true);
-        g1.call();
-        var ee = b.flushToGet();
-        render("",ee)
-      };
-      var filter2 = function (value,id) {
-        b.addFilter({"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR", "selected_dom_id": id}, true);
-        g1.call();
-        var dd = a.flushToGet();
-        render(dd,"")
-      };
-      function render (obj1,obj2) {
-        if (obj1) {
+        this.execute = function () {
+          var obj1 = this.a.flushToGet();
+          console.log(obj1);
+
           var html1 = "<table><tr><td>City</td><td>Price</td></tr>";
           for (var i = 0; i< obj1.length; i++) {
-            html1 += "<tr><td><a id='table1-a"+i+"' class='filter1' onclick=filter1('"+obj1[i].city+"','table1-a"+i+"');>"+obj1[i].city+"</a></td><td>"+obj1[i].price+"</td></tr>"
+            html1 += "<tr><td><a id='table1-a"+i+"' class='filter1'>"+obj1[i].city+"</a></td><td>"+obj1[i].price+"</td></tr>"
           }
           html1 += "</table>";
-          document.getElementById(a.div_id).innerHTML = html1;
+
+          document.getElementById(options.selector).innerHTML = html1;
+
+          $(".filter1").click(function () {
+            var value = $(this).html(),
+                id = this.id;
+            that.a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}, true);
+            g1.call();
+            // var ee = that.b.flushToGet();
+          });
         }
-        if (obj2) {
-          var html2 = "<table><tr><td>Zip</td><td>Beds</td></tr>";
-          for (var i = 0; i< obj2.length; i++) {
-            html2 += "<tr><td><a id='table2-a"+i+"' class='filter2' onclick=filter2('"+obj2[i].zip+"','table2-a"+i+"');>"+obj2[i].zip+"</a></td><td>"+obj2[i].beds+"</td></tr>"
-          }
-          html2 += "</table>";
-          document.getElementById(b.div_id).innerHTML = html2;
-        }
+
+        this.a = new PykQuery.init(this, "aggregation", "local", "a", "inbrowser");
+        this.a.storeObjectInMemory('a');
+        this.a.dimensions = ["city"];
+        this.a.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+
+        this.a.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
       }
 
-      var a = new PykQuery.init("aggregation", "local", "a", "inbrowser");
-      a.storeObjectInMemory('a');
-      a.dimensions = ["city"];
-      a.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+      PykCharts.table2 = function (options) {
+        var that = this;
+        this.execute = function () {
+          var obj2 = this.b.flushToGet();
+          var html2 = "<table><tr><td>Zip</td><td>Beds</td></tr>";
+          for (var i = 0; i< obj2.length; i++) {
+            html2 += "<tr><td><a id='table2-a"+i+"' class='filter2'>"+obj2[i].zip+"</a></td><td>"+obj2[i].beds+"</td></tr>"
+          }
+          html2 += "</table>";
+          document.getElementById(options.selector).innerHTML = html2;
 
-      var b = new PykQuery.init("aggregation", "local", "b", "inbrowser");
-      b.storeObjectInMemory('b');
-      b.dimensions = ["zip"];
-      b.metrics = {"beds":["count"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+          $(".filter2").click(function () {
+            var value = $(this).html(),
+            id = this.id;
+            that.b.addFilter({"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR", "selected_dom_id": id}, true);
+            g1.call();
+            // var dd = that.a.flushToGet();
+          });
+        }
+
+        this.b = new PykQuery.init(this, "aggregation", "local", "b", "inbrowser");
+        this.b.storeObjectInMemory('b');
+        this.b.dimensions = ["zip"];
+        this.b.metrics = {"beds":["count"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+
+        this.b.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
+      }
+
+      var k = new PykCharts.table1({
+        selector: "a"
+      });
+      var l = new PykCharts.table2({
+        selector: "b"
+      });
 
       var xmlhttp = new XMLHttpRequest();
       var url = "data/test1data.json";
       xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 
-          g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
+          window.g1 = new PykQuery.init(window, "global", "global", "g1", "inbrowser");
           g1.storeObjectInMemory('g1');
           g1.rawdata = JSON.parse(xmlhttp.response);
           g1.addImpacts(["a", "b"], true);
-
-          a.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
-          b.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
-          a.call();
-          b.call();
-          a.toSql();
-          var d = a.flushToGet();
-          var e = b.flushToGet();
-          render(d,e);
-
           g1.filterList("list_of_filters");
+          $("#reset").click (function () {
+            g1.resetFilters();
+            g1.call();
+          });
+          k.a.call();
+          k.a.toSql();
+          l.b.call();
         }
       }
       xmlhttp.open("GET", url, true);
       xmlhttp.send();
-    </script>
-  </body>
+
+    })
+
+  </script>
+</body>
 </html>
