@@ -1006,43 +1006,29 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
     var xmlhttp, response;
     //console.log(pykquery_json,rumi_params)
     if(rumiParameterValidation(rumi_params)) {
-      var data = { "config": pykquery_json,
-        "filename":rumi_params["filename"],
-        "username":rumi_params["username"],
-        "projectname":rumi_params["projectname"] };
+      var data = { config: pykquery_json,
+        filename: rumi_params["filename"],
+        username: rumi_params["username"],
+        projectname: rumi_params["projectname"] };
     } else {
       return false;
     }
-    if (window.XMLHttpRequest) {
-      // code for IE7+, Firefox, Chrome, Opera, Safari
-      xmlhttp = new XMLHttpRequest();
-    } else {
-      // code for IE6, IE5
-      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    }
 
-    xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState == 4 ) {
-        if(xmlhttp.status == 201){
-          response = xmlhttp.responseText;
-          console.log(xmlhttp.responseText, response);
-          onComplete(response);
-        }
-        else if(xmlhttp.status == 400) {
-          console.error('There was an error 400');
-        }
-        else {
-          console.error('something else other than 200 was returned');
-        }
+    $.ajax({
+      url: "http://192.168.0.121:9292/v1/filter/show",
+      data: data, //return  data
+      dataType: 'json',
+      type: 'POST',
+      async: false,
+      success: function (res) {
+        onComplete(res);
+      },
+      error: function () {  
+        console.log('Save error.');
       }
-    }
-
-    xmlhttp.open("POST", "http://192.168.0.121:9292/v1/filter/show", false);
-    xmlhttp.setRequestHeader("Content-Type", "text/plain");
-    console.log(response, "------response");
-    xmlhttp.send(JSON.stringify(data));
+    });
   }
-
+  
   var rumiParameterValidation = function(params){
     var util = new PykUtil.init();
     console.log(util.isBlank(params))
