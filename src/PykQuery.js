@@ -9,7 +9,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   that = this;
   PykQuery.list_of_scopes[divid_param] = query_scope;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, selected_dom_id, local_div_id_triggering_event, rumi_params = adapter_param;
+  var div_id, mode, _scope, adapter, global_exists, local_exists, selected_dom_id, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var available_adapters = ["inbrowser", "rumi"];
@@ -582,17 +582,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     }
   }
 
-  var appendSelectedClassToRespectiveDomId = function (filters) {
-    for (var i = 0; i < filters.length; i++) {
-      if (filters[i].selected_dom_id) {
-        document.getElementById(filters[i].selected_dom_id).className += " selected";
-      }
-    }
-  }
-
   var invoke_call = function(pykquery_json){
-    var consolidated_filters = generateConsolidatedFiltersArray();
-    appendSelectedClassToRespectiveDomId(consolidated_filters);
+    consolidated_filters = generateConsolidatedFiltersArray();
     var response;
     if(adapter == "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(pykquery_json, consolidated_filters);
@@ -714,7 +705,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     var k = PykQuery.list_of_scopes[that.div_id],
         len = __impacts.length,
         global_filter = query_scope[__impacts[0]].filters;
-        console.log(global_filter,div_id);
     if (global_filter) {
       for (var i = 0; i < global_filter.length; i++) {
         if (global_filter[i].local_div_id_triggering_event !== div_id) {
@@ -732,7 +722,21 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
         k.execute();
       }
     }
+    appendSelectedClassToRespectiveDomId();
   };
+
+  var appendSelectedClassToRespectiveDomId = function () {
+    for (var i = 0; i < consolidated_filters.length; i++) {
+      if (consolidated_filters[i].selected_dom_id) {
+        console.log(document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']"));
+        var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']")[0];
+        if (!element.classList.contains("selected")) {
+          element.className += " selected";
+        }
+      }
+    }
+  }
+
 
   this.toSql = function() {
     that = this;

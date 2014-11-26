@@ -34,7 +34,7 @@
 
           var html1 = "<table><tr><td>City</td><td>Price</td></tr>";
           for (var i = 0; i< obj1.length; i++) {
-            html1 += "<tr><td><a id='table1-a"+i+"' class='filter1'>"+obj1[i].city+"</a></td><td>"+obj1[i].price+"</td></tr>"
+            html1 += "<tr><td><a data-id='"+obj1[i].city+"' class='filter1'>"+obj1[i].city+"</a></td><td>"+obj1[i].price+"</td></tr>"
           }
           html1 += "</table>";
 
@@ -42,7 +42,8 @@
 
           $(".filter1").click(function () {
             var value = $(this).html(),
-                id = this.id;
+                id = $(this).attr('data-id');
+                console.log(id);
             that.a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}, true);
             g1.call();
             // var ee = that.b.flushToGet();
@@ -63,14 +64,14 @@
           var obj2 = this.b.flushToGet();
           var html2 = "<table><tr><td>Zip</td><td>Beds</td></tr>";
           for (var i = 0; i< obj2.length; i++) {
-            html2 += "<tr><td><a id='table2-a"+i+"' class='filter2'>"+obj2[i].zip+"</a></td><td>"+obj2[i].beds+"</td></tr>"
+            html2 += "<tr><td><a data-id='"+obj2[i].zip+"' class='filter2'>"+obj2[i].zip+"</a></td><td>"+obj2[i].beds+"</td></tr>"
           }
           html2 += "</table>";
           document.getElementById(options.selector).innerHTML = html2;
 
           $(".filter2").click(function () {
             var value = $(this).html(),
-            id = this.id;
+            id = $(this).attr('data-id');
             that.b.addFilter({"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR", "selected_dom_id": id}, true);
             g1.call();
             // var dd = that.a.flushToGet();
@@ -97,7 +98,7 @@
       xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 
-          window.g1 = new PykQuery.init(window, "global", "global", "g1", "inbrowser");
+          g1 = new PykQuery.init(window, "global", "global", "g1", "inbrowser");
           g1.storeObjectInMemory('g1');
           g1.rawdata = JSON.parse(xmlhttp.response);
           g1.addImpacts(["a", "b"], true);
