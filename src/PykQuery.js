@@ -350,6 +350,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     if(_scope == "local") {
       var len = impacts.length;
       for(var j =0;j<len;j++) {
+        var query_scope = PykQuery.list_of_scopes[impacts[j]];
         var global_filter = query_scope[impacts[j]];
         global_filter.removeFilterInQuery(column_name, condition_type, params);
       }
@@ -405,6 +406,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     if (_scope == "local") {
       var len = __impacts.length;
       for (var j = 0; j < len; j++) {
+        var query_scope = PykQuery.list_of_scopes[__impacts[j]];
         var global_filter = query_scope[__impacts[j]];
         global_filter.addFilter(new_filter, true, div_id);
       }
@@ -419,7 +421,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
         __impacts.push(array_of_div_ids[i]);
         setGlobalDivIdForRawData(this,array_of_div_ids[i]);
         if(is_cyclical){
-          query_scope = PykQuery.list_of_scopes[array_of_div_ids[i]];
+          var query_scope = PykQuery.list_of_scopes[array_of_div_ids[i]];
 
           setGlobalDivIdForRawData(query_scope[array_of_div_ids[i]],this.div_id);
           related_pykquery = query_scope[array_of_div_ids[i]];
@@ -446,6 +448,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       impacts_allowed_on = "local";
     }
     for (var i = 0; i < len; i++) {
+      var query_scope = PykQuery.list_of_scopes[array_of_div_ids[i]];
       var query_object = query_scope[array_of_div_ids[i]];
       if (query_object && query_object.scope === _scope) {
         console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "A " + _scope + " can only impact a " + impacts_allowed_on + ".")
@@ -556,7 +559,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
-        query_scope = PykQuery.list_of_scopes[__impacts[j]];
+        var query_scope = PykQuery.list_of_scopes[__impacts[j]];
         var local_filter = query_scope[__impacts[j]];
         local_filter.filter_data = local_filter.call();
       }
@@ -566,11 +569,11 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   var generateConsolidatedFiltersArray = function(){
     if (_scope == "local") {
-      query_scope = PykQuery.list_of_scopes[div_id];
+      var query_scope = PykQuery.list_of_scopes[div_id];
       var consolidated_filters = query_scope[div_id].filters;
       var len = __impacts.length;
       for(var i = 0; i < len; i++) {
-        query_scope = PykQuery.list_of_scopes[__impacts[i]];
+        var query_scope = PykQuery.list_of_scopes[__impacts[i]];
         var global_filter = query_scope[__impacts[i]].filters;
         if (global_filter && global_filter.localdividtriggeringevent !== div_id) {
           consolidated_filters = _.flatten(global_filter, consolidated_filters);
@@ -701,7 +704,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
 
   var callLocalRenderOnFilter = function (that) {
-    query_scope = PykQuery.list_of_scopes[__impacts[0]];
+    var query_scope = PykQuery.list_of_scopes[__impacts[0]];
     var k = PykQuery.list_of_scopes[that.div_id],
         len = __impacts.length,
         global_filter = query_scope[__impacts[0]].filters;
