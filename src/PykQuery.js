@@ -3,25 +3,32 @@
 var PykQuery = {};
 PykQuery.global_names = [];
 PykQuery.local_names = [];
+PykQuery.list_of_scopes = {};
 PykQuery.query_json = {};
 
-var queryjson = {};
+var queryjson = {}, query_restore = true;
 
+var restoreFilters = function () {
+  for (var key in PykQuery.query_json) {
+    PykQuery.list_of_scopes[key][key].addFilter(PykQuery.query_json[key][0], PykQuery.query_json[key][1], PykQuery.query_json[key][2], true)
+  }
+}
 Object.defineProperty(PykQuery, 'query_json', {
   get: function () {
     return queryjson;
   },
   set: function (json) {
     queryjson = _.extend(queryjson, json);
+    if (query_restore) {
+      restoreFilters();
+    }
   }
 });
 
 PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, adapter_param) {
-
+  // console.log(query_scope.constructor.name,query_scope.prototype.toString());
   that = this;
-  var temp_obj_for_current_query_json = {};
-  temp_obj_for_current_query_json[divid_param] = query_scope;
-  PykQuery.query_json = temp_obj_for_current_query_json;
+  PykQuery.list_of_scopes[divid_param] = query_scope;
   var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
@@ -288,7 +295,15 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     });
   }
 
-  this.addFilter = function(name, is_interactive, domid){
+  this.addFilter = function(name, is_interactive, domid, restore){
+    query_restore = restore;
+    var temp_obj_for_current_query_json = {};
+    temp_obj_for_current_query_json[this.div_id] = arguments;
+    if (!restore) {
+      PykQuery.query_json = temp_obj_for_current_query_json;
+    }
+    query_restore = true;
+
     if(!this.filters){ //this is hacky code. ronak wrote it.
       this.filter();
     }
@@ -355,7 +370,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     if(_scope == "local") {
       var len = impacts.length;
       for(var j =0;j<len;j++) {
-        var query_scope = PykQuery.query_json[impacts[j]];
+        var query_scope = PykQuery.list_of_scopes[impacts[j]];
         var global_filter = query_scope[impacts[j]];
         global_filter.removeFilterInQuery(column_name, condition_type, params);
       }
@@ -412,7 +427,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     if (_scope == "local") {
       var len = __impacts.length;
       for (var j = 0; j < len; j++) {
-        var query_scope = PykQuery.query_json[__impacts[j]];
+        var query_scope = PykQuery.list_of_scopes[__impacts[j]];
         var global_filter = query_scope[__impacts[j]];
         global_filter.addFilter(new_filter, true, div_id);
       }
@@ -427,7 +442,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
         __impacts.push(array_of_div_ids[i]);
         setGlobalDivIdForRawData(this,array_of_div_ids[i]);
         if(is_cyclical){
-          var query_scope = PykQuery.query_json[array_of_div_ids[i]];
+          var query_scope = PykQuery.list_of_scopes[array_of_div_ids[i]];
 
           setGlobalDivIdForRawData(query_scope[array_of_div_ids[i]],this.div_id);
           related_pykquery = query_scope[array_of_div_ids[i]];
@@ -454,7 +469,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       impacts_allowed_on = "local";
     }
     for (var i = 0; i < len; i++) {
-      var query_scope = PykQuery.query_json[array_of_div_ids[i]];
+      var query_scope = PykQuery.list_of_scopes[array_of_div_ids[i]];
+      console.log(query_scope);
       var query_object = query_scope[array_of_div_ids[i]];
       if (query_object && query_object.scope === _scope) {
         console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "A " + _scope + " can only impact a " + impacts_allowed_on + ".")
@@ -566,7 +582,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
-        var query_scope = PykQuery.query_json[__impacts[j]];
+        var query_scope = PykQuery.list_of_scopes[__impacts[j]];
         var local_filter = query_scope[__impacts[j]];
         local_filter.filter_data = local_filter.call();
       }
@@ -576,11 +592,11 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   var generateConsolidatedFiltersArray = function(){
     if (_scope == "local") {
-      var query_scope = PykQuery.query_json[div_id];
+      var query_scope = PykQuery.list_of_scopes[div_id];
       var consolidated_filters = query_scope[div_id].filters;
       var len = __impacts.length;
       for(var i = 0; i < len; i++) {
-        var query_scope = PykQuery.query_json[__impacts[i]];
+        var query_scope = PykQuery.list_of_scopes[__impacts[i]];
         var global_filter = query_scope[__impacts[i]].filters;
         if (global_filter && global_filter.localdividtriggeringevent !== div_id) {
           consolidated_filters = _.flatten(global_filter, consolidated_filters);
@@ -637,32 +653,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     document.getElementById(div_id).setAttribute("pyk_object", obj_name);
   }
 
-  //   var databaseQuery = function(filter_obj){
-  //     var data;
-  //     $.ajax({
-  //         url: host + "pykquery/datarequest",
-  //         data: filter_obj, //return  data
-  //         dataType: 'json',
-  //         type: 'GET',
-  //         async: false,
-  //         success: function (res) {
-  //           if (res.status == "200") {
-  //             data = res.data;
-  //             console.log('data recived');
-
-  //           }
-  //           else {
-  //             console.log("error");
-  //           }
-  //           azax_flag = true;
-  //         },
-  //         error: function () {
-  //           console.log('error in connection to database.');
-  //         }
-  //       });
-  //     return data;
-  //   }
-
   var processAlias = function(res) {
     //TO-DO -- replace all occurences of column_names with aliases if any
     //waiting for -- response format
@@ -711,8 +701,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
 
   var callLocalRenderOnFilter = function (that) {
-    var query_scope = PykQuery.query_json[__impacts[0]];
-    var k = PykQuery.query_json[that.div_id],
+    var query_scope = PykQuery.list_of_scopes[__impacts[0]];
+    var k = PykQuery.list_of_scopes[that.div_id],
         len = __impacts.length,
         global_filter = query_scope[__impacts[0]].filters;
     if (typeof global_filter === "object") {

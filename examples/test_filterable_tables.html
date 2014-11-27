@@ -49,6 +49,8 @@
                 id = $(this).attr('data-id');
             that.a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}, true);
             g1.call();
+            console.log(PykQuery.query_json);
+            $("#filters_json").html(JSON.stringify(PykQuery.query_json,"null", "\t"));
             // var ee = that.b.flushToGet();
           });
         }
