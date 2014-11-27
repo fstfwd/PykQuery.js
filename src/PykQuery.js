@@ -22,7 +22,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   var temp_obj_for_current_query_json = {};
   temp_obj_for_current_query_json[divid_param] = query_scope;
   PykQuery.query_json = temp_obj_for_current_query_json;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, selected_dom_id, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters;
+  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var available_adapters = ["inbrowser", "rumi"];
@@ -182,15 +182,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   Object.defineProperty(this, 'div_id', {
     get: function() {
       return div_id;
-    }
-  });
-
-  Object.defineProperty(this, 'selecteddomid', {
-    get: function() {
-      return selected_dom_id;
-    },
-    set: function(id) {
-      selected_dom_id = id;
     }
   });
 
@@ -390,6 +381,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
           else {
             old_filter['in'] = util.concat_and_uniq(old_filter['in'], new_filter['in']);
             old_filter['not_in'] = util.concat_and_uniq(old_filter['not_in'], new_filter['not_in']);
+            old_filter.selected_dom_id = new_filter.selected_dom_id;
             where_clause[i] = old_filter;
             is_new_filter = false;
             break;
@@ -752,8 +744,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   var appendSelectedClassToRespectiveDomId = function () {
     for (var i = 0; i < consolidated_filters.length; i++) {
+      console.log(consolidated_filters[i].selected_dom_id);
       if (consolidated_filters[i].selected_dom_id) {
-        console.log(document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']"));
         var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']")[0];
         if (!element.classList.contains("pykquery-selected")) {
           element.className += " pykquery-selected";
@@ -962,7 +954,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     showFilterList();
   }
   var showFilterList = function() {
-    console.log(where_clause);
     len = where_clause.length,
     document.getElementsByClassName('filter_list')[0].innerHTML = "";
     for (var i = 0; i < len; i++) {
