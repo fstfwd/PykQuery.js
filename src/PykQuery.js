@@ -3,12 +3,25 @@
 var PykQuery = {};
 PykQuery.global_names = [];
 PykQuery.local_names = [];
-PykQuery.list_of_scopes = {};
+PykQuery.query_json = {};
+
+var queryjson = {};
+
+Object.defineProperty(PykQuery, 'query_json', {
+  get: function () {
+    return queryjson;
+  },
+  set: function (json) {
+    queryjson = _.extend(queryjson, json);
+  }
+});
 
 PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, adapter_param) {
 
   that = this;
-  PykQuery.list_of_scopes[divid_param] = query_scope;
+  var temp_obj_for_current_query_json = {};
+  temp_obj_for_current_query_json[divid_param] = query_scope;
+  PykQuery.query_json = temp_obj_for_current_query_json;
   var div_id, mode, _scope, adapter, global_exists, local_exists, selected_dom_id, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
@@ -350,7 +363,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     if(_scope == "local") {
       var len = impacts.length;
       for(var j =0;j<len;j++) {
-        var query_scope = PykQuery.list_of_scopes[impacts[j]];
+        var query_scope = PykQuery.query_json[impacts[j]];
         var global_filter = query_scope[impacts[j]];
         global_filter.removeFilterInQuery(column_name, condition_type, params);
       }
@@ -406,7 +419,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     if (_scope == "local") {
       var len = __impacts.length;
       for (var j = 0; j < len; j++) {
-        var query_scope = PykQuery.list_of_scopes[__impacts[j]];
+        var query_scope = PykQuery.query_json[__impacts[j]];
         var global_filter = query_scope[__impacts[j]];
         global_filter.addFilter(new_filter, true, div_id);
       }
@@ -421,7 +434,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
         __impacts.push(array_of_div_ids[i]);
         setGlobalDivIdForRawData(this,array_of_div_ids[i]);
         if(is_cyclical){
-          var query_scope = PykQuery.list_of_scopes[array_of_div_ids[i]];
+          var query_scope = PykQuery.query_json[array_of_div_ids[i]];
 
           setGlobalDivIdForRawData(query_scope[array_of_div_ids[i]],this.div_id);
           related_pykquery = query_scope[array_of_div_ids[i]];
@@ -448,7 +461,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       impacts_allowed_on = "local";
     }
     for (var i = 0; i < len; i++) {
-      var query_scope = PykQuery.list_of_scopes[array_of_div_ids[i]];
+      var query_scope = PykQuery.query_json[array_of_div_ids[i]];
       var query_object = query_scope[array_of_div_ids[i]];
       if (query_object && query_object.scope === _scope) {
         console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "A " + _scope + " can only impact a " + impacts_allowed_on + ".")
@@ -556,10 +569,11 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     if (_scope == "local") {
       invoke_call(getConfig(that));
       callLocalRenderOnFilter(that);
+      appendSelectedClassToRespectiveDomId();
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
-        var query_scope = PykQuery.list_of_scopes[__impacts[j]];
+        var query_scope = PykQuery.query_json[__impacts[j]];
         var local_filter = query_scope[__impacts[j]];
         local_filter.filter_data = local_filter.call();
       }
@@ -569,11 +583,11 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   var generateConsolidatedFiltersArray = function(){
     if (_scope == "local") {
-      var query_scope = PykQuery.list_of_scopes[div_id];
+      var query_scope = PykQuery.query_json[div_id];
       var consolidated_filters = query_scope[div_id].filters;
       var len = __impacts.length;
       for(var i = 0; i < len; i++) {
-        var query_scope = PykQuery.list_of_scopes[__impacts[i]];
+        var query_scope = PykQuery.query_json[__impacts[i]];
         var global_filter = query_scope[__impacts[i]].filters;
         if (global_filter && global_filter.localdividtriggeringevent !== div_id) {
           consolidated_filters = _.flatten(global_filter, consolidated_filters);
@@ -585,16 +599,16 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     }
   }
 
-  var invoke_call = function(pykquery_json){
+  var invoke_call = function(query){
     consolidated_filters = generateConsolidatedFiltersArray();
     var response;
     if(adapter == "inbrowser"){
-      var connector = new PykQuery.adapter.inbrowser.init(pykquery_json, consolidated_filters);
-      //console.log(pykquery_json);
+      var connector = new PykQuery.adapter.inbrowser.init(query, consolidated_filters);
+      //console.log(query);
       return filter_data = connector.call();
     }
     else{
-      var connector = new PykQuery.adapter.rumi.init(pykquery_json, rumi_params);
+      var connector = new PykQuery.adapter.rumi.init(query, rumi_params);
       return connector.call(function (response) {
         return filter_data = response;
       });
@@ -704,37 +718,45 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
 
   var callLocalRenderOnFilter = function (that) {
-    var query_scope = PykQuery.list_of_scopes[__impacts[0]];
-    var k = PykQuery.list_of_scopes[that.div_id],
+    var query_scope = PykQuery.query_json[__impacts[0]];
+    var k = PykQuery.query_json[that.div_id],
         len = __impacts.length,
         global_filter = query_scope[__impacts[0]].filters;
-    if (global_filter) {
+    if (typeof global_filter === "object") {
       for (var i = 0; i < global_filter.length; i++) {
         if (global_filter[i].local_div_id_triggering_event !== div_id) {
-          if (k.hasOwnProperty("refresh")) {
-            k.refresh();
-          } else if (k.hasOwnProperty("execute")) {
-            k.execute();
-          }
+          renderFunctions(k);
+          return true;
         } else {
           // The chart triggering the event should not get rendered
+          return false;
         }
       }
+      renderFunctions(k) // When reset filter is clicked, the global_filter = []. Therefore, for loop doesn't iterate.
+      return true;
     } else {
       if (k.hasOwnProperty("execute")) {
         k.execute();
       }
+      return true;
     }
-    appendSelectedClassToRespectiveDomId();
   };
+
+  var renderFunctions = function (k) {
+    if (k.hasOwnProperty("refresh")) {
+      k.refresh();
+    } else if (k.hasOwnProperty("execute")) {
+      k.execute();
+    }
+  }
 
   var appendSelectedClassToRespectiveDomId = function () {
     for (var i = 0; i < consolidated_filters.length; i++) {
       if (consolidated_filters[i].selected_dom_id) {
         console.log(document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']"));
         var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']")[0];
-        if (!element.classList.contains("selected")) {
-          element.className += " selected";
+        if (!element.classList.contains("pykquery-selected")) {
+          element.className += " pykquery-selected";
         }
       }
     }

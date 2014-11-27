@@ -8,7 +8,7 @@
 <script src="../src/filterList.js"></script>
 <script src="../src/PykQuery.adapter.inbrowser.js"></script>
 <style>
-.selected {
+.pykquery-selected {
   background-color: #f7b77f;
 }
 </style>
@@ -35,7 +35,6 @@
 
         this.execute = function () {
           var obj1 = this.a.flushToGet();
-          console.log(obj1);
 
           var html1 = "<table><tr><td>City</td><td>Price</td></tr>";
           for (var i = 0; i< obj1.length; i++) {
@@ -48,7 +47,6 @@
           $(".filter1").click(function () {
             var value = $(this).html(),
                 id = $(this).attr('data-id');
-                console.log(id);
             that.a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}, true);
             g1.call();
             // var ee = that.b.flushToGet();
