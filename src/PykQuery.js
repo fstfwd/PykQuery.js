@@ -744,11 +744,10 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   var appendSelectedClassToRespectiveDomId = function () {
     for (var i = 0; i < consolidated_filters.length; i++) {
-      console.log(consolidated_filters[i].selected_dom_id);
       if (consolidated_filters[i].selected_dom_id) {
-        var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']")[0];
-        if (!element.classList.contains("pykquery-selected")) {
-          element.className += " pykquery-selected";
+        var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']");
+        if (element.length>0 && !element[0].classList.contains("pykquery-selected")) {
+          element[0].className += " pykquery-selected";
         }
       }
     }

@@ -74,7 +74,7 @@
 
           $(".filter2").click(function () {
             var value = $(this).html(),
-            id = $(this).attr('data-id');
+                id = $(this).attr('data-id');
             that.b.addFilter({"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR", "selected_dom_id": id}, true);
             g1.call();
             // var dd = that.a.flushToGet();
