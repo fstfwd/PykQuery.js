@@ -319,6 +319,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   this.resetFilters = function(){
     if(_scope == "global"){
       where_clause = [];
+      this.call();
     } else {
       console.error("You cannot reset a local. Please run it on a Global.")
     }
@@ -723,22 +724,21 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
         len = __impacts.length,
         global_filter = query_scope[__impacts[0]].filters;
     if (typeof global_filter === "object") {
-      for (var i = 0; i < global_filter.length; i++) {
-        if (global_filter[i].local_div_id_triggering_event !== div_id) {
-          renderFunctions(k);
-          return true;
-        } else {
-          // The chart triggering the event should not get rendered
-          return false;
+      if (global_filter.length === 0) {
+        renderFunctions(k) // When reset filter is clicked, the global_filter = []. Therefore, for loop doesn't iterate.
+      } else {
+        for (var i = 0; i < global_filter.length; i++) {
+          if (global_filter[i].local_div_id_triggering_event !== div_id) {
+            renderFunctions(k);
+          } else {
+            // The chart triggering the event should not get rendered
+          }
         }
       }
-      renderFunctions(k) // When reset filter is clicked, the global_filter = []. Therefore, for loop doesn't iterate.
-      return true;
     } else {
       if (k.hasOwnProperty("execute")) {
         k.execute();
       }
-      return true;
     }
   };
 
