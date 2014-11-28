@@ -369,8 +369,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
           if (!where_clause[x]['in'] && !where_clause[x]['not_in']) {
             where_clause.splice(x,1);
           }
-          if (caller_scope) {
-            caller_scope.call();
+          if (global_obj) {
+            global_obj.call();
           }
         }
         else if (condition_type == "range") {
@@ -379,8 +379,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
           if(!util.isBlank(__min) && !util.isBlank(__max)) {
             if(__min == where_clause[x]['condition']['min'] && __max == where_clause[x]['condition']['max']) {
               where_clause.splice(x,1);
-              if (caller_scope) {
-                caller_scope.call();
+              if (global_obj) {
+                global_obj.call();
               }
             }
           }
