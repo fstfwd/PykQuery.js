@@ -320,7 +320,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     }
     if (filterValidation(name)) {
       if(is_interactive && _scope == "global"){
-        addFilterInQuery(name);
+        addFilterInQuery(name,this);
       } else if(is_interactive && _scope == "local"){
         name.local_div_id_triggering_event = div_id;
         addFilterPropagate(name);
@@ -389,7 +389,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   }
 
 
-  var addFilterInQuery = function(new_filter) {
+  var addFilterInQuery = function(new_filter,caller_scope) {
     var is_new_filter = true;
     for (var i = 0; i < where_clause.length; i++) {
       var old_filter = where_clause[i];
@@ -410,6 +410,9 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
             old_filter.selected_dom_id = new_filter.selected_dom_id;
             where_clause[i] = old_filter;
             is_new_filter = false;
+            if (caller_scope) {
+              caller_scope.call();
+            }
             break;
           }
         }
@@ -424,12 +427,18 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
             return false;
           } else {
             is_new_filter = true;
+            if (caller_scope) {
+              caller_scope.call();
+            }
           }
         }
       }
     }
     if (is_new_filter == true){
       where_clause.push(new_filter);
+      if (caller_scope) {
+        caller_scope.call();
+      }
     }
   }
 
