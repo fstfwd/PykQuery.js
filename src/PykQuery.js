@@ -10,10 +10,8 @@ var queryjson = {}, query_restore = true;
 
 var restoreFilters = function () {
   for (var key in PykQuery.query_json) {
-    console.log(PykQuery.query_json);
     for (var i = 0; i < PykQuery.query_json[key].length; i++) {
       var temp_obj_for_each_saved_filter = PykQuery.query_json[key][i];
-      console.log(temp_obj_for_each_saved_filter,PykQuery.query_json[key].length,key,PykQuery.query_json);
       PykQuery.list_of_scopes[key][key].addFilter(temp_obj_for_each_saved_filter[0], temp_obj_for_each_saved_filter[1], temp_obj_for_each_saved_filter[2], true);
     }
   }
