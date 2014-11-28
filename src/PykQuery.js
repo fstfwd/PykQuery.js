@@ -10,7 +10,12 @@ var queryjson = {}, query_restore = true;
 
 var restoreFilters = function () {
   for (var key in PykQuery.query_json) {
-    PykQuery.list_of_scopes[key][key].addFilter(PykQuery.query_json[key][0], PykQuery.query_json[key][1], PykQuery.query_json[key][2], true)
+    console.log(PykQuery.query_json);
+    for (var i = 0; i < PykQuery.query_json[key].length; i++) {
+      var temp_obj_for_each_saved_filter = PykQuery.query_json[key][i];
+      console.log(temp_obj_for_each_saved_filter,PykQuery.query_json[key].length,key,PykQuery.query_json);
+      PykQuery.list_of_scopes[key][key].addFilter(temp_obj_for_each_saved_filter[0], temp_obj_for_each_saved_filter[1], temp_obj_for_each_saved_filter[2], true);
+    }
   }
 }
 Object.defineProperty(PykQuery, 'query_json', {
@@ -18,7 +23,14 @@ Object.defineProperty(PykQuery, 'query_json', {
     return queryjson;
   },
   set: function (json) {
-    queryjson = _.extend(queryjson, json);
+    var key = Object.keys(json)[0];
+    if (Object.keys(json).length > 1) {
+      queryjson = JSON.parse(JSON.stringify(json));
+    } else if (queryjson[key]) {
+      queryjson[key].push(JSON.parse(JSON.stringify(json[key])));
+    } else {
+      queryjson[key] = [JSON.parse(JSON.stringify(json[key]))];
+    }
     if (query_restore) {
       restoreFilters();
     }
@@ -26,7 +38,6 @@ Object.defineProperty(PykQuery, 'query_json', {
 });
 
 PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, adapter_param) {
-  // console.log(query_scope.constructor.name,query_scope.prototype.toString());
   that = this;
   PykQuery.list_of_scopes[divid_param] = query_scope;
   var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters;
@@ -370,8 +381,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     if(_scope == "local") {
       var len = impacts.length;
       for(var j =0;j<len;j++) {
-        var query_scope = PykQuery.list_of_scopes[impacts[j]];
-        var global_filter = query_scope[impacts[j]];
+        var list_of_scopes = PykQuery.list_of_scopes[impacts[j]];
+        var global_filter = list_of_scopes[impacts[j]];
         global_filter.removeFilterInQuery(column_name, condition_type, params);
       }
     }
@@ -427,8 +438,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     if (_scope == "local") {
       var len = __impacts.length;
       for (var j = 0; j < len; j++) {
-        var query_scope = PykQuery.list_of_scopes[__impacts[j]];
-        var global_filter = query_scope[__impacts[j]];
+        var list_of_scopes = PykQuery.list_of_scopes[__impacts[j]];
+        var global_filter = list_of_scopes[__impacts[j]];
         global_filter.addFilter(new_filter, true, div_id);
       }
     }
@@ -442,10 +453,10 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
         __impacts.push(array_of_div_ids[i]);
         setGlobalDivIdForRawData(this,array_of_div_ids[i]);
         if(is_cyclical){
-          var query_scope = PykQuery.list_of_scopes[array_of_div_ids[i]];
+          var list_of_scopes = PykQuery.list_of_scopes[array_of_div_ids[i]];
 
-          setGlobalDivIdForRawData(query_scope[array_of_div_ids[i]],this.div_id);
-          related_pykquery = query_scope[array_of_div_ids[i]];
+          setGlobalDivIdForRawData(list_of_scopes[array_of_div_ids[i]],this.div_id);
+          related_pykquery = list_of_scopes[array_of_div_ids[i]];
           related_pykquery.impacts = [this.div_id];
         }
       }
@@ -469,9 +480,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       impacts_allowed_on = "local";
     }
     for (var i = 0; i < len; i++) {
-      var query_scope = PykQuery.list_of_scopes[array_of_div_ids[i]];
-      console.log(query_scope);
-      var query_object = query_scope[array_of_div_ids[i]];
+      var list_of_scopes = PykQuery.list_of_scopes[array_of_div_ids[i]];
+      var query_object = list_of_scopes[array_of_div_ids[i]];
       if (query_object && query_object.scope === _scope) {
         console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "A " + _scope + " can only impact a " + impacts_allowed_on + ".")
         return false;
@@ -582,8 +592,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
-        var query_scope = PykQuery.list_of_scopes[__impacts[j]];
-        var local_filter = query_scope[__impacts[j]];
+        var list_of_scopes = PykQuery.list_of_scopes[__impacts[j]];
+        var local_filter = list_of_scopes[__impacts[j]];
         local_filter.filter_data = local_filter.call();
       }
     }
@@ -592,12 +602,12 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   var generateConsolidatedFiltersArray = function(){
     if (_scope == "local") {
-      var query_scope = PykQuery.list_of_scopes[div_id];
-      var consolidated_filters = query_scope[div_id].filters;
+      var list_of_scopes = PykQuery.list_of_scopes[div_id];
+      var consolidated_filters = list_of_scopes[div_id].filters;
       var len = __impacts.length;
       for(var i = 0; i < len; i++) {
-        var query_scope = PykQuery.list_of_scopes[__impacts[i]];
-        var global_filter = query_scope[__impacts[i]].filters;
+        var list_of_scopes = PykQuery.list_of_scopes[__impacts[i]];
+        var global_filter = list_of_scopes[__impacts[i]].filters;
         if (global_filter && global_filter.localdividtriggeringevent !== div_id) {
           consolidated_filters = _.flatten(global_filter, consolidated_filters);
         }
@@ -701,10 +711,10 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
 
   var callLocalRenderOnFilter = function (that) {
-    var query_scope = PykQuery.list_of_scopes[__impacts[0]];
+    var list_of_scopes = PykQuery.list_of_scopes[__impacts[0]];
     var k = PykQuery.list_of_scopes[that.div_id],
         len = __impacts.length,
-        global_filter = query_scope[__impacts[0]].filters;
+        global_filter = list_of_scopes[__impacts[0]].filters;
     if (typeof global_filter === "object") {
       if (global_filter.length === 0) {
         renderFunctions(k) // When reset filter is clicked, the global_filter = []. Therefore, for loop doesn't iterate.

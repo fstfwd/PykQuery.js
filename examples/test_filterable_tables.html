@@ -49,7 +49,6 @@
                 id = $(this).attr('data-id');
             that.a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}, true);
             g1.call();
-            console.log(PykQuery.query_json);
             $("#filters_json").html(JSON.stringify(PykQuery.query_json,"null", "\t"));
             // var ee = that.b.flushToGet();
           });
@@ -79,6 +78,7 @@
                 id = $(this).attr('data-id');
             that.b.addFilter({"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR", "selected_dom_id": id}, true);
             g1.call();
+            $("#filters_json").html(JSON.stringify(PykQuery.query_json,"null", "\t"));
             // var dd = that.a.flushToGet();
           });
         }
@@ -112,7 +112,6 @@
             g1.resetFilters();
           });
           k.a.call();
-          k.a.toSql();
           l.b.call();
         }
       }
