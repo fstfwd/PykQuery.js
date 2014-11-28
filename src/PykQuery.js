@@ -38,7 +38,7 @@ Object.defineProperty(PykQuery, 'query_json', {
 PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, adapter_param) {
   that = this;
   PykQuery.list_of_scopes[divid_param] = query_scope;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters;
+  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters = [];
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var available_adapters = ["inbrowser", "rumi"];
@@ -340,31 +340,33 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     }
   }
 
-  this.removeFilter = function(column_name, condition_type, params, is_interactive){
+  this.removeFilter = function(name, is_interactive){
     if (filterValidation(name)) {
       if(is_interactive && _scope == "global"){
-        removeFilterInQuery(column_name, condition_type, params);
+        removeFilterInQuery(name);
       } else if(is_interactive && _scope == "local"){
-        removeFilterPropagate(column_name, condition_type, params);
+        removeFilterPropagate(name);
       } else if(!is_interactive && _scope == "global"){
         //not possible
       } else if(!is_interactive && _scope == "local"){ //onload
-        removeFilterInQuery(column_name, condition_type, params);
+        removeFilterInQuery(name);
       }
     }
   }
 
-  var removeFilterInQuery = function(column_name, condition_type, params) {
+  var removeFilterInQuery = function(name) {
+    var column_name = name.column_name,
+        condition_type = name.condition_type;
     var len = where_clause.length;
     for (var x = 0; x < len; x++) {
       if (where_clause[x]['column_name'] == column_name && where_clause[x]['condition_type'] == condition_type) {
         if (condition_type == "values") {
-          where_clause[x]['in'] = util.subtract_array(where_clause[x]['in'], params['in']);
-          where_clause[x]['not_in'] = util.subtract_array(where_clause[x]['not_in'], params['not_in']);
+          where_clause[x]['in'] = util.subtract_array(where_clause[x]['in'], name['in']);
+          where_clause[x]['not_in'] = util.subtract_array(where_clause[x]['not_in'], name['not_in']);
         }
         else if (condition_type == "range") {
-          var __min = params['min'];
-          var __max = params['max'];
+          var __min = name['min'];
+          var __max = name['max'];
           if(!util.isBlank(__min) && !util.isBlank(__max)) {
             if(__min == where_clause[x]['condition']['min'] && __max == where_clause[x]['condition']['max']) {
               where_clause.splice(x,1);
@@ -375,13 +377,13 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     }
   }
 
-  var removeFilterPropagate = function(column_name, condition_type, params) {
+  var removeFilterPropagate = function(name) {
     if(_scope == "local") {
-      var len = impacts.length;
+      var len = __impacts.length;
       for(var j =0;j<len;j++) {
-        var list_of_scopes = PykQuery.list_of_scopes[impacts[j]];
-        var global_filter = list_of_scopes[impacts[j]];
-        global_filter.removeFilterInQuery(column_name, condition_type, params);
+        var list_of_scopes = PykQuery.list_of_scopes[__impacts[j]];
+        var global_filter = list_of_scopes[__impacts[j]];
+        removeFilterInQuery(name);
       }
     }
   }
@@ -960,7 +962,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     showFilterList();
   }
   var showFilterList = function() {
-    len = where_clause.length,
+    var len = consolidated_filters.length;
+    console.log(consolidated_filters);
     document.getElementsByClassName('filter_list')[0].innerHTML = "";
     for (var i = 0; i < len; i++) {
       var filter_block = document.createElement("div");
@@ -986,7 +989,10 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     }
   }
   var removeFilterFromList = function (index) {
-    where_clause.splice(index,1);
+    var filter_to_be_removed = consolidated_filters[index];
+    var list_of_scopes = PykQuery.list_of_scopes[filter_to_be_removed['local_div_id_triggering_event']];
+    list_of_scopes[filter_to_be_removed['local_div_id_triggering_event']].removeFilter(filter_to_be_removed, true);
+    // consolidated_filters.splice(index,1);
     showFilterList();
   }
 };
