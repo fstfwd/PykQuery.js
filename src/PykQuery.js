@@ -343,26 +343,35 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   this.removeFilter = function(name, is_interactive){
     if (filterValidation(name)) {
       if(is_interactive && _scope == "global"){
-        removeFilterInQuery(name);
+        removeFilterInQuery(name,this);
       } else if(is_interactive && _scope == "local"){
-        removeFilterPropagate(name);
+        removeFilterPropagate(name,this);
       } else if(!is_interactive && _scope == "global"){
         //not possible
       } else if(!is_interactive && _scope == "local"){ //onload
-        removeFilterInQuery(name);
+        removeFilterInQuery(name,this);
       }
     }
   }
 
-  var removeFilterInQuery = function(name) {
-    var column_name = name.column_name,
-        condition_type = name.condition_type;
+  var removeFilterInQuery = function(name,caller_scope) {
+    var list_of_scopes = PykQuery.list_of_scopes[caller_scope.global_divid_for_raw_data],
+        global_obj = list_of_scopes[caller_scope.global_divid_for_raw_data],
+        column_name = name.column_name,
+        condition_type = name.condition_type,
+        where_clause = global_obj.filters;
     var len = where_clause.length;
     for (var x = 0; x < len; x++) {
       if (where_clause[x]['column_name'] == column_name && where_clause[x]['condition_type'] == condition_type) {
         if (condition_type == "values") {
           where_clause[x]['in'] = util.subtract_array(where_clause[x]['in'], name['in']);
           where_clause[x]['not_in'] = util.subtract_array(where_clause[x]['not_in'], name['not_in']);
+          if (!where_clause[x]['in'] && !where_clause[x]['not_in']) {
+            where_clause.splice(x,1);
+          }
+          if (caller_scope) {
+            caller_scope.call();
+          }
         }
         else if (condition_type == "range") {
           var __min = name['min'];
@@ -370,20 +379,25 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
           if(!util.isBlank(__min) && !util.isBlank(__max)) {
             if(__min == where_clause[x]['condition']['min'] && __max == where_clause[x]['condition']['max']) {
               where_clause.splice(x,1);
+              if (caller_scope) {
+                caller_scope.call();
+              }
             }
           }
         }
       }
     }
+
+    console.log(global_obj.filters,where_clause);
   }
 
-  var removeFilterPropagate = function(name) {
+  var removeFilterPropagate = function(name,caller_scope) {
     if(_scope == "local") {
       var len = __impacts.length;
       for(var j =0;j<len;j++) {
         var list_of_scopes = PykQuery.list_of_scopes[__impacts[j]];
         var global_filter = list_of_scopes[__impacts[j]];
-        removeFilterInQuery(name);
+        removeFilterInQuery(name,caller_scope);
       }
     }
   }

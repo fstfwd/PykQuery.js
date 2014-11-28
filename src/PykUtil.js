@@ -42,6 +42,9 @@ PykUtil.init = function() {
                 if (index > -1) {
                     a1.splice(index, 1);
                 }
+                if (a1.length===0) {
+                  a1 = undefined;
+                }
             }
         }
         return a1;
