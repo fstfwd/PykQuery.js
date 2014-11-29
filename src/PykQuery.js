@@ -381,15 +381,15 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     query_restore = true;
   }
 
-  this.resetFilters = function(){
-    if(_scope == "global"){
-      where_clause = [];
-      this.call();
-      query_restore = false;
-      setQueryJSON();
-      showFilterList();
-    } else {
-      console.error("You cannot reset a local. Please run it on a Global.")
+  // If a local filter is changed and it impacts a global then append to global
+  var addFilterPropagate = function(new_filter) {
+    if (_scope == "local") {
+      var len = __impacts.length;
+      for (var j = 0; j < len; j++) {
+        var list_of_scopes = PykQuery.list_of_scopes[__impacts[j]];
+        var global_filter = list_of_scopes[__impacts[j]];
+        global_filter.addFilter(new_filter, true, div_id);
+      }
     }
   }
 
@@ -455,18 +455,39 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     }
   }
 
-  // If a local filter is changed and it impacts a global then append to global
-  var addFilterPropagate = function(new_filter) {
-    if (_scope == "local") {
-      var len = __impacts.length;
-      for (var j = 0; j < len; j++) {
-        var list_of_scopes = PykQuery.list_of_scopes[__impacts[j]];
-        var global_filter = list_of_scopes[__impacts[j]];
-        global_filter.addFilter(new_filter, true, div_id);
-      }
+  this.resetFilters = function(){
+    if(_scope == "global"){
+      where_clause = [];
+      this.call();
+      query_restore = false;
+      setQueryJSON();
+      showFilterList();
+    } else {
+      console.error("You cannot reset a local. Please run it on a Global.")
     }
   }
 
+  this.resetDimensions = function(){
+    if(_scope == "local"){
+      this.dimensions = [];
+      // this.call();
+      query_restore = false;
+      setQueryJSON();
+    } else {
+      console.error("Globals do not have dimensions. Please run it on a local.")
+    }
+  }
+
+  this.resetMetrics = function(){
+    if(_scope == "local"){
+      this.metrics = [];
+      // this.call();
+      query_restore = false;
+      setQueryJSON();
+    } else {
+      console.error("Globals do not have metrics. Please run it on a local.")
+    }
+  }
 
   this.addImpacts = function(array_of_div_ids, is_cyclical) {
     if (impactValidation(array_of_div_ids)) {
