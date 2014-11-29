@@ -387,6 +387,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       this.call();
       query_restore = false;
       setQueryJSON();
+      showFilterList();
     } else {
       console.error("You cannot reset a local. Please run it on a Global.")
     }
