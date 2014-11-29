@@ -35,6 +35,10 @@ Object.defineProperty(PykQuery, 'query_json', {
   }
 });
 
+// PykQuery.setQueryJSON = function () {
+//
+// }
+
 PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, adapter_param) {
   that = this;
   PykQuery.list_of_scopes[divid_param] = query_scope;
@@ -335,6 +339,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     if(_scope == "global"){
       where_clause = [];
       this.call();
+      delete PykQuery.query_json[this.div_id];
     } else {
       console.error("You cannot reset a local. Please run it on a Global.")
     }
@@ -387,8 +392,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
         }
       }
     }
-
-    console.log(global_obj.filters,where_clause);
   }
 
   var removeFilterPropagate = function(name,caller_scope) {
@@ -976,37 +979,42 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     showFilterList();
   }
   var showFilterList = function() {
-    var len = consolidated_filters.length;
-    console.log(consolidated_filters);
-    document.getElementsByClassName('filter_list')[0].innerHTML = "";
-    for (var i = 0; i < len; i++) {
-      var filter_block = document.createElement("div");
-      filter_block.setAttribute("class","filter_block");
-      filter_block.setAttribute("id","filter_block"+i);
-      document.getElementsByClassName('filter_list')[0].appendChild(filter_block);
-      var filter_values = document.createElement("div");
-      filter_values.setAttribute("class","filter_value");
-      filter_values.innerHTML = "Filter by __";
-      document.getElementById('filter_block'+i).appendChild(filter_values);
-      var filter_remove = document.createElement("div");
-      filter_remove.setAttribute("class","filter_remove");
-      filter_remove.setAttribute("id","filter_remove_"+i);
-      filter_remove.innerHTML = "Remove"
-      document.getElementById('filter_block'+i).appendChild(filter_remove);
-    }
-    var divs = document.getElementsByClassName("filter_remove");
-    for (var i = 0; i< divs.length; i++) {
-      divs[i].onclick = function () {
-        var index = this.id.split("filter_remove_");
-        removeFilterFromList(index[1]);
+    var each_filter = PykQuery.query_json;
+    for (var key in each_filter) {
+      if (PykQuery.list_of_scopes[key][key].scope==="global") {
+        var len = each_filter[key].length;
+        document.getElementsByClassName('filter_list')[0].innerHTML = "";
+        for (var i = 0; i < len; i++) {
+          var current_filter = each_filter[key][i][0];
+          var filter_block = document.createElement("div");
+          filter_block.setAttribute("class","filter_block");
+          filter_block.setAttribute("id","filter_block"+i);
+          document.getElementsByClassName('filter_list')[0].appendChild(filter_block);
+          var filter_values = document.createElement("div");
+          filter_values.setAttribute("class","filter_value");
+          filter_values.innerHTML = "Filter by "+(current_filter.in[0] || current_filter.not_in[0]);
+          document.getElementById('filter_block'+i).appendChild(filter_values);
+          var filter_remove = document.createElement("div");
+          filter_remove.setAttribute("class","filter_remove");
+          filter_remove.setAttribute("id",key+"_filter_remove_"+i);
+          filter_remove.innerHTML = "Remove"
+          document.getElementById('filter_block'+i).appendChild(filter_remove);
+        }
+        var divs = document.getElementsByClassName("filter_remove");
+        for (var i = 0; i< divs.length; i++) {
+          divs[i].onclick = function () {
+            var index = this.id.split("_filter_remove_");
+            removeFilterFromList(index[0],index[1]);
+          }
+        }
       }
     }
   }
-  var removeFilterFromList = function (index) {
-    var filter_to_be_removed = consolidated_filters[index];
+  var removeFilterFromList = function (query_obj,index) {
+    var filter_to_be_removed = PykQuery.query_json[query_obj][index][0];
     var list_of_scopes = PykQuery.list_of_scopes[filter_to_be_removed['local_div_id_triggering_event']];
     list_of_scopes[filter_to_be_removed['local_div_id_triggering_event']].removeFilter(filter_to_be_removed, true);
-    // consolidated_filters.splice(index,1);
+    PykQuery.query_json[query_obj].splice(index,1)
     showFilterList();
   }
 };
