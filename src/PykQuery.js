@@ -130,6 +130,19 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
         rumi_params = params;
       }
     });
+
+    Object.defineProperty(this, 'dataformat', {
+      get: function() {
+        return data_format;
+      },
+      set: function(format) {
+        if (format.toLowerCase() === "csv" || format.toLowerCase() === "json" || format.toLowerCase() === "array") {
+          data_format = format;
+        } else {
+          console.error("The accepted data formats are csv, json and array only. Kindly set a valid data format.");
+        }
+      }
+    });
   }
   Object.defineProperty(this, 'scope', {
     get: function () {
