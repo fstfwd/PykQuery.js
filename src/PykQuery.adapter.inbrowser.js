@@ -7,7 +7,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
       raw_data,
       global_divid_for_raw_data = pykquery.global_divid_for_raw_data,
       query_scope = PykQuery.list_of_scopes[global_divid_for_raw_data];
-
   global_divid_for_raw_data = query_scope[global_divid_for_raw_data];
   raw_data = global_divid_for_raw_data.rawdata;
 
