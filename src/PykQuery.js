@@ -20,7 +20,6 @@ var restoreFilters = function () {
       } else {
         is_interactive = true;
       }
-      console.log(saved_filters[i], is_interactive, query_obj.localdividtriggeringevent, true, query_obj);
       query_obj.addFilter(saved_filters[i], is_interactive, query_obj.localdividtriggeringevent, true);
     }
     // PykQuery.list_of_scopes[key][key].filters = PykQuery.query_json[key];
@@ -441,7 +440,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       if (where_clause[x]['column_name'] == column_name && where_clause[x]['condition_type'] == condition_type) {
         if (condition_type == "values") {
           if (_.difference(where_clause[x].in, name.in).length===0 && _.difference(where_clause[x].not_in, name.not_in).length===0) {
-            console.log(_.difference(where_clause[x].not_in, name.not_in));
             where_clause.splice(x,1);
           }
           if (caller_scope) {
@@ -678,15 +676,61 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       }
       return consolidated_filters;
     } else {
-      console.error("Cannot call generateConsolidatedFiltersArray to on a Global PykQuery.");
+      console.error("Cannot call generateConsolidatedFiltersArray on a Global PykQuery.");
+    }
+  }
+
+  var generateQueryableFiltersArray = function(){
+    if (_scope == "local") {
+      var queryable_filters = [];
+      if (consolidated_filters.length > 0) {
+        var where_in = [],
+            where_not_in = [];
+        var group = _.groupBy(consolidated_filters, function (d) {
+          return d.column_name + "-" + d.condition_type;
+        });
+        for (var key in group) {
+          var each_filter = group[key];
+          var obj = {
+            "column_name": each_filter[0].column_name,
+            "condition_type": each_filter[0].condition_type,
+          }
+          for (var i = 0; i < each_filter.length; i++) {
+            where_in = each_filter[i].in ? _.union(where_in, each_filter[i].in) : where_in;
+            where_not_in = each_filter[i].not_in ? _.union(where_not_in, each_filter[i].not_in) : where_not_in;
+          }
+          // console.log(where_in,where_not_in);
+          obj.in = where_in;
+          obj.not_in = where_not_in;
+        }
+        queryable_filters.push(obj);
+      } else {
+        queryable_filters = [];
+      }
+
+      // var list_of_scopes = PykQuery.list_of_scopes[div_id];
+      // var consolidated_filters = list_of_scopes[div_id].filters;
+      // var len = __impacts.length;
+      // for(var i = 0; i < len; i++) {
+      //   var list_of_scopes = PykQuery.list_of_scopes[__impacts[i]];
+      //   var global_filter = list_of_scopes[__impacts[i]].filters;
+      //   console.log(consolidated_filters,global_filter);
+      //   if (global_filter && global_filter.localdividtriggeringevent !== div_id) {
+      //     consolidated_filters = _.flatten(global_filter, consolidated_filters);
+      //   }
+      // }
+      return queryable_filters;
+    } else {
+      console.error("Cannot call generateConsolidatedFiltersArray on a Global PykQuery.");
     }
   }
 
   var invoke_call = function(query){
     consolidated_filters = generateConsolidatedFiltersArray();
-    var response;
+    var queryable_filters = generateQueryableFiltersArray(),
+        response;
     if(adapter == "inbrowser"){
-      var connector = new PykQuery.adapter.inbrowser.init(query, consolidated_filters);
+      var connector = new PykQuery.adapter.inbrowser.init(query, queryable_filters);
       //console.log(query);
       return filter_data = connector.call();
     }

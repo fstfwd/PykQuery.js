@@ -66,11 +66,13 @@
         var that = this;
         this.execute = function () {
           var obj2 = this.b.flushToGet();
+          console.log(obj2);
           var html2 = "<table><tr><td>Zip</td><td>Beds</td></tr>";
           for (var i = 0; i< obj2.length; i++) {
             html2 += "<tr><td><a data-id='"+obj2[i].zip+"' class='filter2'>"+obj2[i].zip+"</a></td><td>"+obj2[i].beds+"</td></tr>"
           }
           html2 += "</table>";
+          console.log(html2);
           document.getElementById(options.selector).innerHTML = html2;
 
           $(".filter2").click(function () {

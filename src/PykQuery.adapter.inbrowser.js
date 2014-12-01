@@ -1,7 +1,7 @@
 PykQuery.adapter = PykQuery.adapter || {};
 PykQuery.adapter.inbrowser = {};
 //PykQuery.adapter.inbrowser.init(query);
-PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
+PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
   // data which is used for filtering data is in global_divid_for_raw_data
   var query_object = pykquery,
       raw_data,
@@ -10,7 +10,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
   global_divid_for_raw_data = query_scope[global_divid_for_raw_data];
   raw_data = global_divid_for_raw_data.rawdata;
 
-  query_object.filters = consolidated_filters;
+  query_object.filters = queryable_filters;
 
   // function call by adapter from pykquery.js
   this.call = function () {
@@ -90,7 +90,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery, consolidated_filters){
       });
       local_filter_array.push(local_obj);
     });
-    //console.log(local_filter_array);
     return local_filter_array;
   }
 
