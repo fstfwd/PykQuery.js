@@ -49,7 +49,7 @@ var setQueryJSON = function () {
 PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, adapter_param) {
   that = this;
   PykQuery.list_of_scopes[divid_param] = query_scope;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters = [];
+  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters = [], queryable_filters = [];
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var available_adapters = ["inbrowser", "rumi"];
@@ -196,7 +196,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
           if (metricsValidation(name)) {
             for (var key in name) {
               metrics[key] = name[key]; //"column_name_l1": ["sum", "avg"],
-              //console.log("metrics save");
             }
           }
         }
@@ -394,7 +393,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     }
     if (is_new_filter == true){
       where_clause.push(new_filter);
-      if (caller_scope) {
+      if (caller_scope && caller_scope.scope==="global") {
         caller_scope.call();
       }
     }
@@ -694,12 +693,12 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
           var obj = {
             "column_name": each_filter[0].column_name,
             "condition_type": each_filter[0].condition_type,
+            "local_div_id_triggering_event": each_filter[0].local_div_id_triggering_event
           }
           for (var i = 0; i < each_filter.length; i++) {
             where_in = each_filter[i].in ? _.union(where_in, each_filter[i].in) : where_in;
             where_not_in = each_filter[i].not_in ? _.union(where_not_in, each_filter[i].not_in) : where_not_in;
           }
-          // console.log(where_in,where_not_in);
           obj.in = where_in;
           obj.not_in = where_not_in;
         }
@@ -714,7 +713,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       // for(var i = 0; i < len; i++) {
       //   var list_of_scopes = PykQuery.list_of_scopes[__impacts[i]];
       //   var global_filter = list_of_scopes[__impacts[i]].filters;
-      //   console.log(consolidated_filters,global_filter);
       //   if (global_filter && global_filter.localdividtriggeringevent !== div_id) {
       //     consolidated_filters = _.flatten(global_filter, consolidated_filters);
       //   }
@@ -727,11 +725,10 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   var invoke_call = function(query){
     consolidated_filters = generateConsolidatedFiltersArray();
-    var queryable_filters = generateQueryableFiltersArray(),
-        response;
+    queryable_filters = generateQueryableFiltersArray();
+    var response;
     if(adapter == "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(query, queryable_filters);
-      //console.log(query);
       return filter_data = connector.call();
     }
     else{
@@ -752,7 +749,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     for (var i in arr) {
       if (that.propertyIsEnumerable(arr[i]) == false) {
         filter_obj[arr[i]] = that[arr[i]];
-        //console.log(arr);
       }
     }
     //filter_obj['filters'] = where_clause;
@@ -819,16 +815,16 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
 
   var callLocalRenderOnFilter = function (that) {
-    var list_of_scopes = PykQuery.list_of_scopes[__impacts[0]];
-    var k = PykQuery.list_of_scopes[that.div_id],
-        len = __impacts.length,
-        global_filter = list_of_scopes[__impacts[0]].filters;
-    if (typeof global_filter === "object") {
-      if (global_filter.length === 0) {
+    var list_of_scopes = PykQuery.list_of_scopes[__impacts[0]],
+        k = PykQuery.list_of_scopes[that.div_id];
+    //     len = __impacts.length,
+    //     global_filter = list_of_scopes[__impacts[0]].filters;
+    if (typeof queryable_filters === "object") {
+      if (queryable_filters.length === 0) {
         renderFunctions(k) // When reset filter is clicked, the global_filter = []. Therefore, for loop doesn't iterate.
       } else {
-        for (var i = 0; i < global_filter.length; i++) {
-          if (global_filter[i].local_div_id_triggering_event !== div_id) {
+        for (var i = 0; i < queryable_filters.length; i++) {
+          if (queryable_filters[i].local_div_id_triggering_event !== div_id) {
             renderFunctions(k);
           } else {
             // The chart triggering the event should not get rendered
