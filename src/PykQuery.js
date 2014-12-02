@@ -487,7 +487,9 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   this.resetDimensions = function(){
     if(_scope == "local"){
-      this.dimensions = [];
+      while(this.dimensions.length > 0) {
+        this.dimensions.pop();
+      }
       // this.call();
       query_restore = false;
       setQueryJSON();
@@ -498,7 +500,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   this.resetMetrics = function(){
     if(_scope == "local"){
-      this.metrics = [];
+      this.metrics = {};
       // this.call();
       query_restore = false;
       setQueryJSON();
