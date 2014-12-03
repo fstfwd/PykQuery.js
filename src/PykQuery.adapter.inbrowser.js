@@ -70,8 +70,8 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var local_filter_array = []
     _.map(local_data, function (value,key) {
       var local_obj = {};
-      local_obj[pykquery.dimensions[0]] = key;
-      local_obj[column_name] = value.length;
+      local_obj[processAlias(pykquery.dimensions[0])] = key;
+      local_obj[processAlias(column_name)] = value.length;
       local_filter_array.push(local_obj);
     });
     //console.log(local_filter_array);
@@ -82,8 +82,8 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var local_filter_array = []
     _.map(local_data, function (values,key) {
       var local_obj = {};
-      local_obj[pykquery.dimensions[0]] = key;
-      local_obj[column_name] = _.sum(values, function (value) {
+      local_obj[processAlias(pykquery.dimensions[0])] = key;
+      local_obj[processAlias(column_name)] = _.sum(values, function (value) {
         return parseInt(value[column_name],10);
       });
       local_filter_array.push(local_obj);
@@ -209,4 +209,8 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     //console.log("rangeFilter done----");
   }
 
+  var processAlias = function(colname) {
+    alias = query_object.alias;
+    return alias[colname];
+  }
 }

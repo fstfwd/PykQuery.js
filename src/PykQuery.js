@@ -730,17 +730,14 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     queryable_filters = generateQueryableFiltersArray();
     if(adapter == "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(query, queryable_filters);
-      filter_data = connector.call();
-      return filter_data = processAlias(filter_data);
+      return filter_data = connector.call();
     }
     else{
       var connector = new PykQuery.adapter.rumi.init(query, rumi_params);
       return connector.call(function (response) {
-        filter_data = response;
-        return filter_data = processAlias(filter_data);
+        return filter_data = response;
       });
     }
-    //response = processAlias(response);
     //TODO to delete instance of adapter adapter.delete();
   }
 
@@ -764,22 +761,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     return filter_obj;
   };
 
-
-
   this.storeObjectInMemory = function(obj_name) {
     document.getElementById(div_id).setAttribute("pyk_object", obj_name);
-  }
-
-  var processAlias = function(data) {
-    var list_of_scopes = PykQuery.list_of_scopes[div_id],
-        alias = list_of_scopes[div_id].alias;
-    data = JSON.stringify(data);
-    for (var key in alias) {
-      var regex = new RegExp(key, "g");
-      data = data.replace(regex,alias[key]);
-    }
-    data = JSON.parse(data);
-    return data;
   }
 
   var findQueryByDivid = function(id) {
