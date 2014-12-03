@@ -899,15 +899,15 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   var appendSelectedClassToRespectiveDomId = function () {
     if (consolidated_filters) {
-      var divs = document.querySelectorAll(".pykquery-selected");//document.getElementsByClassName("pykquery-selected");
+      var divs = document.querySelectorAll(".pykquery-selected");
       for (var i = 0; i < divs.length; i++) {
-        divs[i].className = divs[i].className.replace("pykquery-selected","");
+        divs[i].classList.remove("pykquery-selected");
       }
       for (var i = 0; i < consolidated_filters.length; i++) {
         if (consolidated_filters[i].selected_dom_id) {
           var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']");
           if (element.length>0 && !element[0].classList.contains("pykquery-selected")) {
-            element[0].className += " pykquery-selected";
+            element[0].classList.add(" pykquery-selected");
           }
         }
       }
