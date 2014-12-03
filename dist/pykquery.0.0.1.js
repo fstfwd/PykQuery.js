@@ -741,7 +741,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   var generateQueryableFiltersArray = function(){
     if (_scope == "local") {
       var queryable_filters = [];
-      if (consolidated_filters.length > 0) {
+      if (consolidated_filters && consolidated_filters.length > 0) {
         var where_in = [],
             where_not_in = [];
         var group = _.groupBy(consolidated_filters, function (d) {
@@ -785,15 +785,16 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   var invoke_call = function(query){
     consolidated_filters = generateConsolidatedFiltersArray();
     queryable_filters = generateQueryableFiltersArray();
-    var response;
     if(adapter == "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(query, queryable_filters);
-      return filter_data = connector.call();
+      filter_data = connector.call();
+      return filter_data = processAlias(filter_data);
     }
     else{
       var connector = new PykQuery.adapter.rumi.init(query, rumi_params);
       return connector.call(function (response) {
-        return filter_data = response;
+        filter_data = response;
+        return filter_data = processAlias(filter_data);
       });
     }
     //response = processAlias(response);
@@ -826,10 +827,16 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     document.getElementById(div_id).setAttribute("pyk_object", obj_name);
   }
 
-  var processAlias = function(res) {
-    //TO-DO -- replace all occurences of column_names with aliases if any
-    //waiting for -- response format
-    return res
+  var processAlias = function(data) {
+    var list_of_scopes = PykQuery.list_of_scopes[div_id],
+        alias = list_of_scopes[div_id].alias;
+    data = JSON.stringify(data);
+    for (var key in alias) {
+      var regex = new RegExp(key, "g");
+      data = data.replace(regex,alias[key]);
+    }
+    data = JSON.parse(data);
+    return data;
   }
 
   var findQueryByDivid = function(id) {
@@ -906,15 +913,17 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   }
 
   var appendSelectedClassToRespectiveDomId = function () {
-    var divs = document.querySelectorAll(".pykquery-selected");//document.getElementsByClassName("pykquery-selected");
-    for (var i = 0; i < divs.length; i++) {
-      divs[i].className = divs[i].className.replace("pykquery-selected","");
-    }
-    for (var i = 0; i < consolidated_filters.length; i++) {
-      if (consolidated_filters[i].selected_dom_id) {
-        var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']");
-        if (element.length>0 && !element[0].classList.contains("pykquery-selected")) {
-          element[0].className += " pykquery-selected";
+    if (consolidated_filters) {
+      var divs = document.querySelectorAll(".pykquery-selected");//document.getElementsByClassName("pykquery-selected");
+      for (var i = 0; i < divs.length; i++) {
+        divs[i].className = divs[i].className.replace("pykquery-selected","");
+      }
+      for (var i = 0; i < consolidated_filters.length; i++) {
+        if (consolidated_filters[i].selected_dom_id) {
+          var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']");
+          if (element.length>0 && !element[0].classList.contains("pykquery-selected")) {
+            element[0].className += " pykquery-selected";
+          }
         }
       }
     }
@@ -1227,11 +1236,9 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var filtered_data;
     var mode = pykquery.mode;
     //checking whether filter is exit in query or not
-    if(query_object.filters != undefined){
-      if(query_object.filters.length > 0) {
-        //console.log('start filter');
-        startFilterData(query_object); //call to start filter
-      }
+    if(query_object && query_object.filters.length > 0) {
+      //console.log('start filter');
+      startFilterData(query_object); //call to start filter
     }
     switch(mode) {
       case "aggregation":
@@ -1296,7 +1303,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       var local_obj = {};
       local_obj[pykquery.dimensions[0]] = key;
       local_obj[column_name] = _.sum(values, function (value) {
-        return value[column_name];
+        return parseInt(value[column_name],10);
       });
       local_filter_array.push(local_obj);
     });
