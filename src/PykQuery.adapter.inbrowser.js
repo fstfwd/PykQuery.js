@@ -17,7 +17,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var filtered_data;
     var mode = pykquery.mode;
     //checking whether filter is exit in query or not
-    if(query_object && query_object.filters.length > 0) {
+    if(query_object.filters && query_object.filters.length > 0) {
       //console.log('start filter');
       startFilterData(query_object); //call to start filter
     }

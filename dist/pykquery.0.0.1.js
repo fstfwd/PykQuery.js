@@ -106,7 +106,7 @@ var setQueryJSON = function () {
 PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, adapter_param) {
   that = this;
   PykQuery.list_of_scopes[divid_param] = query_scope;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters = [], queryable_filters = [];
+  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters = [], queryable_filters;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var available_adapters = ["inbrowser", "rumi"];
@@ -740,30 +740,30 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   var generateQueryableFiltersArray = function(){
     if (_scope == "local") {
-      var queryable_filters = [];
-      if (consolidated_filters && consolidated_filters.length > 0) {
-        var where_in = [],
-            where_not_in = [];
-        var group = _.groupBy(consolidated_filters, function (d) {
-          return d.column_name + "-" + d.condition_type;
-        });
-        for (var key in group) {
-          var each_filter = group[key];
-          var obj = {
-            "column_name": each_filter[0].column_name,
-            "condition_type": each_filter[0].condition_type,
-            "local_div_id_triggering_event": each_filter[0].local_div_id_triggering_event
+      if (consolidated_filters) {
+        var queryable_filters = [];
+        if (consolidated_filters.length > 0) {
+          var where_in = [],
+              where_not_in = [];
+          var group = _.groupBy(consolidated_filters, function (d) {
+            return d.column_name + "-" + d.condition_type;
+          });
+          for (var key in group) {
+            var each_filter = group[key];
+            var obj = {
+              "column_name": each_filter[0].column_name,
+              "condition_type": each_filter[0].condition_type,
+              "local_div_id_triggering_event": each_filter[0].local_div_id_triggering_event
+            }
+            for (var i = 0; i < each_filter.length; i++) {
+              where_in = each_filter[i].in ? _.union(where_in, each_filter[i].in) : where_in;
+              where_not_in = each_filter[i].not_in ? _.union(where_not_in, each_filter[i].not_in) : where_not_in;
+            }
+            obj.in = where_in;
+            obj.not_in = where_not_in;
           }
-          for (var i = 0; i < each_filter.length; i++) {
-            where_in = each_filter[i].in ? _.union(where_in, each_filter[i].in) : where_in;
-            where_not_in = each_filter[i].not_in ? _.union(where_not_in, each_filter[i].not_in) : where_not_in;
-          }
-          obj.in = where_in;
-          obj.not_in = where_not_in;
+          queryable_filters.push(obj);
         }
-        queryable_filters.push(obj);
-      } else {
-        queryable_filters = [];
       }
 
       // var list_of_scopes = PykQuery.list_of_scopes[div_id];
@@ -1236,7 +1236,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var filtered_data;
     var mode = pykquery.mode;
     //checking whether filter is exit in query or not
-    if(query_object && query_object.filters.length > 0) {
+    if(query_object.filters && query_object.filters.length > 0) {
       //console.log('start filter');
       startFilterData(query_object); //call to start filter
     }
