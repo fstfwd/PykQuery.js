@@ -728,15 +728,16 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   var invoke_call = function(query){
     consolidated_filters = generateConsolidatedFiltersArray();
     queryable_filters = generateQueryableFiltersArray();
-    var response;
     if(adapter == "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(query, queryable_filters);
-      return filter_data = connector.call();
+      filter_data = connector.call();
+      return filter_data = processAlias(filter_data);
     }
     else{
       var connector = new PykQuery.adapter.rumi.init(query, rumi_params);
       return connector.call(function (response) {
-        return filter_data = response;
+        filter_data = response;
+        return filter_data = processAlias(filter_data);
       });
     }
     //response = processAlias(response);
@@ -769,10 +770,16 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     document.getElementById(div_id).setAttribute("pyk_object", obj_name);
   }
 
-  var processAlias = function(res) {
-    //TO-DO -- replace all occurences of column_names with aliases if any
-    //waiting for -- response format
-    return res
+  var processAlias = function(data) {
+    var list_of_scopes = PykQuery.list_of_scopes[div_id],
+        alias = list_of_scopes[div_id].alias;
+    data = JSON.stringify(data);
+    for (var key in alias) {
+      var regex = new RegExp(key, "g");
+      data = data.replace(regex,alias[key]);
+    }
+    data = JSON.parse(data);
+    return data;
   }
 
   var findQueryByDivid = function(id) {

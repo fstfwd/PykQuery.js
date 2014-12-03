@@ -38,7 +38,7 @@
 
           var html1 = "<table><tr><td>City</td><td>Price</td></tr>";
           for (var i = 0; i< obj1.length; i++) {
-            html1 += "<tr><td><a data-id='"+obj1[i].city+"' class='filter1'>"+obj1[i].city+"</a></td><td>"+obj1[i].price+"</td></tr>"
+            html1 += "<tr><td><a data-id='"+obj1[i].name+"' class='filter1'>"+obj1[i].name+"</a></td><td>"+obj1[i].weight+"</td></tr>"
           }
           html1 += "</table>";
 
@@ -58,6 +58,7 @@
         this.a.storeObjectInMemory('a');
         this.a.dimensions = ["city"];
         this.a.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+        this.a.alias = {"city": "name", "price": "weight"};
 
         this.a.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
       }
@@ -68,7 +69,7 @@
           var obj2 = this.b.flushToGet();
           var html2 = "<table><tr><td>Zip</td><td>Beds</td></tr>";
           for (var i = 0; i< obj2.length; i++) {
-            html2 += "<tr><td><a data-id='"+obj2[i].zip+"' class='filter2'>"+obj2[i].zip+"</a></td><td>"+obj2[i].beds+"</td></tr>"
+            html2 += "<tr><td><a data-id='"+obj2[i].name+"' class='filter2'>"+obj2[i].name+"</a></td><td>"+obj2[i].weight+"</td></tr>"
           }
           html2 += "</table>";
           document.getElementById(options.selector).innerHTML = html2;
@@ -87,6 +88,7 @@
         this.b.storeObjectInMemory('b');
         this.b.dimensions = ["zip"];
         this.b.metrics = {"beds":["count"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+        this.b.alias = {"zip": "name", "beds": "weight"};
 
         this.b.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
       }
