@@ -907,7 +907,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
         if (consolidated_filters[i].selected_dom_id) {
           var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']");
           if (element.length>0 && !element[0].classList.contains("pykquery-selected")) {
-            element[0].classList.add(" pykquery-selected");
+            element[0].classList.add("pykquery-selected");
           }
         }
       }
