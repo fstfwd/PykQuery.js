@@ -691,9 +691,9 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   var generateQueryableFiltersArray = function(){
     if (_scope == "local") {
       if (consolidated_filters) {
-        var queryable_filters = [];
         if (consolidated_filters.length > 0) {
-          var where_in = [],
+          var queryable_filters = [],
+              where_in = [],
               where_not_in = [];
           var group = _.groupBy(consolidated_filters, function (d) {
             return d.column_name + "-" + d.condition_type;
