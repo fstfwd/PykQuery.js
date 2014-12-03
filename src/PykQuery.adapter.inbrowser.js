@@ -17,11 +17,9 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var filtered_data;
     var mode = pykquery.mode;
     //checking whether filter is exit in query or not
-    if(query_object.filters != undefined){
-      if(query_object.filters.length > 0) {
-        //console.log('start filter');
-        startFilterData(query_object); //call to start filter
-      }
+    if(query_object && query_object.filters.length > 0) {
+      //console.log('start filter');
+      startFilterData(query_object); //call to start filter
     }
     switch(mode) {
       case "aggregation":
@@ -86,7 +84,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       var local_obj = {};
       local_obj[pykquery.dimensions[0]] = key;
       local_obj[column_name] = _.sum(values, function (value) {
-        return value[column_name];
+        return parseInt(value[column_name],10);
       });
       local_filter_array.push(local_obj);
     });

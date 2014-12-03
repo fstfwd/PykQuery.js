@@ -684,7 +684,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   var generateQueryableFiltersArray = function(){
     if (_scope == "local") {
       var queryable_filters = [];
-      if (consolidated_filters.length > 0) {
+      if (consolidated_filters && consolidated_filters.length > 0) {
         var where_in = [],
             where_not_in = [];
         var group = _.groupBy(consolidated_filters, function (d) {
@@ -849,15 +849,17 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   }
 
   var appendSelectedClassToRespectiveDomId = function () {
-    var divs = document.querySelectorAll(".pykquery-selected");//document.getElementsByClassName("pykquery-selected");
-    for (var i = 0; i < divs.length; i++) {
-      divs[i].className = divs[i].className.replace("pykquery-selected","");
-    }
-    for (var i = 0; i < consolidated_filters.length; i++) {
-      if (consolidated_filters[i].selected_dom_id) {
-        var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']");
-        if (element.length>0 && !element[0].classList.contains("pykquery-selected")) {
-          element[0].className += " pykquery-selected";
+    if (consolidated_filters) {
+      var divs = document.querySelectorAll(".pykquery-selected");//document.getElementsByClassName("pykquery-selected");
+      for (var i = 0; i < divs.length; i++) {
+        divs[i].className = divs[i].className.replace("pykquery-selected","");
+      }
+      for (var i = 0; i < consolidated_filters.length; i++) {
+        if (consolidated_filters[i].selected_dom_id) {
+          var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']");
+          if (element.length>0 && !element[0].classList.contains("pykquery-selected")) {
+            element[0].className += " pykquery-selected";
+          }
         }
       }
     }
