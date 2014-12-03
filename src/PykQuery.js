@@ -337,7 +337,9 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       } else if(is_interactive && _scope == "local"){
         name.local_div_id_triggering_event = div_id;
         addFilterPropagate(name,false,restore);
-        showFilterList();
+        if (document.getElementsByClassName('filter_list').length > 0) {
+          showFilterList();
+        }
       } else if(!is_interactive && _scope == "global"){
         //not possible
       } else if(!is_interactive && _scope == "local"){ //onload
