@@ -787,17 +787,14 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     queryable_filters = generateQueryableFiltersArray();
     if(adapter == "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(query, queryable_filters);
-      filter_data = connector.call();
-      return filter_data = processAlias(filter_data);
+      return filter_data = connector.call();
     }
     else{
       var connector = new PykQuery.adapter.rumi.init(query, rumi_params);
       return connector.call(function (response) {
-        filter_data = response;
-        return filter_data = processAlias(filter_data);
+        return filter_data = response;
       });
     }
-    //response = processAlias(response);
     //TODO to delete instance of adapter adapter.delete();
   }
 
@@ -821,22 +818,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     return filter_obj;
   };
 
-
-
   this.storeObjectInMemory = function(obj_name) {
     document.getElementById(div_id).setAttribute("pyk_object", obj_name);
-  }
-
-  var processAlias = function(data) {
-    var list_of_scopes = PykQuery.list_of_scopes[div_id],
-        alias = list_of_scopes[div_id].alias;
-    data = JSON.stringify(data);
-    for (var key in alias) {
-      var regex = new RegExp(key, "g");
-      data = data.replace(regex,alias[key]);
-    }
-    data = JSON.parse(data);
-    return data;
   }
 
   var findQueryByDivid = function(id) {
@@ -1289,8 +1272,8 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var local_filter_array = []
     _.map(local_data, function (value,key) {
       var local_obj = {};
-      local_obj[pykquery.dimensions[0]] = key;
-      local_obj[column_name] = value.length;
+      local_obj[processAlias(pykquery.dimensions[0])] = key;
+      local_obj[processAlias(column_name)] = value.length;
       local_filter_array.push(local_obj);
     });
     //console.log(local_filter_array);
@@ -1301,8 +1284,8 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var local_filter_array = []
     _.map(local_data, function (values,key) {
       var local_obj = {};
-      local_obj[pykquery.dimensions[0]] = key;
-      local_obj[column_name] = _.sum(values, function (value) {
+      local_obj[processAlias(pykquery.dimensions[0])] = key;
+      local_obj[processAlias(column_name)] = _.sum(values, function (value) {
         return parseInt(value[column_name],10);
       });
       local_filter_array.push(local_obj);
@@ -1428,6 +1411,10 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     //console.log("rangeFilter done----");
   }
 
+  var processAlias = function(colname) {
+    alias = query_object.alias;
+    return alias[colname];
+  }
 }
 
 this.toSql = function() {
