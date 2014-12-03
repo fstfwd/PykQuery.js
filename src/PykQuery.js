@@ -316,21 +316,16 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     }
   });
 
-  this.filter = function() {
-    Object.defineProperty(this, 'filters', {
-      get: function() {
-        return where_clause;
-      },
-      set: function(new_where_clause){ //used only by the adaptors!
-        where_clause = new_where_clause;
-      }
-    });
-  }
+  Object.defineProperty(this, 'filters', {
+    get: function() {
+      return where_clause;
+    },
+    set: function(new_where_clause){ //used only by the adaptors!
+      where_clause = new_where_clause;
+    }
+  });
 
   this.addFilter = function(name, is_interactive, domid, restore){
-    if(!this.filters){ //this is hacky code. ronak wrote it.
-      this.filter();
-    }
     if (filterValidation(name)) {
       if(is_interactive && _scope == "global"){
         addFilterInQuery(name,this,restore);
