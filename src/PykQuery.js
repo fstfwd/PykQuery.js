@@ -326,19 +326,24 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   });
 
   this.addFilter = function(name, is_interactive, domid, restore){
+    var element = document.querySelectorAll("[data-id='"+name.selected_dom_id+"']");
+    if (element.length>0 && element[0].classList.contains("pykquery-selected")) {
+      this.removeFilter(name, is_interactive);
+      return;
+    }
     if (filterValidation(name)) {
       if(is_interactive && _scope == "global"){
         addFilterInQuery(name,this,restore);
       } else if(is_interactive && _scope == "local"){
         name.local_div_id_triggering_event = div_id;
         addFilterPropagate(name,false,restore);
-        if (document.getElementsByClassName('filter_list').length > 0) {
-          showFilterList();
-        }
       } else if(!is_interactive && _scope == "global"){
         //not possible
       } else if(!is_interactive && _scope == "local"){ //onload
         addFilterInQuery(name,false,restore);
+      }
+      if (document.getElementsByClassName('filter_list').length > 0) {
+        showFilterList();
       }
     }
   }
@@ -425,6 +430,9 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       } else if(!is_interactive && _scope == "local"){ //onload
         removeFilterInQuery(name,this);
       }
+      if (document.getElementsByClassName('filter_list').length > 0) {
+        showFilterList();
+      }
     }
   }
 
@@ -465,7 +473,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       for(var j =0;j<len;j++) {
         var list_of_scopes = PykQuery.list_of_scopes[__impacts[j]];
         var global_filter = list_of_scopes[__impacts[j]];
-        removeFilterInQuery(name,caller_scope);
+        global_filter.removeFilter(name,caller_scope);
       }
     }
   }
@@ -1080,9 +1088,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   }
 
   var removeFilterFromList = function (filter_to_be_removed) {
-    var key = filter_to_be_removed.local_div_id_triggering_event;
-    id = PykQuery.list_of_scopes[key][key].global_divid_for_raw_data;
-    PykQuery.list_of_scopes[id][id].removeFilter(filter_to_be_removed, true);
-    showFilterList();
+    var key = filter_to_be_removed.local_div_id_triggering_event,
+        list_of_scopes = PykQuery.list_of_scopes[key];
+    list_of_scopes[key].removeFilter(filter_to_be_removed, true);
   }
 };
