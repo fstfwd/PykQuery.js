@@ -1,7 +1,7 @@
 PykQuery.adapter = PykQuery.adapter || {};
 PykQuery.adapter.rumi = {};
 
-PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
+PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params, queryable_filters) {
 
   this.call = function(onComplete) {
     var xmlhttp, response;
@@ -24,12 +24,12 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
       success: function (res) {
         onComplete(res);
       },
-      error: function () {  
+      error: function () {
         console.log('Save error.');
       }
     });
   }
-  
+
   var rumiParameterValidation = function(params){
     var util = new PykUtil.init();
     console.log(util.isBlank(params))
@@ -40,7 +40,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
     if(util.isBlank(params['filename'])){
       console.log('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "filename missing in rumi parameter");
       return false;
-    } 
+    }
     if(util.isBlank(params['username'])){
       console.log('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "username missing in rumi parameter");
       return false;

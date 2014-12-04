@@ -809,7 +809,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       return filter_data = connector.call();
     }
     else{
-      var connector = new PykQuery.adapter.rumi.init(query, rumi_params);
+      var connector = new PykQuery.adapter.rumi.init(query, rumi_params, queryable_filters);
       return connector.call(function (response) {
         return filter_data = response;
       });
@@ -1159,7 +1159,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 PykQuery.adapter = PykQuery.adapter || {};
 PykQuery.adapter.rumi = {};
 
-PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
+PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params, queryable_filters) {
 
   this.call = function(onComplete) {
     var xmlhttp, response;
@@ -1182,12 +1182,12 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
       success: function (res) {
         onComplete(res);
       },
-      error: function () {  
+      error: function () {
         console.log('Save error.');
       }
     });
   }
-  
+
   var rumiParameterValidation = function(params){
     var util = new PykUtil.init();
     console.log(util.isBlank(params))
@@ -1198,7 +1198,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
     if(util.isBlank(params['filename'])){
       console.log('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "filename missing in rumi parameter");
       return false;
-    } 
+    }
     if(util.isBlank(params['username'])){
       console.log('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "username missing in rumi parameter");
       return false;

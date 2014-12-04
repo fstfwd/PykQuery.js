@@ -752,7 +752,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       return filter_data = connector.call();
     }
     else{
-      var connector = new PykQuery.adapter.rumi.init(query, rumi_params);
+      var connector = new PykQuery.adapter.rumi.init(query, rumi_params, queryable_filters);
       return connector.call(function (response) {
         return filter_data = response;
       });
