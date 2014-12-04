@@ -1334,51 +1334,25 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     // matrics_column_name = objectkeymatrics;
     local_data = _.groupBy(raw_data,filter_obj.dimensions[0]);
     //metrices
-    for (var prop in metrics) {
-      switch (metrics[prop][0]) {
-        case "count":
-          local_data = metricsCount(local_data,prop);//prop is property which is actually a column name
-        break;
-        case "sum":
-          local_data = metricsSum(local_data,prop);//prop is property which is actually a column name
-        break;
-        case "min":
-          local_data = metricsMin(local_data,prop);//prop is property which is actually a column name
-        break;
-        case "max":
-          local_data = metricsMax(local_data,prop);//prop is property which is actually a column name
-        break;
-        case "extent":
-          local_data = metricsExtent(local_data,prop);//prop is property which is actually a column name
-          break;
-
-        default:
-        //other cases is remaning
-      }
-      return local_data;
-    }
-  }
-
-  var metricsCount = function (local_data,column_name) {
     var local_filter_array = []
     _.map(local_data, function (value,key) {
       var local_obj = {};
       local_obj[processAlias(pykquery.dimensions[0])] = key;
-      local_obj[processAlias(column_name)] = value.length;
-      local_filter_array.push(local_obj);
-    });
-    //console.log(local_filter_array);
-    return local_filter_array;
-  }
-
-  var metricsSum = function (local_data,column_name) {
-    var local_filter_array = []
-    _.map(local_data, function (values,key) {
-      var local_obj = {};
-      local_obj[processAlias(pykquery.dimensions[0])] = key;
-      local_obj[processAlias(column_name)] = _.sum(values, function (value) {
-        return parseInt(value[column_name],10);
-      });
+      for (var prop in metrics) {
+        var individual_metric = metrics[prop];
+        for (var i = 0; i < individual_metric.length; i++) {
+          switch (individual_metric[i]) {
+            case "count":
+              local_obj[processAlias(prop)] = value.length;
+              break;
+            case "sum":
+              local_obj[processAlias(prop)] = _.sum(value, function (values) {
+                return parseInt(values[prop],10);
+              });
+              break;
+          }
+        }
+      }
       local_filter_array.push(local_obj);
     });
     return local_filter_array;
