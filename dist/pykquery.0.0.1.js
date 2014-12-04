@@ -1209,6 +1209,86 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params) {
   }
 }
 
+// underscore addon with sum, mean, median and nrange function
+// see details below
+
+_.mixin({
+
+  // Return sum of the elements
+  sum : function(obj, iterator, context) {
+    if (!iterator && _.isEmpty(obj)) return 0;
+    var result = 0;
+    if (!iterator && _.isArray(obj)){
+      for(var i=obj.length-1;i>-1;i-=1){
+        result += obj[i];
+      };
+      return result;
+    };
+    _.each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      result += computed;
+    });
+    return result;
+  },
+
+  // Return aritmethic mean of the elements
+  // if an iterator function is given, it is applied before
+  mean : function(obj, iterator, context) {
+    if (!iterator && _.isEmpty(obj)) return Infinity;
+    if (!iterator && _.isArray(obj)) return _.sum(obj)/obj.length;
+    if (_.isArray(obj) && !_.isEmpty(obj)) return _.sum(obj, iterator, context)/obj.length;
+  },
+
+  // Return median of the elements
+  // if the object element number is odd the median is the
+  // object in the "middle" of a sorted array
+  // in case of an even number, the arithmetic mean of the two elements
+  // in the middle (in case of characters or strings: obj[n/2-1] ) is returned.
+  // if an iterator function is provided, it is applied before
+  median : function(obj, iterator, context) {
+    if (_.isEmpty(obj)) return Infinity;
+    var tmpObj = [];
+    if (!iterator && _.isArray(obj)){
+      tmpObj = _.clone(obj);
+      tmpObj.sort(function(f,s){return f-s;});
+    }else{
+      _.isArray(obj) && each(obj, function(value, index, list) {
+        tmpObj.push(iterator ? iterator.call(context, value, index, list) : value);
+        tmpObj.sort();
+      });
+    };
+    return tmpObj.length%2 ? tmpObj[Math.floor(tmpObj.length/2)] : (_.isNumber(tmpObj[tmpObj.length/2-1]) && _.isNumber(tmpObj[tmpObj.length/2])) ? (tmpObj[tmpObj.length/2-1]+tmpObj[tmpObj.length/2]) /2 : tmpObj[tmpObj.length/2-1];
+  },
+
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  // replacement of old _.range() faster + incl. convenience operations:
+  //    _.nrange(start, stop) will automatically set step to +1/-1
+  //    _.nrange(+/- stop) will automatically start = 0 and set step to +1/-1
+  nrange : function(start, stop, step) {
+    if (arguments.length <= 1) {
+      if (start === 0)
+        return [];
+      stop = start || 0;
+      start = 0;
+    }
+    step = arguments[2] || 1*(start < stop) || -1;
+
+    var len = Math.max(Math.ceil((stop - start) / step), 0);
+    var idx = 0;
+    var range = new Array(len);
+
+    do {
+      range[idx] = start;
+      start += step;
+    } while((idx += 1) < len);
+
+    return range;
+  }
+
+})
+
 PykQuery.adapter = PykQuery.adapter || {};
 PykQuery.adapter.inbrowser = {};
 //PykQuery.adapter.inbrowser.init(query);
@@ -1423,243 +1503,3 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     return alias[colname];
   }
 }
-
-this.toSql = function() {
-  that = this;
-
-  var filters = that.filters,
-		  mode = that.mode,
-		  unique = that.unique,
-		  metrics = that.metrics,
-		  select = that.select,
-		  sort = that.sort,
-		  dimensions = that.dimensions,
-		  limit  = that.limit,
-		  offset = that.offset,
-		  div_id = that.div_id;
-
-  var table_name = "__",
-		  columns = that.columns,
-		  required_columns = [],
-		  group_by_columns = [];
-
-  var query_string = [],
-		  query_select = "",
-		  query_from = "FROM "+table_name+" ",
-		  query_where = [],
-		  query_group_by = "",
-		  query_order_by = "",
-		  query_limit = "",
-		  query_offset = "",
-		  next_op,
-		  vals,
-		  is_IN = false;
-
-
-  //START -- SELECT COLUMN NAMES clause
-  if (dimensions && mode == "aggregation") {
-    if (metrics && _.isEmpty(metrics) == false) {
-    	for(var i in metrics){
-	      len = metrics[i].length;
-	      for(var j = 0; j < len; j++){
-	        required_columns.push(metrics[i][j] + "("+ i +")")
-	      }
-	    }	
-    }
-
-    if (_.isEmpty(dimensions) == false) {
-    	for(var i=0 ; i<dimensions.length ; i++) {
-    		if (_.has(metrics, dimensions[i]) == false) {
-    			required_columns.push(dimensions[i]);
-    			group_by_columns.push(dimensions[i]);
-    		}
-    	}
-    }
-  }
-
-  if (select && mode == "select") {
-  	if (_.intersection(columns,select).length !== 0 || select.toString() === ["*"].toString()) {
-      _.each(select, function(d) {
-        required_columns.push(d);
-      });
-    }
-    else {
-      return false; // column(s) not found
-    }
-  }
-
-  if(unique && mode == "unique") {
-  	if (_.intersection(columns,unique).length !== 0) {
-      _.each(unique, function(d) {
-        required_columns.push(d);
-      });
-    }
-    else {
-      return false; // column(s) not found
-    }
-  }
-
-  if (_.isEmpty(required_columns) == true && _.isEmpty(dimensions) == true && mode != "unique") {
-    query_select = "SELECT * ";
-  }
-  else if (mode == "unique") {
-  	query_select = "SELECT DISTINCT " + required_columns.join(", ") + " ";
-  }
-  else {
-    query_select = "SELECT " + required_columns.join(", ") + " ";
-  }
-  // END -- SELECT COLUMN NAMES clause
-
-
-  // START -- WHERE clause
-  if (filters && _.isEmpty(filters) == false) {
-    // query_where = "WHERE ";
-    next_op = false;
-    
-    _.each(filters, function (d,i) {      
-      // if (next_op) {
-      //   query_where += next_op + " ";
-      // }
-      query_where[i] = "";
-      switch (d["condition_type"]) {
-
-        case "values" :
-          vals = [];
-          if (d["in"] && d["in"].length !== 0) {
-            is_IN = true;
-            query_where[i] += d["column_name"] + " IN (";
-            _.each(d["in"], function (k) {
-              query_where[i] += k + ", ";
-            });
-            query_where[i] = query_where[i].slice(0,-2) + ") ";
-          }
-          if (d["not_in"] && d["not_in"].length !== 0) {
-            if (is_IN) {
-              query_where[i] += "AND " + d["column_name"] + " NOT IN (";
-            }
-            else {
-              query_where[i] += d["column_name"] + " NOT IN (";
-            }
-            _.each(d["not_in"], function (a) {
-              query_where[i] += a + ", ";
-            });
-            query_where[i] = query_where[i].slice(0,-2) + ") ";
-          }
-          if (d["next"] && i != (filters.length - 1)) {
-          	query_where[i] = query_where[i] + d["next"];
-            next_op = d["next"];
-          }
-          else {
-            next_op = false;
-          }
-          break;
-
-        case "range":
-        	if (_.isEmpty(d["condition"]) == false) {
-        		query_where[i] += d["column_name"] + " ";
-	          if (d["condition"]["not"]) {
-	            query_where[i] += "NOT ";
-	          }
-	          query_where[i] += "BETWEEN " + d["condition"]["min"] + " AND " + d["condition"]["max"] + " ";
-	          if (d["next"] && i != (filters.length - 1)) {
-	          	query_where[i] = query_where[i] + d["next"];
-	            next_op = d["next"];
-	          }
-	          else {
-	            next_op = false;
-	          }
-        	}          
-          break;
-
-        case "data_types":
-          // yet to be coded
-          break;
-        }
-    });
-  }
-  // END -- WHERE clause
-
-
-  // START -- GROUP BY clause
-  if (dimensions && mode === "aggregation") {
-    query_group_by = "GROUP BY " + group_by_columns.join(", ") + " ";
-  }
-  // END -- GROUP BY clause
-
-
-  // START -- ORDER BY clause
-  if (sort && _.isEmpty(sort) == false) {
-    query_order_by = "ORDER BY ";
-    for (key in sort) {
-      query_order_by += key + " " + sort[key] + ", ";
-    }
-    query_order_by = query_order_by.slice(0,-2) + " ";
-  }
-  // END -- ORDER clause
-
-
-  // Limit & offset to be added to the query
-  query_limit = (limit) ? ("LIMIT " + limit + " ") : query_limit;
-  query_offset = (offset) ? ("OFFSET " + offset + " ") : query_offset;
-
-
-  // FINAL DB QUERY STRING
-  query_string = div_id + ": \n " + query_select + " \n " + query_from + " \n " + "WHERE";
-  
-  var query_where_length = query_where.length;
-  for(var i=0 ; i<query_where_length ; i++) {
-  	query_string = query_string + " \n\t " + query_where[i];
-  }
-
-	query_string =  query_string + " \n " + query_group_by + " \n " + query_order_by + " \n " + query_limit + " \n " + query_offset;
-  console.log(query_string);
-
-  return query_string;
-};
-
-this.returnsWhereClause = function (d) {
-	var query_where = "";
-
-  switch (d["condition_type"]) {
-
-    case "values" :
-      vals = [];
-      if (d["in"] && d["in"].length !== 0) {
-        is_IN = true;
-        query_where += d["column_name"] + " IN (";
-        _.each(d["in"], function (k) {
-          query_where += k + ", ";
-        });
-        query_where = query_where.slice(0,-2) + ") ";
-      }
-      if (d["not_in"] && d["not_in"].length !== 0) {
-        if (is_IN) {
-          query_where += "AND " + d["column_name"] + " NOT IN (";
-        }
-        else {
-          query_where += d["column_name"] + " NOT IN (";
-        }
-        _.each(d["not_in"], function (a) {
-          query_where += a + ", ";
-        });
-        query_where = query_where.slice(0,-2) + ") ";
-      }
-      break;
-
-    case "range":
-    	if (_.isEmpty(d["condition"]) == false) {
-    		query_where += d["column_name"] + " ";
-        if (d["condition"]["not"]) {
-          query_where += "NOT ";
-        }
-        query_where += "BETWEEN " + d["condition"]["min"] + " AND " + d["condition"]["max"] + " ";
-    	}          
-      break;
-
-    case "data_types":
-      // yet to be coded
-      break;
-  }
-
-  return query_where;
-};

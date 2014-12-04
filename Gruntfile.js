@@ -14,8 +14,8 @@ module.exports = function(grunt) {
                       '<%= js_src_path %>/PykUtil.js'
                     , '<%= js_src_path %>/PykQuery.js'
                     , '<%= js_src_path %>/PykQuery.adapter.rumi.js'
+                    , '<%= js_src_path %>/underscoreAddon.js'
                     , '<%= js_src_path %>/PykQuery.adapter.inbrowser.js'
-                    , '<%= js_src_path %>/filter.js'
                 ],
                 'dest': '<%= js_distro_path %>/pykquery.<%= pkg.version %>.js'
             }
