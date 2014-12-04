@@ -2,7 +2,7 @@
 <head>
 <script src="lib/jquery-1.11.1.min.js"></script>
 <script src='../lib/underscore-min.js'></script>
-<script src='../lib/underscoreAddon.js'></script>
+<script src='../src/underscoreAddon.js'></script>
 <script src="../src/PykUtil.js"></script>
 <script src="../src/PykQuery.js"></script>
 <script src="../src/PykQuery.adapter.inbrowser.js"></script>
@@ -112,8 +112,7 @@
           $("#reset").click (function () {
             g1.resetFilters();
           });
-          k.a.call();
-          l.b.call();
+          g1.call();
         }
       }
       xmlhttp.open("GET", url, true);

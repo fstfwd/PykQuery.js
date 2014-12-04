@@ -515,7 +515,9 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   this.resetMetrics = function(){
     if(_scope == "local"){
-      this.metrics = {};
+      for (var key in this.metrics) {
+        delete this.metrics[key];
+      }
       // this.call();
       query_restore = false;
       setQueryJSON();
