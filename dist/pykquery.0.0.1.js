@@ -1165,6 +1165,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params, queryable_filte
     var xmlhttp, response;
     //console.log(pykquery_json,rumi_params)
     if(rumiParameterValidation(rumi_params)) {
+      pykquery_json["filters"] = queryable_filters;
       var data = { config: pykquery_json,
         filename: rumi_params["filename"],
         username: rumi_params["username"],
