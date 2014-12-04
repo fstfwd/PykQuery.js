@@ -5,7 +5,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
   // data which is used for filtering data is in global_divid_for_raw_data
   var query_object = pykquery,
       raw_data,
-      global_divid_for_raw_data = pykquery.global_divid_for_raw_data,
+      global_divid_for_raw_data = findQueryByDivid(pykquery.global_divid_for_raw_data),
       query_scope = PykQuery.list_of_scopes[global_divid_for_raw_data];
   global_divid_for_raw_data = query_scope[global_divid_for_raw_data];
   raw_data = global_divid_for_raw_data.rawdata;
@@ -150,11 +150,9 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       //checking condition_type of filter exit
       switch(filters_array[i]["condition_type"]) {
         case "values":
-          console.log('---- value code');
           valueFilter(filters_array[i],columns,mode); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "range":
-          console.log('---- range code');
           rangeFilter(filters_array[i],columns); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
           break;
         case "datatype":
