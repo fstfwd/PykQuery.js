@@ -50,10 +50,10 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         for (var i = 0; i < individual_metric.length; i++) {
           switch (individual_metric[i]) {
             case "count":
-              local_obj[processAlias(prop)] = value.length;
+              local_obj[processAlias(prop,individual_metric[i])] = value.length;
               break;
             case "sum":
-              local_obj[processAlias(prop)] = _.sum(value, function (values) {
+              local_obj[processAlias(prop,individual_metric[i])] = _.sum(value, function (values) {
                 return parseInt(values[prop],10);
               });
               break;
@@ -181,8 +181,12 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     //console.log("rangeFilter done----");
   }
 
-  var processAlias = function(colname) {
+  var processAlias = function(colname,aggregation_method) {
     alias = query_object.alias;
-    return alias[colname];
+    if (typeof alias[colname] === "string") {
+      return alias[colname];
+    } else {
+      return alias[colname][aggregation_method];
+    }
   }
 }

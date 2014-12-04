@@ -86,8 +86,8 @@
         this.b = new PykQuery.init(this, "aggregation", "local", "table2", "inbrowser");
         this.b.storeObjectInMemory('b');
         this.b.dimensions = ["zip"];
-        this.b.metrics = {"beds":["count"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
-        this.b.alias = {"zip": "name", "beds": "weight"};
+        this.b.metrics = {"beds":["count","sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+        this.b.alias = {"zip": "name","beds": {"sum": "bed_sum", "count": "weight"}};
 
         this.b.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
       }
