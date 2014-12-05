@@ -79,7 +79,7 @@
         selector: "b"
       });
 
-      a = new PykQuery.init(this, "aggregation", "local", "a", "inbrowser");
+      a = new PykQuery.init("aggregation", "local", "a", "inbrowser");
       a.dimensions = ["city"];
       a.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
       a.alias = {"city": "name", "price": "weight"};
@@ -89,7 +89,7 @@
 
       a.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
 
-      b = new PykQuery.init(this, "aggregation", "local", "b", "inbrowser");
+      b = new PykQuery.init("aggregation", "local", "b", "inbrowser");
       b.dimensions = ["zip"];
       b.metrics = {"beds":["count","sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
       b.alias = {"zip": "name","beds": {"sum": "bed_sum", "count": "weight"}};
@@ -104,7 +104,7 @@
       xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 
-          g1 = new PykQuery.init(window, "global", "global", "g1", "inbrowser");
+          g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
           g1.rawdata = JSON.parse(xmlhttp.response);
           a.addImpacts(["g1"], false);
           g1.addImpacts(["b"],false);
