@@ -717,7 +717,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           var obj = {
             "column_name": each_filter[0].column_name,
             "condition_type": each_filter[0].condition_type,
-            "local_div_id_triggering_event": each_filter[0].local_div_id_triggering_event
+            "local_div_id_triggering_event": each_filter[0].local_div_id_triggering_event,
+            "next": each_filter[0]['next']
           }
           if (each_filter[0].condition_type === "values") {
             var where_in = [],
@@ -735,8 +736,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
               not: each_filter[0].condition.not
             }
           }
+          queryable_filters.push(obj);
         }
-        queryable_filters.push(obj);
       }
       return queryable_filters;
     } else {
@@ -1029,13 +1030,20 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   var showFilterList = function() {
     document.getElementsByClassName('filter_list')[0].innerHTML = "";
     for (var i = 0; i < consolidated_filters.length; i++) {
+      if (consolidated_filters[i].in) {
+        var value = consolidated_filters[i].in+" in "+consolidated_filters[i].column_name;
+      } else if (consolidated_filters[i].not_in) {
+        var value = consolidated_filters[i].not_in+" not in "+consolidated_filters[i].column_name;
+      } else if (consolidated_filters[i].condition) {
+        var value = consolidated_filters[i].min+" - "+consolidated_filters[i].max+" of "+consolidated_filters[i].column_name;
+      }
       var filter_block = document.createElement("div");
       filter_block.setAttribute("class","filter_block");
       filter_block.setAttribute("id","filter_block"+i);
       document.getElementsByClassName('filter_list')[0].appendChild(filter_block);
       var filter_values = document.createElement("div");
       filter_values.setAttribute("class","filter_value");
-      filter_values.innerHTML = "Filter by "+(consolidated_filters[i].in || consolidated_filters[i].not_in);
+      filter_values.innerHTML = "Filter by "+value;
       document.getElementById('filter_block'+i).appendChild(filter_values);
       var filter_remove = document.createElement("div");
       filter_remove.setAttribute("class","filter_remove");
