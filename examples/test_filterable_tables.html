@@ -33,7 +33,7 @@
         var that = this;
 
         this.execute = function () {
-          var obj1 = this.a.flushToGet();
+          var obj1 = a.flushToGet();
 
           var html1 = "<table><tr><td>City</td><td>Price</td></tr>";
           for (var i = 0; i< obj1.length; i++) {
@@ -46,25 +46,17 @@
           $(".filter1").click(function () {
             var value = $(this).html(),
                 id = $(this).attr('data-id');
-            that.a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}, true);
-            // g1.call();
+            a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}, true);
             $("#filters_json").html(JSON.stringify(PykQuery.query_json,"null", "\t"));
-            // var ee = that.b.flushToGet();
+            l.execute();
           });
         }
-
-        this.a = new PykQuery.init(this, "aggregation", "local", "a", "inbrowser");
-        this.a.dimensions = ["city"];
-        this.a.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
-        this.a.alias = {"city": "name", "price": "weight"};
-
-        this.a.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
       }
 
       PykCharts.table2 = function (options) {
         var that = this;
         this.execute = function () {
-          var obj2 = this.b.flushToGet();
+          var obj2 = b.flushToGet();
           var html2 = "<table><tr><td>Zip</td><td>Beds</td></tr>";
           for (var i = 0; i< obj2.length; i++) {
             html2 += "<tr><td><a data-id='"+obj2[i].name+"' class='filter2'>"+obj2[i].name+"</a></td><td>"+obj2[i].weight+"</td></tr>"
@@ -75,19 +67,11 @@
           $(".filter2").click(function () {
             var value = $(this).html(),
                 id = $(this).attr('data-id');
-            that.b.addFilter({"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR", "selected_dom_id": id}, true);
-            // g1.call();
+            b.addFilter({"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR", "selected_dom_id": id}, true);
             $("#filters_json").html(JSON.stringify(PykQuery.query_json,"null", "\t"));
-            // var dd = that.a.flushToGet();
+            k.execute();
           });
         }
-
-        this.b = new PykQuery.init(this, "aggregation", "local", "b", "inbrowser");
-        this.b.dimensions = ["zip"];
-        this.b.metrics = {"beds":["count","sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
-        this.b.alias = {"zip": "name","beds": {"sum": "bed_sum", "count": "weight"}};
-
-        this.b.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
       }
 
       window.k = new PykCharts.table1({
@@ -97,6 +81,20 @@
         selector: "b"
       });
 
+      a = new PykQuery.init(this, "aggregation", "local", "a", "inbrowser");
+      a.dimensions = ["city"];
+      a.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+      a.alias = {"city": "name", "price": "weight"};
+
+      a.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
+
+      b = new PykQuery.init(this, "aggregation", "local", "b", "inbrowser");
+      b.dimensions = ["zip"];
+      b.metrics = {"beds":["count","sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+      b.alias = {"zip": "name","beds": {"sum": "bed_sum", "count": "weight"}};
+
+      b.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
+
       var xmlhttp = new XMLHttpRequest();
       var url = "data/test1data.json";
       xmlhttp.onreadystatechange = function () {
@@ -104,14 +102,16 @@
 
           g1 = new PykQuery.init(window, "global", "global", "g1", "inbrowser");
           g1.rawdata = JSON.parse(xmlhttp.response);
-          k.a.addImpacts(["g1"], false);
+          a.addImpacts(["g1"], false);
           g1.addImpacts(["b"],false);
           g1.filterList("list_of_filters");
           $("#reset").click (function () {
             g1.resetFilters();
           });
-          k.a.call();
-          l.b.call();
+          a.call();
+          b.call();
+          k.execute();
+          l.execute();
         }
       }
       xmlhttp.open("GET", url, true);
