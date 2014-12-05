@@ -103,7 +103,7 @@ var setQueryJSON = function (id,scope,filters) {
   // PykQuery.query_json = temp_query_json;
 }
 
-PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, adapter_param) {
+PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   that = this;
   var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
@@ -820,15 +820,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     }
     return filter_obj;
   };
-
-  // for (var key in query_scope) {
-  //   console.log(key]);
-  //   if (query_scope[key] && query_scope[key].constructor === PykQuery.init) {
-  //     console.log(key,divid_param);
-  //     break;
-  //   }
-  // }
-  // console.log("---------------------");
 
   /* -------------- URL params ------------ */
   // var filters = ["Pykih","mumbai","startup"];
