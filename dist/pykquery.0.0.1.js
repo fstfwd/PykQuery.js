@@ -1290,12 +1290,25 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
   var startAggregation = function (filter_obj){
     var metrics = filter_obj.metrics;
     // matrics_column_name = objectkeymatrics;
-    local_data = _.groupBy(raw_data,filter_obj.dimensions[0]);
-    //metrices
-    var local_filter_array = []
+    local_data = _.groupBy(raw_data, function (d) {
+      var groupby = "";
+      for (var k = 0; k < filter_obj.dimensions.length; k++) {
+        if (k===0) {
+          groupby = d[filter_obj.dimensions[k]];
+        } else {
+          groupby = groupby + "-" + d[filter_obj.dimensions[k]];
+        }
+      }
+      return groupby;
+    });
+
+    var local_filter_array = [];
     _.map(local_data, function (value,key) {
-      var local_obj = {};
-      local_obj[processAlias(pykquery.dimensions[0])] = key;
+      var local_obj = {},
+          keys = key.split("-");
+      for (var j = 0; j < keys.length; j++) {
+        local_obj[processAlias(pykquery.dimensions[j])] = keys[j];
+      }
       for (var prop in metrics) {
         var individual_metric = metrics[prop];
         for (var i = 0; i < individual_metric.length; i++) {
