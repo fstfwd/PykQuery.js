@@ -112,7 +112,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   filter_data,
   raw_data,
   global_divid_for_rawdata,
-  execute_on_filter;
+  execute_on_filter,
+  data_format;
   // set the global data to pykquery
 
   if(mode == "global" && _scope == "global" && adapter == "inbrowser") {
