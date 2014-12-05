@@ -15,9 +15,9 @@
 <body>
   <h3>Testing #1: Filters with two tables</h3>
   <div id="reset">Reset All</div>
-  <div id="main" style='float:left;'>
-    <div id='table1' style="float:left;margin-left:100px;"></div>
-    <div id='table2' style="float:left;margin-left:100px;"></div>
+  <div id="g1" style='float:left;'>
+    <div id='a' style="float:left;margin-left:100px;"></div>
+    <div id='b' style="float:left;margin-left:100px;"></div>
   </div>
   <div id="list_of_filters" style='margin-left:50px;float:left;'>&nbsp;</div>
   <div id="save_filters_form" style='margin-left:50px;float:left;'>
@@ -53,8 +53,7 @@
           });
         }
 
-        this.a = new PykQuery.init(this, "aggregation", "local", "table1", "inbrowser");
-        this.a.storeObjectInMemory('a');
+        this.a = new PykQuery.init(this, "aggregation", "local", "a", "inbrowser");
         this.a.dimensions = ["city"];
         this.a.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
         this.a.alias = {"city": "name", "price": "weight"};
@@ -83,8 +82,7 @@
           });
         }
 
-        this.b = new PykQuery.init(this, "aggregation", "local", "table2", "inbrowser");
-        this.b.storeObjectInMemory('b');
+        this.b = new PykQuery.init(this, "aggregation", "local", "b", "inbrowser");
         this.b.dimensions = ["zip"];
         this.b.metrics = {"beds":["count","sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
         this.b.alias = {"zip": "name","beds": {"sum": "bed_sum", "count": "weight"}};
@@ -92,11 +90,11 @@
         this.b.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
       }
 
-      var k = new PykCharts.table1({
-        selector: "table1"
+      window.k = new PykCharts.table1({
+        selector: "a"
       });
-      var l = new PykCharts.table2({
-        selector: "table2"
+      window.l = new PykCharts.table2({
+        selector: "b"
       });
 
       var xmlhttp = new XMLHttpRequest();
@@ -104,15 +102,16 @@
       xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 
-          g1 = new PykQuery.init(window, "global", "global", "main", "inbrowser");
-          g1.storeObjectInMemory('g1');
+          g1 = new PykQuery.init(window, "global", "global", "g1", "inbrowser");
           g1.rawdata = JSON.parse(xmlhttp.response);
-          g1.addImpacts(["a", "b"], true);
+          k.a.addImpacts(["g1"], false);
+          g1.addImpacts(["b"],false);
           g1.filterList("list_of_filters");
           $("#reset").click (function () {
             g1.resetFilters();
           });
-          g1.call();
+          k.a.call();
+          l.b.call();
         }
       }
       xmlhttp.open("GET", url, true);

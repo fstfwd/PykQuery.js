@@ -45,18 +45,11 @@ var setQueryJSON = function () {
   }
   PykQuery.query_json = temp_query_json;
 }
-
-var findQueryByDivid = function(id) {
-  var obj_name = document.getElementById(id).getAttribute("pyk_object");
-  if(obj_name == undefined){
-    console.log("div not exit "+id);
-  }
-  return obj_name;
-}
-
+var consolidated_filters = [];
 PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, adapter_param) {
   that = this;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param, consolidated_filters = [], queryable_filters;
+  PykQuery.list_of_scopes[divid_param] = query_scope;
+  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters;
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var available_adapters = ["inbrowser", "rumi"];
@@ -114,6 +107,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   sort = {},
   limit = 2000,
   __impacts =[],
+  __impactedby = [],
   offset = 0,
   alias = {},
   filter_data,
@@ -283,6 +277,16 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
       if (impactValidation(val)){
         __impacts.push(val);
       }
+    }
+  });
+  Object.defineProperty(this, 'impactedby', {
+    get: function() {
+      return __impactedby;
+    },
+    set: function(val) { //APPEND
+      // if (impactValidation(val)){
+        __impactedby.push(val);
+      // }
     }
   });
 
@@ -526,28 +530,38 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     }
   }
 
+  //g1.impacts(l1)
   this.addImpacts = function(array_of_div_ids, is_cyclical) {
     if (impactValidation(array_of_div_ids)) {
       len = array_of_div_ids.length;
       for(var i = 0; i < len; i++) {
         __impacts.push(array_of_div_ids[i]);
-        setGlobalDivIdForRawData(this,array_of_div_ids[i]);
-        if(is_cyclical){
-          var list_of_scopes = PykQuery.list_of_scopes[array_of_div_ids[i]];
 
-          setGlobalDivIdForRawData(list_of_scopes[array_of_div_ids[i]],this.div_id);
-          related_pykquery = list_of_scopes[array_of_div_ids[i]];
-          related_pykquery.impacts = [findQueryByDivid(this.div_id)];
+        //loop on array_of_div_ids for each d
+        var list_of_scopes = PykQuery.list_of_scopes[array_of_div_ids[i]], //d = window[d]
+            query_obj = list_of_scopes[array_of_div_ids[i]];
+        query_obj.impactedby = this.div_id; //d.impacted_by(this)
+        if (this.scope==="local") {
+          setGlobalDivIdForRawData(this,array_of_div_ids[i]);
+        } else {
+          setGlobalDivIdForRawData(query_obj,this.div_id);
+        }
+        if(is_cyclical){
+          __impactedby.push(array_of_div_ids[i]);
+          query_obj.impacts.push(this.div_id);
+          setGlobalDivIdForRawData(query_obj,this.div_id);
+
+          // var list_of_scopes = PykQuery.list_of_scopes[array_of_div_ids[i]];
+          // related_pykquery = list_of_scopes[array_of_div_ids[i]];
+          // related_pykquery.impacts = [this.div_id];
         }
       }
     }
   }
 
   var setGlobalDivIdForRawData = function (that,id) {
-    if (adapter === "inbrowser" && that.scope === "local") {
-      if (!that.global_divid_for_raw_data) {
-        that.global_divid_for_raw_data = id;
-      }
+    if (!that.global_divid_for_raw_data) {
+      that.global_divid_for_raw_data = id;
     }
   }
 
@@ -682,13 +696,12 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   var generateConsolidatedFiltersArray = function(){
     if (_scope == "local") {
-      var id = findQueryByDivid(div_id);
-      var list_of_scopes = PykQuery.list_of_scopes[id];
-      var consolidated_filters = list_of_scopes[id].filters;
-      var len = __impacts.length;
+      var list_of_scopes = PykQuery.list_of_scopes[div_id];
+      var consolidated_filters = list_of_scopes[div_id].filters;
+      var len = __impactedby.length;
       for(var i = 0; i < len; i++) {
-        var list_of_scopes = PykQuery.list_of_scopes[__impacts[i]];
-        var global_filter = list_of_scopes[__impacts[i]].filters;
+        var list_of_scopes = PykQuery.list_of_scopes[__impactedby[i]];
+        var global_filter = list_of_scopes[__impactedby[i]].filters;
         if (global_filter && global_filter.localdividtriggeringevent !== div_id) {
           consolidated_filters = _.flatten(global_filter, consolidated_filters);
         }
@@ -773,11 +786,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     return filter_obj;
   };
 
-  this.storeObjectInMemory = function(obj_name) {
-    PykQuery.list_of_scopes[obj_name] = query_scope;
-    document.getElementById(div_id).setAttribute("pyk_object", obj_name);
-  }
-
   // for (var key in query_scope) {
   //   console.log(key]);
   //   if (query_scope[key] && query_scope[key].constructor === PykQuery.init) {
@@ -822,7 +830,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
 
   var callLocalRenderOnFilter = function (id) {
     var list_of_scopes = PykQuery.list_of_scopes[__impacts[0]],
-        k = PykQuery.list_of_scopes[findQueryByDivid(id)];
+        k = PykQuery.list_of_scopes[id];
     if (typeof queryable_filters === "object") {
       if (queryable_filters.length === 0) {
         renderFunctions(k) // When reset filter is clicked, the global_filter = []. Therefore, for loop doesn't iterate.
@@ -1093,7 +1101,7 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   }
 
   var removeFilterFromList = function (filter_to_be_removed) {
-    var key = findQueryByDivid(filter_to_be_removed.local_div_id_triggering_event),
+    var key = filter_to_be_removed.local_div_id_triggering_event,
         list_of_scopes = PykQuery.list_of_scopes[key];
     list_of_scopes[key].removeFilter(filter_to_be_removed, true);
   }

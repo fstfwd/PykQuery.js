@@ -5,7 +5,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
   // data which is used for filtering data is in global_divid_for_raw_data
   var query_object = pykquery,
       raw_data,
-      global_divid_for_raw_data = findQueryByDivid(pykquery.global_divid_for_raw_data),
+      global_divid_for_raw_data = pykquery.global_divid_for_raw_data,
       query_scope = PykQuery.list_of_scopes[global_divid_for_raw_data];
   global_divid_for_raw_data = query_scope[global_divid_for_raw_data];
   raw_data = global_divid_for_raw_data.rawdata;
