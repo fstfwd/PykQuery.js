@@ -168,7 +168,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   alias = {},
   filter_data,
   raw_data,
-  global_divid_for_rawdata;
+  global_divid_for_rawdata,
+  execute_on_filter;
   // set the global data to pykquery
 
   if(mode == "global" && _scope == "global" && adapter == "inbrowser") {
@@ -390,6 +391,15 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     },
     set: function(new_where_clause){ //used only by the adaptors!
       where_clause = new_where_clause;
+    }
+  });
+
+  Object.defineProperty(this, 'executeonfilter', {
+    get: function() {
+      return execute_on_filter;
+    },
+    set: function(callback) {
+      execute_on_filter = callback;
     }
   });
 
@@ -718,12 +728,14 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     var that = this;
     if (_scope == "local") {
       invoke_call(getConfig(that));
+      this.executeonfilter();
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
         var local_filter = window[__impacts[j]];
         local_filter.filter_data = local_filter.call();
       }
+      this.appendClassSelected();
     }
     return true;
   }
@@ -1064,7 +1076,8 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     return query_string;
   };
 
-  this.filterList = function (div_element) {
+  this.listFilters = function (div_element) {
+
     document.getElementById(div_element).innerHTML = "";
     document.getElementById(div_element).innerHTML = "<div class='filter_list'></div>";
     showFilterList();
