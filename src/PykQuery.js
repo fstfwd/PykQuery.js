@@ -112,7 +112,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   filter_data,
   raw_data,
   global_divid_for_rawdata,
-  execute_on_filter,
+  execute_on_filter = function () {},
   data_format;
   // set the global data to pykquery
 
