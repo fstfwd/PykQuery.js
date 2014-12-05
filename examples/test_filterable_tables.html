@@ -49,6 +49,7 @@
             a.addFilter({"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}, true);
             $("#filters_json").html(JSON.stringify(PykQuery.query_json,"null", "\t"));
             l.execute();
+            g1.appendClassSelected();
           });
         }
       }
@@ -112,6 +113,7 @@
           b.call();
           k.execute();
           l.execute();
+          g1.appendClassSelected();
         }
       }
       xmlhttp.open("GET", url, true);

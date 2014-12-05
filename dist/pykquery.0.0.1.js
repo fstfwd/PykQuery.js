@@ -718,7 +718,6 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
     var that = this;
     if (_scope == "local") {
       invoke_call(getConfig(that));
-      appendSelectedClassToRespectiveDomId();
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
@@ -850,20 +849,24 @@ PykQuery.init = function(query_scope, mode_param, _scope_param, divid_param, ada
   // urlParams("name","Pykih",1);
   // urlParams("type","startup",1);
 
-  var appendSelectedClassToRespectiveDomId = function () {
-    if (consolidated_filters) {
-      var divs = document.querySelectorAll(".pykquery-selected");
-      for (var i = 0; i < divs.length; i++) {
-        divs[i].classList.remove("pykquery-selected");
-      }
-      for (var i = 0; i < consolidated_filters.length; i++) {
-        if (consolidated_filters[i].selected_dom_id) {
-          var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']");
-          if (element.length>0 && !element[0].classList.contains("pykquery-selected")) {
-            element[0].classList.add("pykquery-selected");
+  this.appendClassSelected = function () {
+    if (this.scope === "global") {
+      if (consolidated_filters) {
+        var divs = document.querySelectorAll(".pykquery-selected");
+        for (var i = 0; i < divs.length; i++) {
+          divs[i].classList.remove("pykquery-selected");
+        }
+        for (var i = 0; i < consolidated_filters.length; i++) {
+          if (consolidated_filters[i].selected_dom_id) {
+            var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']");
+            if (element.length>0 && !element[0].classList.contains("pykquery-selected")) {
+              element[0].classList.add("pykquery-selected");
+            }
           }
         }
       }
+    } else {
+      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "Cannot call appendClassSelected() on local.");
     }
   }
 
