@@ -452,11 +452,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         // OUTPUT - age > 13 or age < 65
         else if(old_filter['condition_type'] == "range") {
           var new_c = new_filter['condition'];
-          var old_c =old_filter['condition'];
+          var old_c = old_filter['condition'];
           if(new_c['min'] == old_c['min'] && new_c['max'] == old_c['max']  && new_c['not'] == old_c['not']){
             console.warn('Clean up your JS: Same filter cannot add');
             return false;
           } else {
+            where_clause.splice(i, 1);
             is_new_filter = true;
           }
         }
