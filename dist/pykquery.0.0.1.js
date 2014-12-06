@@ -61,8 +61,8 @@ PykQuery.local_names = [];
 PykQuery.query_json = {};
 
 var queryjson = {},
-    query_restore = true,
-    consolidated_filters = [];
+    query_restore = true;
+    // consolidated_filters = [];
 
 var restoreFilters = function () {
   for (var key in PykQuery.query_json) {
@@ -105,7 +105,7 @@ var setQueryJSON = function (id,scope,filters) {
 
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   that = this;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters;
+  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters, consolidated_filters = [];
   var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
   var available_scope = ["local", "global"];
   var available_adapters = ["inbrowser", "rumi"];
@@ -413,6 +413,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     if (filterValidation(name)) {
       if(is_interactive && _scope == "global"){
         addFilterInQuery(name,this,restore);
+        if (document.getElementsByClassName('filter_list').length > 0) {
+          showFilterList();
+        }
       } else if(is_interactive && _scope == "local"){
         name.local_div_id_triggering_event = div_id;
         addFilterPropagate(name,this,restore);
@@ -420,9 +423,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         //not possible
       } else if(!is_interactive && _scope == "local"){ //onload
         addFilterInQuery(name,this,restore);
-      }
-      if (document.getElementsByClassName('filter_list').length > 0) {
-        showFilterList();
       }
     }
   }
@@ -491,15 +491,15 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     if (filterValidation(name)) {
       if(is_interactive && _scope == "global"){
         removeFilterInQuery(name,this);
+        if (document.getElementsByClassName('filter_list').length > 0) {
+          showFilterList();
+        }
       } else if(is_interactive && _scope == "local"){
         removeFilterPropagate(name,this);
       } else if(!is_interactive && _scope == "global"){
         //not possible
       } else if(!is_interactive && _scope == "local"){ //onload
         removeFilterInQuery(name,this);
-      }
-      if (document.getElementsByClassName('filter_list').length > 0) {
-        showFilterList();
       }
     }
   }
@@ -744,15 +744,25 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   var generateConsolidatedFiltersArray = function(){
     if (_scope == "local") {
-      var consolidated_filters = window[div_id].filters,
+      var consolidated_filters = JSON.parse(JSON.stringify(window[div_id].filters)),
           len = __impactedby.length,
           global_filter;
+
       for(var i = 0; i < len; i++) {
         global_filter = window[__impactedby[i]].filters;
-        if (global_filter && global_filter.localdividtriggeringevent !== div_id) {
-          consolidated_filters = _.flatten(global_filter, consolidated_filters);
+        for (var j = 0; j < global_filter.length; j++) {
+          if (global_filter[j] && global_filter[j].local_div_id_triggering_event !== div_id) {
+            consolidated_filters.push(global_filter[j]);
+          }
         }
       }
+      //Loop over consolidated filters
+      //If my div == filter.where_i_came_from_div_id then remove me from consolidated filters
+      // for (var j = 0; j < consolidated_filters.length; j++) {
+      //   if (div_id === consolidated_filters[j].local_div_id_triggering_event) {
+      //     consolidated_filters.splice(j, 1);
+      //   }
+      // }
       return consolidated_filters;
     } else {
       console.error("Cannot call generateConsolidatedFiltersArray on a Global PykQuery.");
@@ -865,14 +875,14 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   this.appendClassSelected = function () {
     if (this.scope === "global") {
-      if (consolidated_filters) {
+      if (where_clause) {
         var divs = document.querySelectorAll(".pykquery-selected");
         for (var i = 0; i < divs.length; i++) {
           divs[i].classList.remove("pykquery-selected");
         }
-        for (var i = 0; i < consolidated_filters.length; i++) {
-          if (consolidated_filters[i].selected_dom_id) {
-            var element = document.querySelectorAll("[data-id='"+consolidated_filters[i].selected_dom_id+"']");
+        for (var i = 0; i < where_clause.length; i++) {
+          if (where_clause[i].selected_dom_id) {
+            var element = document.querySelectorAll("[data-id='"+where_clause[i].selected_dom_id+"']");
             if (element.length>0 && !element[0].classList.contains("pykquery-selected")) {
               element[0].classList.add("pykquery-selected");
             }
@@ -1086,13 +1096,13 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
   var showFilterList = function() {
     document.getElementsByClassName('filter_list')[0].innerHTML = "";
-    for (var i = 0; i < consolidated_filters.length; i++) {
-      if (consolidated_filters[i].in) {
-        var value = consolidated_filters[i].in+" in "+consolidated_filters[i].column_name;
-      } else if (consolidated_filters[i].not_in) {
-        var value = consolidated_filters[i].not_in+" not in "+consolidated_filters[i].column_name;
-      } else if (consolidated_filters[i].condition) {
-        var value = consolidated_filters[i].min+" - "+consolidated_filters[i].max+" of "+consolidated_filters[i].column_name;
+    for (var i = 0; i < where_clause.length; i++) {
+      if (where_clause[i].in) {
+        var value = where_clause[i].in+" in "+where_clause[i].column_name;
+      } else if (where_clause[i].not_in) {
+        var value = where_clause[i].not_in+" not in "+where_clause[i].column_name;
+      } else if (where_clause[i].condition) {
+        var value = where_clause[i].min+" - "+where_clause[i].max+" of "+where_clause[i].column_name;
       }
       var filter_block = document.createElement("div");
       filter_block.setAttribute("class","filter_block");
@@ -1112,7 +1122,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     for (var i = 0; i< divs.length; i++) {
       divs[i].onclick = function () {
         var index = this.id.split("_")
-        removeFilterFromList(consolidated_filters[index[2]]);
+        removeFilterFromList(where_clause[index[2]]);
       }
     }
   }

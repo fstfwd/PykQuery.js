@@ -107,7 +107,8 @@
           g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
           g1.rawdata = JSON.parse(xmlhttp.response);
           a.addImpacts(["g1"], false);
-          g1.addImpacts(["b"],false);
+          g1.addImpacts(["b"], false);
+          // g1.addImpacts(["a","b"],true);
           g1.listFilters("list_of_filters");
           $("#reset").click (function () {
             g1.resetFilters();
