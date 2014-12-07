@@ -175,13 +175,17 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     //console.log("value filter completed");
   }
   var rangeFilter = function (filter_obj,columns,mode){
-    var min = filter_obj['condition']['min'],
-        max = filter_obj['condition']['max'],
+    var min,
+        max,
         column_name = filter_obj['column_name'],
         col;
     raw_data = _.filter(raw_data ,function (obj){
-      if(obj[column_name] <= max && obj[column_name] >=min){
-        return obj;
+      for (var i = 0; i < filter_obj.condition; i++) {
+        min = filter_obj.condition[i]['min'];
+        max = filter_obj.condition[i]['max'];
+        if(obj[column_name] <= max && obj[column_name] >=min){
+          return obj;
+        }
       }
     });
     //return perticular columns data
@@ -197,8 +201,10 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     alias = query_object.alias;
     if (typeof alias[colname] === "string") {
       return alias[colname];
-    } else {
+    } else if (typeof alias[colname] === "string") {
       return alias[colname][aggregation_method];
+    } else {
+      return colname;
     }
   }
 }

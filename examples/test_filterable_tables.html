@@ -35,9 +35,9 @@
         this.execute = function () {
           var obj1 = a.flushToGet();
 
-          var html1 = "<table><tr><td>City</td><td>Price</td></tr>";
+          var html1 = "<table><tr><td>City</td><td>Type</td><td>Price</td></tr>";
           for (var i = 0; i< obj1.length; i++) {
-            html1 += "<tr><td><a data-id='"+obj1[i].name+"' class='filter1'>"+obj1[i].name+"</a></td><td>"+obj1[i].weight+"</td></tr>"
+            html1 += "<tr><td><a data-id='"+obj1[i].name+"' class='filter1'>"+obj1[i].name+"</a></td><td>"+obj1[i].type+"</td><td>"+obj1[i].weight+"</td></tr>"
           }
           html1 += "</table>";
 
@@ -80,7 +80,7 @@
       });
 
       a = new PykQuery.init("aggregation", "local", "a", "inbrowser");
-      a.dimensions = ["city"];
+      a.dimensions = ["city","type"];
       a.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
       a.alias = {"city": "name", "price": "weight"};
       a.executeOnFilter = function() {

@@ -400,7 +400,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             console.warn('Clean up your JS: Same filter cannot add');
             return false;
           } else {
-            where_clause.splice(i, 1);
+            if (name.override_filter) {
+              where_clause.splice(i, 1);
+            }
             is_new_filter = true;
           }
         }
@@ -740,10 +742,13 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             obj.in = where_in;
             obj.not_in = where_not_in;
           } else if (each_filter[0].condition_type === "range") {
-            obj.condition = {
-              min: each_filter[0].condition.min,
-              max: each_filter[0].condition.max,
-              not: each_filter[0].condition.not
+            obj.condition = [];
+            for (var i = 0; i < each_filter.length; i++) {
+              obj.condition .push({
+                min: each_filter[i].condition.min,
+                max: each_filter[i].condition.max,
+                not: each_filter[i].condition.not
+              });
             }
           }
           queryable_filters.push(obj);
