@@ -83,7 +83,7 @@
       a.dimensions = ["city"];
       a.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
       a.alias = {"city": "name", "price": "weight"};
-      a.executeonfilter = function() {
+      a.executeOnFilter = function() {
         k.execute();
       }
 
@@ -93,7 +93,7 @@
       b.dimensions = ["zip"];
       b.metrics = {"beds":["count","sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
       b.alias = {"zip": "name","beds": {"sum": "bed_sum", "count": "weight"}};
-      b.executeonfilter = function() {
+      b.executeOnFilter = function() {
         l.execute();
       }
 
@@ -106,9 +106,9 @@
 
           g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
           g1.rawdata = JSON.parse(xmlhttp.response);
-          a.addImpacts(["g1"], false);
-          g1.addImpacts(["b"], false);
-          // g1.addImpacts(["a","b"],true);
+          // a.addImpacts(["g1"], false);
+          // g1.addImpacts(["b"], false);
+          g1.addImpacts(["a","b"],true);
           g1.listFilters("list_of_filters");
           $("#reset").click (function () {
             g1.resetFilters();

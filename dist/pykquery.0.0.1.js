@@ -395,7 +395,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   });
 
-  Object.defineProperty(this, 'executeonfilter', {
+  Object.defineProperty(this, 'executeOnFilter', {
     get: function() {
       return execute_on_filter;
     },
@@ -730,7 +730,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     var that = this;
     if (_scope == "local") {
       invoke_call(getConfig(that));
-      this.executeonfilter();
+      this.executeOnFilter();
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
