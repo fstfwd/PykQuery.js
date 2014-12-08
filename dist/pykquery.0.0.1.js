@@ -122,7 +122,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     local_exists = (_scope == "local") ? _.find(PykQuery.local_names,function(d){ return (d == div_id); }) : null;
 
     if (mode == "global" && _scope != "global"){
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', div_id + ": scope and mode both should be global.");
+      errorHandling(1, div_id + ": scope and mode both should be global");
       return false;
     }
 
@@ -141,19 +141,19 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   } else {
     if (available_mode.indexOf(mode) == -1){
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', divid + ": mode has invalid value. It should be one of " + available_mode);
+      errorHandling(2, divid + ": mode has invalid value. It should be one of " + available_mode);
     }
     if (available_scope.indexOf(_scope) == -1){
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', divid + ": scope has invalid value. It should be one of " + available_scope);
+      errorHandling(3, divid + ": scope has invalid value. It should be one of " + available_scope);
     }
     if (available_adapters.indexOf(adapter) == -1){
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', divid + ": adapters has invalid value. It should be one of " + available_adapters);
+      errorHandling(4, divid + ": adapters has invalid value. It should be one of " + available_adapters);
     }
     if (util.isBlank(divid)){
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', divid + ": DivID cannot be undefined.");
+      errorHandling(5, divid + ": DivID cannot be undefined");
     }
     if (mode == "global" && _scope != "global"){
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', divid + ": scope and mode both should be global.");
+      errorHandling(6, divid + ": scope and mode both should be global");
     }
     return false;
   }
@@ -214,7 +214,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         if (available_dataformat.indexOf(format.toLowerCase()) > -1) {
           data_format = format;
         } else {
-          console.error("The accepted data formats are csv, json and array only. Kindly set a valid data format.");
+          errorHandling(7, "The accepted data formats are csv, json and array only. Kindly set a valid data format");
         }
       }
     });
@@ -287,7 +287,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       });
       break;
     case "datatype":
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "datatype is currently a missing functionality.");
+      errorHandling(8, "Datatype is currently a missing functionality");
       break;
   }
 
@@ -369,7 +369,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       //Input Format -- vals = {"col_name": "alias_name", "col_name1": "alias_name1", ...}
       columns = Object.keys(vals);
       if (columns.length < 1) {
-        console.warn("Need atleast 1 alias name to add");
+        warningHandling(1, "Need atleast 1 alias name to add.");
         return;
       }
 
@@ -388,7 +388,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     set: function(name) { //"[{"col1": "asc"}, ]"
       for (var prop in name) {
         if(util.isBlank(prop)){
-          console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "Column name is undefined in sort.")
+          errorHandling(9, "Column name is undefined in sort");
           return;
         }
         if (util.isBlank(name[prop]) || (name[prop] != "asc" && name[prop] != "desc")) {
@@ -449,7 +449,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']),
               is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
           if (is_same2 == true && is_same1 == true) {
-            console.warn('Clean up your JS: Same filter cannot add');
+            warningHandling(2, "Clean up your JS: Same filter cannot add");
             return false;
           }
           else {
@@ -460,7 +460,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           var new_c = new_filter['condition'],
               old_c = old_filter['condition'];
           if(new_c['min'] == old_c['min'] && new_c['max'] == old_c['max']  && new_c['not'] == old_c['not']){
-            console.warn('Clean up your JS: Same filter cannot add');
+            warningHandling(3, "Clean up your JS: Same filter cannot add");
             return false;
           } else {
             if (name.override_filter) {
@@ -562,7 +562,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         showFilterList();
       }
     } else {
-      console.error("You cannot reset a local. Please run it on a Global.")
+      errorHandling(10, "You cannot reset a local. Please run it on a Global");
     }
   }
 
@@ -575,7 +575,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
-      console.error("Globals do not have dimensions. Please run it on a local.")
+      errorHandling(11, "Globals do not have dimensions. Please run it on a local");
     }
   }
 
@@ -588,7 +588,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
-      console.error("Globals do not have datatypes. Please run it on a local.")
+      errorHandling(12, "Globals do not have datatypes. Please run it on a local");
     }
   }
 
@@ -601,7 +601,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
-      console.error("Globals do not have metrics. Please run it on a local.")
+      errorHandling(13, "Globals do not have metrics. Please run it on a local");
     }
   }
 
@@ -647,7 +647,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     for (var i = 0; i < len; i++) {
       query_object = window[array_of_div_ids[i]];
       if (query_object && query_object.scope === _scope) {
-        console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "A " + _scope + " can only impact a " + impacts_allowed_on + ".")
+        errorHandling(14, "A " + _scope + " can only impact a " + impacts_allowed_on);
         return false;
       }
     }
@@ -666,44 +666,44 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     //}]
 
     if (Object.keys(f).length == 0) {
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "Empty filter object is not allowed.")
+      errorHandling(15, "Empty filter object is not allowed");
       return false;
     }
     if(util.isBlank(f["column_name"])){
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "'column_name' cannot be empty.")
+      errorHandling(16, "'column_name' cannot be empty");
       return false;
     }
     if(!util.isBlank(f["next"]) && f["next"] != "OR" && f["next"] != "AND"){
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "'next' must either be empty or OR or AND.")
+      errorHandling(17, "'next' must either be empty or OR or AND");
       return false;
     }
     if (f["condition_type"] == "range") {
       if(util.isBlank(f["condition"])){
-        console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "'condition' cannot be empty.")
+        errorHandling(18, "'condition' cannot be empty");
         return false;
       }
       else{
         if(util.isBlank(f["condition"]["min"]) && util.isBlank(f["condition"]["max"])){
-          console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "Either 'min' or 'max' or both must always be present.")
+          errorHandling(19, "Either 'min' or 'max' or both must always be present");
           return false;
         }
       }
       return true;
     } else if (f["condition_type"] == "values") {
       if(util.isBlank(f["not_in"]) && util.isBlank(f["in"])){
-        console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "Either 'in' or 'not_in' or both must always be present.")
+        errorHandling(20, "Either 'in' or 'not_in' or both must always be present");
         return false;
       }
       if(f["not_in"] != undefined && f["in"] != undefined){
         if(f["not_in"].length == 0 && f["in"].length == 0 ){
-          console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "Either 'in' or 'not_in' or both must always be present.")
+          errorHandling(21, "Either 'in' or 'not_in' or both must always be present");
           return false;
         }
       }
       return true;
     }
     else{
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', div_id + ": 'condition_type' must be one of " + ["range", "values"] + ".");
+      errorHandling(22, div_id + ": 'condition_type' must be one of " + ["range", "values"]);
       return false;
     }
   }
@@ -712,23 +712,23 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   var metricsValidation = function(m) {
     var metric_functions = ['min', 'max', 'avg', 'sum', 'median', 'count'];
     if (Object.keys(m).length == 0) {
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "'metrics' object cannot be empty.")
+      errorHandling(23, "'metrics' object cannot be empty");
       return false;
     }
     for (var prop in m) {
       if(util.isBlank(prop)){
-        console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "Column name is undefined in 'metrics'.")
+        errorHandling(24, "Column name is undefined in 'metrics'");
         return false;
       }
       if (util.isBlank(m[prop]) || m[prop].length == 0) {
-        console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "Please pass an Array of metric functions for column name '" + prop + "'.")
+        errorHandling(25, "Please pass an Array of metric functions for column name '" + prop);
         return false;
       }
       else{
         var len = m[prop].length;
         for(var i = 0; i < len; i++){
           if (metric_functions.indexOf(m[prop][i]) <= -1) {
-            console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "Wrong metric function passed for column name '" + prop + "'.");
+            errorHandling(26, "Wrong metric function passed for column name '" + prop);
             return false;
           }
         }
@@ -743,7 +743,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       filter_data = "";
       return t;
     } else {
-      console.error("Cannot call flushToGet to on a Global PykQuery.")
+      errorHandling(27, "Cannot call flushToGet to on a Global PykQuery");
     }
   }
 
@@ -786,7 +786,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       // }
       return consolidated_filters;
     } else {
-      console.error("Cannot call generateConsolidatedFiltersArray on a Global PykQuery.");
+      errorHandling(28, "Cannot call generateConsolidatedFiltersArray on a Global PykQuery");
     }
   }
 
@@ -832,7 +832,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
       return queryable_filters;
     } else {
-      console.error("Cannot call generateConsolidatedFiltersArray on a Global PykQuery.");
+      errorHandling(29, "Cannot call generateConsolidatedFiltersArray on a Global PykQuery");
     }
   }
 
@@ -914,10 +914,17 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         }
       }
     } else {
-      console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "Cannot call appendClassSelected() on local.");
+      errorHandling(30,"Cannot call appendClassSelected() on local")
     }
   }
 
+  var errorHandling = function (error_code,error_message) {
+    console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', '("'+error_message+'")  Visit http://0.0.0.0:4567/#error_'+error_code);
+  }
+
+  var warningHandling = function (warning_code,warning_message) {
+    console.warn('%c[Warning - PykQuery] ', 'color: #F8C325;font-weight:bold;font-size:14px', '("'+warning_message+'")  Visit http://0.0.0.0:4567/#error_'+warning_code);
+  }
 
   this.toSql = function() {
     that = this;
