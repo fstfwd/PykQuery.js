@@ -31,7 +31,7 @@ PykUtil.init = function() {
             return is_same2;
         }
         else{
-            return false;
+            return true;
         }
     }
 
