@@ -388,12 +388,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     for (var i = 0; i < where_clause.length; i++) {
       var old_filter = where_clause[i];
       if (old_filter['column_name'] == new_filter['column_name'] && old_filter['condition_type'] == new_filter['condition_type']){
-        //INPUT - old_filter, new_filter
-        //INPUT - IN(A, B), IN(A, C)
-        //OUTPUT -- IN (A, B, C)
-        if (old_filter['condition_type'] == "values") {
-          var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']);
-          var is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
+        if (old_filter['condition_type'] == "values" || old_filter['condition_type'] == "datatype") {
+          var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']),
+              is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
           if (is_same2 == true && is_same1 == true) {
             console.warn('Clean up your JS: Same filter cannot add');
             return false;
@@ -402,13 +399,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             is_new_filter = true;
             break;
           }
-        }
-        // INPUT - old_filter, new_filter
-        // INPUT - age > 13, age < 65
-        // OUTPUT - age > 13 or age < 65
-        else if(old_filter['condition_type'] == "range") {
-          var new_c = new_filter['condition'];
-          var old_c = old_filter['condition'];
+        } else if(old_filter['condition_type'] == "range") {
+          var new_c = new_filter['condition'],
+              old_c = old_filter['condition'];
           if(new_c['min'] == old_c['min'] && new_c['max'] == old_c['max']  && new_c['not'] == old_c['not']){
             console.warn('Clean up your JS: Same filter cannot add');
             return false;
@@ -758,7 +751,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             "local_div_id_triggering_event": each_filter[0].local_div_id_triggering_event,
             "next": each_filter[0]['next']
           }
-          if (each_filter[0].condition_type === "values") {
+          if (each_filter[0].condition_type === "values" || each_filter[0].condition_type == "datatype") {
             var where_in = [],
                 where_not_in = [];
             for (var i = 0; i < each_filter.length; i++) {
