@@ -105,10 +105,12 @@ var setQueryJSON = function (id,scope,filters) {
 
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   that = this;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters, consolidated_filters = [];
-  var available_mode = ["aggregation", "unique", "select", "datatype", "global"];
-  var available_scope = ["local", "global"];
-  var available_adapters = ["inbrowser", "rumi"];
+  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters, consolidated_filters = [],
+      available_mode = ["aggregation", "unique", "select", "datatype", "global"],
+      available_scope = ["local", "global"],
+      available_adapters = ["inbrowser", "rumi"],
+      available_dataformat = ["csv","json","array"];
+
   var util = new PykUtil.init();
 
   if (available_mode.indexOf(mode_param) > -1 && available_scope.indexOf(_scope_param) > -1 && !util.isBlank(divid_param) && available_adapters.indexOf(adapter_param) > -1) {
@@ -170,7 +172,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   raw_data,
   global_divid_for_rawdata,
   execute_on_filter = function () {},
-  data_format;
+  data_format,
+  data_type = [];
   // set the global data to pykquery
 
   if(mode == "global" && _scope == "global" && adapter == "inbrowser") {
@@ -208,7 +211,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         return data_format;
       },
       set: function(format) {
-        if (format.toLowerCase() === "csv" || format.toLowerCase() === "json" || format.toLowerCase() === "array") {
+        if (available_dataformat.indexOf(format.toLowerCase()) > -1) {
           data_format = format;
         } else {
           console.error("The accepted data formats are csv, json and array only. Kindly set a valid data format.");
@@ -216,6 +219,18 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
     });
   }
+
+  if (mode === "datatype" && _scope === "local" && adapter === "rumi") {
+    Object.defineProperty(this, 'datatype', {
+      get: function() {
+        return data_type;
+      },
+      set: function(type) {
+        data_type = _.union(data_type,type);
+      }
+    });
+  }
+
   Object.defineProperty(this, 'scope', {
     get: function () {
       return _scope;
@@ -243,9 +258,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           return dimensions;
         },
         set: function(name) {
-          _.each(name, function (d) {
-            dimensions.push(d);
-          });
+          dimensions = _.union(dimensions, name);
         }
       });
       Object.defineProperty(this, 'metrics', {
@@ -570,6 +583,19 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
       console.error("Globals do not have dimensions. Please run it on a local.")
+    }
+  }
+
+  this.resetDatatype = function(){
+    if(_scope == "local"){
+      while(this.datatype.length > 0) {
+        this.datatype.pop();
+      }
+      // this.call();
+      query_restore = false;
+      setQueryJSON(this.div_id,this.scope,[]);
+    } else {
+      console.error("Globals do not have datatypes. Please run it on a local.")
     }
   }
 
