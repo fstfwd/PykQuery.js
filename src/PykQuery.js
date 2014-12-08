@@ -172,17 +172,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     });
   }
 
-  if (mode === "datatype" && _scope === "local" && adapter === "rumi") {
-    Object.defineProperty(this, 'datatype', {
-      get: function() {
-        return data_type;
-      },
-      set: function(type) {
-        data_type = _.union(data_type,type);
-      }
-    });
-  }
-
   Object.defineProperty(this, 'scope', {
     get: function () {
       return _scope;
@@ -239,7 +228,17 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       });
       break;
     case "datatype":
-      errorHandling(7, "Datatype is currently a missing functionality");
+      if (mode === "datatype" && _scope === "local" && adapter === "rumi") {
+        Object.defineProperty(this, 'datatype', {
+          get: function() {
+            return data_type;
+          },
+          set: function(type) {
+            data_type = _.union(data_type,type);
+          }
+        });
+      }
+      // errorHandling(7, "Datatype is currently a missing functionality");
       break;
   }
 
@@ -514,7 +513,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         showFilterList();
       }
     } else {
-      errorHandling(9, "You cannot reset a local. Please run it on a Global");
+      errorHandling(9, "You cannot run resetFilters on local. Please run it on a Global");
     }
   }
 
@@ -531,7 +530,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  this.resetDatatype = function(){
+  this.resetDatatypes = function(){
     if(_scope == "local"){
       while(this.datatype.length > 0) {
         this.datatype.pop();
