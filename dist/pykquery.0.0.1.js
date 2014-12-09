@@ -171,7 +171,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   dimensions = [],
   metrics = {},
   cols = [],
-  sort = {},
+  sort = [],
   limit = 2000,
   __impacts =[],
   __impactedby = [],
@@ -382,28 +382,27 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
 
       for (var column_name in vals) {
-        if (vals.hasOwnProperty(column_name)) {
-          alias[column_name] = vals[column_name];
-        }
+        alias[column_name] = vals[column_name];
       }
     }
   });
 
   Object.defineProperty(this, 'sort', {
     get: function() {
-      return sort
+      return sort;
     },
     set: function(name) { //"[{"col1": "asc"}, ]"
-      for (var prop in name) {
+      for (var i = 0; i < name.length; i++) {
+        var prop = Object.keys(name[i])[0];
         if(util.isBlank(prop)){
           errorHandling(8, "Column name is undefined in sort");
           return;
         }
-        if (util.isBlank(name[prop]) || (name[prop] != "asc" && name[prop] != "desc")) {
-          name[prop] = "asc";
+        if (util.isBlank(name[i][prop]) || (name[i][prop] != "asc" && name[i][prop] != "desc")) {
+          name[i][prop] = "asc";
         }
+        sort = _.union(sort, name);
       }
-      sort = name;
     }
   });
 
@@ -1337,7 +1336,30 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         // key: "value",
         //console.log('wrong condition type');
     }
+    if (query_object['sort']) {
+      filtered_data = startSorting(filtered_data);
+    }
     return filtered_data;
+  }
+
+  var startSorting = function (data) {
+    var sort_object = query_object['sort'];
+    return data.sort(function (a, b) {
+      for (var i = 0; i < sort_object.length; i++) {
+        var key = Object.keys(sort_object[i])[0],
+            alias = processAlias(key);
+        if (a[alias] !== b[alias]) {
+          return processSorting(a, b, alias, sort_object[i][key]);
+        }
+      }
+    });
+  }
+  var processSorting = function (a, b, alias, order) {
+    if (order === "asc") {
+      return a[alias] < b[alias] ? -1 : (a[alias] > b[alias] ? 1 : 0);
+    } else {
+      return a[alias] > b[alias] ? -1 : (a[alias] < b[alias] ? 1 : 0);
+    }
   }
 
   var startAggregation = function (filter_obj){

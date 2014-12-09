@@ -114,7 +114,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   dimensions = [],
   metrics = {},
   cols = [],
-  sort = {},
+  sort = [],
   limit = 2000,
   __impacts =[],
   __impactedby = [],
@@ -325,28 +325,27 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
 
       for (var column_name in vals) {
-        if (vals.hasOwnProperty(column_name)) {
-          alias[column_name] = vals[column_name];
-        }
+        alias[column_name] = vals[column_name];
       }
     }
   });
 
   Object.defineProperty(this, 'sort', {
     get: function() {
-      return sort
+      return sort;
     },
     set: function(name) { //"[{"col1": "asc"}, ]"
-      for (var prop in name) {
+      for (var i = 0; i < name.length; i++) {
+        var prop = Object.keys(name[i])[0];
         if(util.isBlank(prop)){
           errorHandling(8, "Column name is undefined in sort");
           return;
         }
-        if (util.isBlank(name[prop]) || (name[prop] != "asc" && name[prop] != "desc")) {
-          name[prop] = "asc";
+        if (util.isBlank(name[i][prop]) || (name[i][prop] != "asc" && name[i][prop] != "desc")) {
+          name[i][prop] = "asc";
         }
+        sort = _.union(sort, name);
       }
-      sort = name;
     }
   });
 

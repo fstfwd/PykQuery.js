@@ -32,7 +32,30 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         // key: "value",
         //console.log('wrong condition type');
     }
+    if (query_object['sort']) {
+      filtered_data = startSorting(filtered_data);
+    }
     return filtered_data;
+  }
+
+  var startSorting = function (data) {
+    var sort_object = query_object['sort'];
+    return data.sort(function (a, b) {
+      for (var i = 0; i < sort_object.length; i++) {
+        var key = Object.keys(sort_object[i])[0],
+            alias = processAlias(key);
+        if (a[alias] !== b[alias]) {
+          return processSorting(a, b, alias, sort_object[i][key]);
+        }
+      }
+    });
+  }
+  var processSorting = function (a, b, alias, order) {
+    if (order === "asc") {
+      return a[alias] < b[alias] ? -1 : (a[alias] > b[alias] ? 1 : 0);
+    } else {
+      return a[alias] > b[alias] ? -1 : (a[alias] < b[alias] ? 1 : 0);
+    }
   }
 
   var startAggregation = function (filter_obj){

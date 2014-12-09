@@ -36,7 +36,7 @@
           var obj1 = a.flushToGet();
 
           var html1 = "<table><tr><td>City</td><td>Type</td><td>Price</td></tr>";
-          for (var i = 0; i< obj1.length; i++) {
+          for (var i = 0; i < obj1.length; i++) {
             html1 += "<tr><td><a data-id='"+obj1[i].name+"' class='filter1'>"+obj1[i].name+"</a></td><td>"+obj1[i].type+"</td><td>"+obj1[i].weight+"</td></tr>"
           }
           html1 += "</table>";
@@ -83,6 +83,7 @@
       a.dimensions = ["city","type"];
       a.metrics = {"price":["sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
       a.alias = {"city": "name", "price": "weight"};
+      a.sort = [{"city":"asc"},{"type":"desc"}];
       a.executeOnFilter = function() {
         k.execute();
       }
@@ -93,6 +94,7 @@
       b.dimensions = ["zip"];
       b.metrics = {"beds":["count","sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
       b.alias = {"zip": "name","beds": {"sum": "bed_sum", "count": "weight"}};
+      b.sort = [{"zip":"asc"}];
       b.executeOnFilter = function() {
         l.execute();
       }
