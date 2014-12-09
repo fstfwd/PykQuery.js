@@ -648,14 +648,16 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         impacts_allowed_on,
         query_object;
     if (_scope === "local") {
+      error_code = 13;
       impacts_allowed_on = "global";
     } else {
+      error_code = 7;
       impacts_allowed_on = "local";
     }
     for (var i = 0; i < len; i++) {
       query_object = window[array_of_div_ids[i]];
       if (query_object && query_object.scope === _scope) {
-        errorHandling(13, "A " + _scope + " can only impact a " + impacts_allowed_on);
+        errorHandling(error_code, "A " + _scope + " can only impact a " + impacts_allowed_on);
         return false;
       }
     }
@@ -699,12 +701,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       return true;
     } else if (f["condition_type"] == "values") {
       if(util.isBlank(f["not_in"]) && util.isBlank(f["in"])){
-        errorHandling(19, "Either 'in' or 'not_in' or both must always be an array with some value");
+        errorHandling(19, "Either 'in' or 'not_in' or both must always be present with array of some value");
         return false;
       }
       if(f["not_in"] != undefined && f["in"] != undefined){
         if(f["not_in"].length == 0 && f["in"].length == 0 ){
-          errorHandling(19, "Either 'in' or 'not_in' or both must always be an array with some value");
+          errorHandling(19, "Either 'in' or 'not_in' or both must always be present with array of some value");
           return false;
         }
       }
