@@ -203,7 +203,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         column_name = filter_obj['column_name'],
         col;
     raw_data = _.filter(raw_data ,function (obj){
-      for (var i = 0; i < filter_obj.condition; i++) {
+      for (var i = 0; i < filter_obj.condition.length; i++) {
         min = filter_obj.condition[i]['min'];
         max = filter_obj.condition[i]['max'];
         if(obj[column_name] <= max && obj[column_name] >=min){
