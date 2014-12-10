@@ -525,7 +525,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         where_clause = caller_scope.filters;
     for (var x = 0; x < where_clause.length; x++) {
       if (where_clause[x]['column_name'] == column_name && where_clause[x]['condition_type'] == condition_type) {
-        if (condition_type == "values") {
+        if (condition_type == "values" || condition_type == "datatype") {
           if (_.difference(where_clause[x].in, name.in).length===0 && _.difference(where_clause[x].not_in, name.not_in).length===0) {
             where_clause.splice(x,1);
           }
