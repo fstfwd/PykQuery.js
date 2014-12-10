@@ -641,7 +641,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         }
       }
       return true;
-    } else if (f["condition_type"] == "values") {
+    } else if (f["condition_type"] == "values" || f["condition_type"] == "datatype") {
       if(util.isBlank(f["not_in"]) && util.isBlank(f["in"])){
         errorHandling(19, "Either 'in' or 'not_in' or both must always be present with array of some value");
         return false;
