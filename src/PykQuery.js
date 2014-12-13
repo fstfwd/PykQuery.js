@@ -1078,7 +1078,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       } else if (where_clause[i].not_in) {
         var value = where_clause[i].not_in+" not in "+where_clause[i].column_name;
       } else if (where_clause[i].condition) {
-        var value = where_clause[i].min+" - "+where_clause[i].max+" of "+where_clause[i].column_name;
+        var value = where_clause[i].condition.min+" - "+where_clause[i].condition.max+" of "+where_clause[i].column_name;
       }
       var filter_block = document.createElement("div");
       filter_block.setAttribute("class","filter_block");
