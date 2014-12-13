@@ -533,8 +533,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             caller_scope.call();
           }
         } else if (condition_type == "range") {
-          var __min = name['min'];
-          var __max = name['max'];
+          var __min = name['condition']['min'];
+          var __max = name['condition']['max'];
           if(!util.isBlank(__min) && !util.isBlank(__max)) {
             if(__min == where_clause[x]['condition']['min'] && __max == where_clause[x]['condition']['max']) {
               where_clause.splice(x,1);
