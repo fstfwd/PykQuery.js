@@ -67,7 +67,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         if (k===0) {
           groupby = d[filter_obj.dimensions[k]];
         } else {
-          groupby = groupby + "-" + d[filter_obj.dimensions[k]];
+          groupby = groupby + "<>" + d[filter_obj.dimensions[k]];
         }
       }
       return groupby;
@@ -76,7 +76,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var local_filter_array = [];
     _.map(local_data, function (value,key) {
       var local_obj = {},
-          keys = key.split("-");
+          keys = key.split("<>");
       for (var j = 0; j < keys.length; j++) {
         local_obj[processAlias(pykquery.dimensions[j])] = keys[j];
       }
