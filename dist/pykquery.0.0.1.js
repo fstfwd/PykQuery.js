@@ -78,6 +78,14 @@ var restoreFilters = function () {
       }
       query_object.addFilter(saved_filters[i], is_interactive, query_object.localdividtriggeringevent, true);
     }
+    if (saved_filters.length === 0) {
+      if(window[key].scope == "global"){
+        if (document.getElementsByClassName('filter_list').length > 0) {
+          var div = document.getElementsByClassName('filter_list')[0].parentNode.id;
+          window[key].listFilters(div);
+        }
+      }
+    }
   }
 }
 Object.defineProperty(PykQuery, 'query_json', {
@@ -93,14 +101,7 @@ Object.defineProperty(PykQuery, 'query_json', {
 });
 
 var setQueryJSON = function (id,scope,filters) {
-  // if (scope === "local") {
-    PykQuery.query_json[id] = filters;
-  // }
-  // var temp_query_json = {};
-  // for (var key in PykQuery.list_of_scopes) {
-  //   temp_query_json[key] = PykQuery.list_of_scopes[key][key].filters;
-  // }
-  // PykQuery.query_json = temp_query_json;
+  PykQuery.query_json[id] = filters;
 }
 
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
@@ -760,7 +761,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     var that = this;
     if (_scope == "local") {
       invoke_call(getConfig(that));
-      this.executeOnFilter();
+      this.executeOnFilter;
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
