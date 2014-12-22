@@ -1132,24 +1132,25 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     document.getElementsByClassName('filter_list')[0].innerHTML = "";
     for (var i = 0; i < where_clause.length; i++) {
       if (where_clause[i].in) {
-        var value = where_clause[i].in+" in "+where_clause[i].column_name;
+        var value = "<b>" + where_clause[i].column_name + " IN</b> (" + where_clause[i].in+")";
       } else if (where_clause[i].not_in) {
-        var value = where_clause[i].not_in+" not in "+where_clause[i].column_name;
+        var value = "<b>" + where_clause[i].column_name + " NOT IN</b> (" + where_clause[i].not_in+")";
       } else if (where_clause[i].condition) {
-        var value = where_clause[i].condition.min+" - "+where_clause[i].condition.max+" of "+where_clause[i].column_name;
+        var value = "<b>" + where_clause[i].column_name + " BETWEEN</b> " + where_clause[i].condition.min.toFixed(2)+" <b>AND</b> "+where_clause[i].condition.max.toFixed(2);
       }
       var filter_block = document.createElement("div");
       filter_block.setAttribute("class","filter_block");
+      filter_block.setAttribute("style","padding: 0px 10px;");
       filter_block.setAttribute("id","filter_block"+i);
       document.getElementsByClassName('filter_list')[0].appendChild(filter_block);
       var filter_values = document.createElement("div");
       filter_values.setAttribute("class","filter_value");
-      filter_values.innerHTML = "Filter by "+value;
+      filter_values.innerHTML = value;
       document.getElementById('filter_block'+i).appendChild(filter_values);
       var filter_remove = document.createElement("div");
       filter_remove.setAttribute("class","filter_remove");
       filter_remove.setAttribute("id","filter_remove_"+i);
-      filter_remove.innerHTML = "Remove"
+      filter_remove.innerHTML = "<b class='glyphicon glyphicon-trash' style='font-size: 11px;'></b>";
       document.getElementById('filter_block'+i).appendChild(filter_remove);
     }
     var divs = document.getElementsByClassName("filter_remove");
