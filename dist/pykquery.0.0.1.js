@@ -394,7 +394,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     },
     set: function(name) { //"[{"col1": "asc"}, ]"
       for (var i = 0; i < name.length; i++) {
-        var prop = Object.keys(name[i])[0];
+        var prop = Object.keys(name[i])[0],
+            len2 = sort.length,
+            sort_column_already_present = false;
         if(util.isBlank(prop)){
           errorHandling(8, "Column name is undefined in sort");
           return;
@@ -402,7 +404,16 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         if (util.isBlank(name[i][prop]) || (name[i][prop] != "asc" && name[i][prop] != "desc")) {
           name[i][prop] = "asc";
         }
-        sort = _.union(sort, name);
+        for (var j = 0; j < len2; j++) {
+          if (sort[j][prop]) {
+            sort[j][prop] = name[i][prop];
+            sort_column_already_present = true;
+            break;
+          }
+        }
+        if (!sort_column_already_present) {
+          sort = _.union(sort, name);
+        }
       }
     }
   });
