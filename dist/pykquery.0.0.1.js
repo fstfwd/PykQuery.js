@@ -429,7 +429,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   Object.defineProperty(this, 'executeOnFilter', {
     get: function() {
-      return execute_on_filter;
+      return execute_on_filter();
     },
     set: function(callback) {
       execute_on_filter = callback;
