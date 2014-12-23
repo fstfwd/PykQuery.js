@@ -1541,8 +1541,12 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     alias = query_object.alias;
     if (typeof alias[colname] === "string") {
       return alias[colname];
-    } else if (typeof alias[colname] === "string") {
-      return alias[colname][aggregation_method];
+    } else if (typeof alias[colname] === "object") {
+      if (aggregation_method) {
+        return alias[colname][aggregation_method];
+      } else {
+        return alias[colname][colname];
+      }
     } else {
       return colname;
     }
