@@ -735,7 +735,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   var generateConsolidatedFiltersArray = function(){
-    if (_scope == "local") {
+    // if (_scope === "local") {
       var consolidated_filters = JSON.parse(JSON.stringify(window[div_id].filters)),
           len = __impactedby.length,
           global_filter;
@@ -756,13 +756,13 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       //   }
       // }
       return consolidated_filters;
-    } else {
-      errorHandling(100, "Cannot call generateConsolidatedFiltersArray on a Global PykQuery");
-    }
+    // } else {
+    //   errorHandling(100, "Cannot call generateConsolidatedFiltersArray on a Global PykQuery");
+    // }
   }
 
   var generateQueryableFiltersArray = function(){
-    if (_scope === "local") {
+    // if (_scope === "local") {
       if (Object.keys(PykQuery.query_json).length > 0) {
         queryable_filters = [];
       }
@@ -802,9 +802,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         }
       }
       return queryable_filters;
-    } else {
-      errorHandling(101, "Cannot call generateQueryableFiltersArray on a Global PykQuery");
-    }
+    // } else {
+    //   errorHandling(101, "Cannot call generateQueryableFiltersArray on a Global PykQuery");
+    // }
   }
 
   var invoke_call = function(query){
