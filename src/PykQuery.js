@@ -408,13 +408,15 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   var addFilterInQuery = function(new_filter,caller_scope,restore) {
     var is_new_filter = true;
-    for (var i = 0; i < where_clause.length; i++) {
+    var where_clause_length = where_clause.length;
+    
+    for (var i = 0; i < where_clause_length; i++) {
       var old_filter = where_clause[i];
-      if (old_filter['column_name'] == new_filter['column_name'] && old_filter['condition_type'] == new_filter['condition_type']){
-        if (old_filter['condition_type'] == "values" || old_filter['condition_type'] == "datatype") {
+      if (old_filter['column_name'] === new_filter['column_name'] && old_filter['condition_type'] === new_filter['condition_type']){
+        if (old_filter['condition_type'] === "values" || old_filter['condition_type'] === "datatype") {
           var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']),
               is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
-          if (is_same2 == true && is_same1 == true) {
+          if (is_same2 === true && is_same1 === true) {
             warningHandling(2, "Clean up your JS: Same filter cannot add");
             return false;
           }
@@ -422,10 +424,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             is_new_filter = true;
             break;
           }
-        } else if(old_filter['condition_type'] == "range") {
+        } else if(old_filter['condition_type'] === "range") {
           var new_c = new_filter['condition'],
               old_c = old_filter['condition'];
-          if(new_c['min'] == old_c['min'] && new_c['max'] == old_c['max']  && new_c['not'] == old_c['not']){
+          if(new_c['min'] === old_c['min'] && new_c['max'] === old_c['max']  && new_c['not'] === old_c['not']){
             warningHandling(2, "Clean up your JS: Same filter cannot add");
             return false;
           } else {
@@ -437,6 +439,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         }
       }
     }
+
     if (is_new_filter == true){
       where_clause.push(new_filter);
       if (caller_scope && caller_scope.scope==="global") {
@@ -759,7 +762,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   var generateQueryableFiltersArray = function(){
-    if (_scope == "local") {
+    if (_scope === "local") {
       if (Object.keys(PykQuery.query_json).length > 0) {
         queryable_filters = [];
       }
