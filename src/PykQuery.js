@@ -11,9 +11,10 @@ var restoreFilters = function () {
   for (var key in PykQuery.query_json) {
     var saved_filters = PykQuery.query_json[key],
         query_object = window[key],
-        is_interactive;
+        is_interactive,
+        saved_filters_length = saved_filters.length;
 
-    for (var  i = 0; i < saved_filters.length; i++) {
+    for (var  i = 0; i < saved_filters_length; i++) {
       if (query_object.scope === "local") {
         is_interactive = false;
       } else {
@@ -21,7 +22,7 @@ var restoreFilters = function () {
       }
       query_object.addFilter(saved_filters[i], is_interactive, query_object.localdividtriggeringevent, true);
     }
-    if (saved_filters.length === 0) {
+    if (saved_filters_length === 0) {
       if(window[key].scope == "global"){
         if (document.getElementsByClassName('filter_list').length > 0) {
           var div = document.getElementsByClassName('filter_list')[0].parentNode.id;
@@ -372,7 +373,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   Object.defineProperty(this, 'executeOnFilter', {
     get: function() {
-      return execute_on_filter;
+      return execute_on_filter();
     },
     set: function(callback) {
       execute_on_filter = callback;
