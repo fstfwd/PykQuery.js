@@ -3,12 +3,7 @@ PykUtil = {}
 PykUtil.init = function() {
 
     this.pushToArray = function(a1, o1){
-        if( a1.length == 0 ){
-            a1 = [o1];
-        }
-        else{
-            a1.push(o1);
-        }
+        a1 = !a.length ? [o1] : (a.push(o1));
         return a1;
     }
 
@@ -52,6 +47,6 @@ PykUtil.init = function() {
     }
 
     this.isBlank = function(a) {
-        return a ? true : false
+        return !a ? true : false
     }
 }
