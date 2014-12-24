@@ -390,7 +390,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       return sort;
     },
     set: function(name) { //"[{"col1": "asc"}, ]"
-      for (var i = 0; i < name.length; i++) {
+    var name_length = name.length;
+      for (var i = 0; i < name_length; i++) {
         var prop = Object.keys(name[i])[0],
             len2 = sort.length,
             sort_column_already_present = false;
@@ -1211,20 +1212,21 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params, queryable_filte
 
   var rumiParameterValidation = function(params){
     var util = new PykUtil.init();
+    var util_is_blank = util.isBlank;
     console.log(util.isBlank(params))
     if (params == undefined) {
       console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "Empty rumi parameter object is not allowed.")
       return false;
     }
-    if(util.isBlank(params['filename'])){
+    if(util_is_blank(params['filename'])){
       console.log('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "filename missing in rumi parameter");
       return false;
     }
-    if(util.isBlank(params['username'])){
+    if(util_is_blank(params['username'])){
       console.log('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "username missing in rumi parameter");
       return false;
     }
-    if(util.isBlank(params['projectname'])){
+    if(util_is_blank(params['projectname'])){
       console.log('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', "projectname missing in rumi parameter");
       return false;
     }
