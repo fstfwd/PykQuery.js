@@ -66,11 +66,8 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       var groupby = "",
           filter_obj_dimensions_length = filter_obj.dimensions.length;
       for (var k = 0; k < filter_obj_dimensions_length; k++) {
-        if (k===0) {
-          groupby = d[filter_obj.dimensions[k]];
-        } else {
-          groupby = groupby + "<>" + d[filter_obj.dimensions[k]];
-        }
+        var filter_obj_dimensions = filter_obj.dimensions[k];
+        k===0 ? groupby = d[filter_obj_dimensions] : groupby += "<>" + d[filter_obj_dimensions];
       }
       return groupby;
     });
