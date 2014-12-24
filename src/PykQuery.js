@@ -337,7 +337,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       return sort;
     },
     set: function(name) { //"[{"col1": "asc"}, ]"
-      for (var i = 0; i < name.length; i++) {
+    var name_length = name.length;
+      for (var i = 0; i < name_length; i++) {
         var prop = Object.keys(name[i])[0],
             len2 = sort.length,
             sort_column_already_present = false;
