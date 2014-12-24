@@ -50,6 +50,7 @@ var setQueryJSON = function (id,scope,filters) {
 
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   that = this;
+  var start = new Date().getTime()/1000;
   var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters, consolidated_filters = [],
       available_mode = ["aggregation", "unique", "select", "datatype", "global"],
       available_scope = ["local", "global"],
@@ -57,11 +58,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       available_dataformat = ["csv","json","array"];
 
   var util = new PykUtil.init();
+  var util_is_blank = util.isBlank;
 
   var errorHandling = function (error_code,error_message) {
     var visit = "";
     if (error_code<100) {
-      var visit = "Visit http://0.0.0.0:4567/#error_"+error_code;
+      visit = "Visit http://0.0.0.0:4567/#error_"+error_code;
     }
     console.error('%c[Error - PykQuery] ', 'color: red;font-weight:bold;font-size:14px', '("'+error_message+'"). '+visit);
   }
@@ -70,7 +72,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     console.warn('%c[Warning - PykQuery] ', 'color: #F8C325;font-weight:bold;font-size:14px', '("'+warning_message+'"). Visit http://0.0.0.0:4567/#warning_'+warning_code);
   }
 
-  if (available_mode.indexOf(mode_param) > -1 && available_scope.indexOf(_scope_param) > -1 && !util.isBlank(divid_param) && available_adapters.indexOf(adapter_param) > -1) {
+  if (available_mode.indexOf(mode_param) > -1 && available_scope.indexOf(_scope_param) > -1 && !util_is_blank(divid_param) && available_adapters.indexOf(adapter_param) > -1) {
     mode = mode_param;
     _scope = _scope_param;
     adapter = adapter_param;
@@ -106,7 +108,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     if (available_adapters.indexOf(adapter_param) == -1){
       errorHandling(4, divid_param + ": adapters has invalid value. It should be one of " + available_adapters);
     }
-    if (util.isBlank(divid_param)){
+    if (util_is_blank(divid_param)){
       errorHandling(5, divid_param + ": DivID cannot be undefined");
     }
     return false;
@@ -342,11 +344,11 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         var prop = Object.keys(name[i])[0],
             len2 = sort.length,
             sort_column_already_present = false;
-        if(util.isBlank(prop)){
+        if(util_is_blank(prop)){
           errorHandling(8, "Column name is undefined in sort");
           return;
         }
-        if (util.isBlank(name[i][prop]) || (name[i][prop] != "asc" && name[i][prop] != "desc")) {
+        if (util_is_blank(name[i][prop]) || (name[i][prop] != "asc" && name[i][prop] != "desc")) {
           name[i][prop] = "asc";
         }
         for (var j = 0; j < len2; j++) {
@@ -492,7 +494,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         } else if (condition_type == "range") {
           var __min = name['condition']['min'];
           var __max = name['condition']['max'];
-          if(!util.isBlank(__min) && !util.isBlank(__max)) {
+          if(!util_is_blank(__min) && !util_is_blank(__max)) {
             if(__min == where_clause[x]['condition']['min'] && __max == where_clause[x]['condition']['max']) {
               where_clause.splice(x,1);
               if (caller_scope) {
@@ -635,28 +637,28 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       errorHandling(14, "Empty filter object is not allowed");
       return false;
     }
-    if(util.isBlank(f["column_name"])){
+    if(util_is_blank(f["column_name"])){
       errorHandling(15, "'column_name' cannot be empty");
       return false;
     }
-    if(!util.isBlank(f["next"]) && f["next"] != "OR" && f["next"] != "AND"){
+    if(!util_is_blank(f["next"]) && f["next"] != "OR" && f["next"] != "AND"){
       errorHandling(16, "'next' must either be empty or OR or AND");
       return false;
     }
     if (f["condition_type"] == "range") {
-      if(util.isBlank(f["condition"])){
+      if(util_is_blank(f["condition"])){
         errorHandling(17, "'condition' cannot be empty");
         return false;
       }
       else{
-        if(util.isBlank(f["condition"]["min"]) && util.isBlank(f["condition"]["max"])){
+        if(util_is_blank(f["condition"]["min"]) && util_is_blank(f["condition"]["max"])){
           errorHandling(18, "Either 'min' or 'max' or both must always be present");
           return false;
         }
       }
       return true;
     } else if (f["condition_type"] == "values" || f["condition_type"] == "datatype") {
-      if(util.isBlank(f["not_in"]) && util.isBlank(f["in"])){
+      if(util_is_blank(f["not_in"]) && util_is_blank(f["in"])){
         errorHandling(19, "Either 'in' or 'not_in' or both must always be present with array of some value");
         return false;
       }
@@ -682,11 +684,11 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       return false;
     }
     for (var prop in m) {
-      if(util.isBlank(prop)){
+      if(util_is_blank(prop)){
         errorHandling(22, "Column name is undefined in 'metrics'");
         return false;
       }
-      if (util.isBlank(m[prop]) || m[prop].length == 0) {
+      if (util_is_blank(m[prop]) || m[prop].length == 0) {
         errorHandling(23, "Please pass an Array of aggregation functions for column name '" + prop);
         return false;
       }
@@ -1085,6 +1087,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     showFilterList();
   }
   var showFilterList = function() {
+    console.log("heyyyyyyyyy")
     document.getElementsByClassName('filter_list')[0].innerHTML = "";
     for (var i = 0; i < where_clause.length; i++) {
       if (where_clause[i].in) {
