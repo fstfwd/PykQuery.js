@@ -1469,11 +1469,8 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var mode = filter_obj.mode,
         filters_array = filter_obj.filters,
         len = filters_array.length, columns;
-    if(filter_obj.mode == 'select'){
-      columns = filter_obj.select;
-    } else {
-      columns = [];
-    }
+    mode === 'select' ? columns = filter_obj.select : columns = [];
+    
     for(var i = 0; i < len; i++) {
       //var obj = {columnname:['count']}
       //checking condition_type of filter exit
