@@ -4,12 +4,12 @@ PykUtil.init = function() {
 
     this.pushToArray = function(a1, o1){
         if( a1.length == 0 ){
-            a1 = [o1]
+            a1 = [o1];
         }
         else{
             a1.push(o1);
         }
-        return a1
+        return a1;
     }
 
     //TODO - Change all _ ruby like names to CamelCase for all PykUtil Functions
@@ -24,8 +24,8 @@ PykUtil.init = function() {
     }
 
     this.is_exactly_same = function(a1, a2) {
-        if (a1 != undefined && a2 != undefined){
-            var is_same2 = (a1.length == a2.length) && a1.every(function(element, index) {
+        if (a1 && a2){
+            var is_same2 = (a1.length === a2.length) && a1.every(function(element, index) {
                 return element === a2[index];
             });
             return is_same2;
@@ -36,13 +36,14 @@ PykUtil.init = function() {
     }
 
     this.subtract_array = function(a1, a2) {
-        if (a1 != undefined && a2 != undefined){
-            for (var i = 0; i < a2.length; i++) {
+        if (a1 && a2){
+            var a2_length = a2.length;
+            for (var i = 0; i < a2_length; i++) {
                 var index = a1.indexOf(a2[i]);
                 if (index > -1) {
                     a1.splice(index, 1);
                 }
-                if (a1.length===0) {
+                if (a1.length === 0) {
                   a1 = undefined;
                 }
             }
@@ -51,6 +52,6 @@ PykUtil.init = function() {
     }
 
     this.isBlank = function(a) {
-        return (a == undefined || a == "") ? true : false
+        return a ? true : false
     }
 }
