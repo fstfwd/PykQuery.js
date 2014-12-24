@@ -105,7 +105,7 @@ var setQueryJSON = function (id,scope,filters) {
 }
 
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
-  that = this;
+
   var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters, consolidated_filters = [],
       available_mode = ["aggregation", "unique", "select", "datatype", "global"],
       available_scope = ["local", "global"],
