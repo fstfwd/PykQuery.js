@@ -39,9 +39,10 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
   }
 
   var startSorting = function (data) {
-    var sort_object = query_object['sort'];
+    var sort_object = query_object['sort'],
+        sort_object_length = sort_object.length;
     return data.sort(function (a, b) {
-      for (var i = 0; i < sort_object.length; i++) {
+      for (var i = 0; i < sort_object_length; i++) {
         var key = Object.keys(sort_object[i])[0],
             alias = processAlias(key);
         if (a[alias] !== b[alias]) {
@@ -62,8 +63,9 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var metrics = filter_obj.metrics;
     // matrics_column_name = objectkeymatrics;
     local_data = _.groupBy(raw_data, function (d) {
-      var groupby = "";
-      for (var k = 0; k < filter_obj.dimensions.length; k++) {
+      var groupby = "",
+          filter_obj_dimensions_length = filter_obj.dimensions.length;
+      for (var k = 0; k < filter_obj_dimensions_length; k++) {
         if (k===0) {
           groupby = d[filter_obj.dimensions[k]];
         } else {
@@ -76,13 +78,15 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var local_filter_array = [];
     _.map(local_data, function (value,key) {
       var local_obj = {},
-          keys = key.split("<>");
-      for (var j = 0; j < keys.length; j++) {
+          keys = key.split("<>"),
+          keys_length = keys.length;
+      for (var j = 0; j < keys_length; j++) {
         local_obj[processAlias(pykquery.dimensions[j])] = keys[j];
       }
       for (var prop in metrics) {
-        var individual_metric = metrics[prop];
-        for (var i = 0; i < individual_metric.length; i++) {
+        var individual_metric = metrics[prop],
+            individual_metric_length = individual_metric.length;
+        for (var i = 0; i < individual_metric_length; i++) {
           switch (individual_metric[i]) {
             case "count":
               local_obj[processAlias(prop,individual_metric[i])] = value.length;
@@ -201,9 +205,10 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     var min,
         max,
         column_name = filter_obj['column_name'],
-        col;
+        col,
+        filter_obj_condition_length = filter_obj.condition.length;
     raw_data = _.filter(raw_data ,function (obj){
-      for (var i = 0; i < filter_obj.condition.length; i++) {
+      for (var i = 0; i < filter_obj_condition_length; i++) {
         min = filter_obj.condition[i]['min'];
         max = filter_obj.condition[i]['max'];
         if(obj[column_name] <= max && obj[column_name] >=min){
