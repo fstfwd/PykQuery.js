@@ -409,7 +409,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   var addFilterInQuery = function(new_filter,caller_scope,restore) {
     var is_new_filter = true;
     var where_clause_length = where_clause.length;
-    
+
     for (var i = 0; i < where_clause_length; i++) {
       var old_filter = where_clause[i];
       if (old_filter['column_name'] === new_filter['column_name'] && old_filter['condition_type'] === new_filter['condition_type']){
@@ -828,7 +828,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     var filter_obj = {};
     var querydata;
     var arr = Object.getOwnPropertyNames(that);
-    for (var i in arr) {
+    var arr_length = arr.length;
+    for (var i = 0; i < arr_length;i++) {
       if (that.propertyIsEnumerable(arr[i]) == false) {
         filter_obj[arr[i]] = that[arr[i]];
       }
