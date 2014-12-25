@@ -180,12 +180,9 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         col;
     raw_data = _.filter(raw_data ,function (obj) {
       if(!not_in || not_in.indexOf(obj[column_name]) < 0) {
-        return obj;
-      }
-    });
-    raw_data = _.filter(raw_data ,function (obj) {
-      if(_in && _in.indexOf(obj[column_name]) > -1) {
-        return obj;
+        if(_in && _in.indexOf(obj[column_name]) > -1) {  
+          return obj;
+        }
       }
     });
     // Why is the below code written. It returns the data with only one column. Ideally, the where clause should return all the columns with aggregation hapenning later ---> AUTHOR RONAK
@@ -196,7 +193,8 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       });
     }
     //console.log("value filter completed");
-  }
+  }; 
+
   var rangeFilter = function (filter_obj,columns,mode){
     var min,
         max,
@@ -220,19 +218,14 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     }
     //console.log("rangeFilter done----");
   }
-
+  
   var processAlias = function(colname,aggregation_method) {
     var alias = query_object.alias;
     if (typeof alias[colname] === "string") {
       return alias[colname];
     } else if (typeof alias[colname] === "object") {
-      if (aggregation_method) {
-        return alias[colname][aggregation_method];
-      } else {
-        return alias[colname][colname];
-      }
-    } else {
-      return colname;
+      return aggregation_method ? alias[colname][aggregation_method] : alias[colname][colname];
     }
+    return colname;
   }
 }
