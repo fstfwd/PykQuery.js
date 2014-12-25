@@ -61,12 +61,12 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
 
   var startAggregation = function (filter_obj){
     var metrics = filter_obj.metrics;
-    // matrics_column_name = objectkeymatrics;
+    var filter_obj_dimension = filter_obj.dimensions;
+    var filter_obj_dimensions_length = filter_obj_dimension.length;
     local_data = _.groupBy(raw_data, function (d) {
-      var groupby = "",
-          filter_obj_dimensions_length = filter_obj.dimensions.length;
+      var groupby = "";
       for (var k = 0; k < filter_obj_dimensions_length; k++) {
-        var filter_obj_dimensions = filter_obj.dimensions[k];
+        var filter_obj_dimensions = filter_obj_dimension[k];
         k===0 ? groupby = d[filter_obj_dimensions] : groupby += "<>" + d[filter_obj_dimensions];
       }
       return groupby;
@@ -151,7 +151,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         filters_array = filter_obj.filters,
         len = filters_array.length, columns;
     mode === 'select' ? columns = filter_obj.select : columns = [];
-    
+
     for(var i = 0; i < len; i++) {
       //var obj = {columnname:['count']}
       //checking condition_type of filter exit
