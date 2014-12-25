@@ -472,10 +472,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         }
       } else if(is_interactive && _scope == "local"){
         removeFilterPropagate(name,this);
-      } else if(!is_interactive && _scope == "global"){
-        //not possible
       } else if(!is_interactive && _scope == "local"){ //onload
         removeFilterInQuery(name,this);
+      } else if(!is_interactive && _scope == "global"){
+        //not possible
       }
     }
   }
@@ -483,8 +483,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   var removeFilterInQuery = function(name,caller_scope) {
     var column_name = name.column_name,
         condition_type = name.condition_type,
-        where_clause = caller_scope.filters;
-    for (var x = 0; x < where_clause.length; x++) {
+        where_clause = caller_scope.filters
+        where_clause_length = where_clause.length;
+        console.log(where_clause_length,"removeFilterInQuery")
+    for (var x = 0; x < where_clause_length; x++) {
       if (where_clause[x]['column_name'] == column_name && where_clause[x]['condition_type'] == condition_type) {
         if (condition_type == "values" || condition_type == "datatype") {
           if (_.difference(where_clause[x].in, name.in).length===0 && _.difference(where_clause[x].not_in, name.not_in).length===0) {
