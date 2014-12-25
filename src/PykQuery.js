@@ -583,7 +583,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
         //loop on array_of_div_ids for each d
         var query_object = window[array_of_div_ids[i]];
-        window[array_of_div_ids[i]].impactedby = this.div_id; //d.impacted_by(this)
+        query_object.impactedby = this.div_id;//d.impacted_by(this)
         if (this.scope==="local") {
           setGlobalDivIdForRawData(this,array_of_div_ids[i]);
         } else {
