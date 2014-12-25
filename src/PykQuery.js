@@ -29,6 +29,7 @@ var restoreFilters = function () {
     }
   }
 }
+
 Object.defineProperty(PykQuery, 'query_json', {
   get: function () {
     return queryjson;
@@ -481,7 +482,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     var column_name = name.column_name,
         condition_type = name.condition_type,
         where_clause = caller_scope.filters;
-        // where_clause_length = where_clause.length;
+       
     for (var x = 0; x < where_clause.length; x++) {
       if (where_clause[x]['column_name'] === column_name && where_clause[x]['condition_type'] === condition_type) {
         if (condition_type === "values" || condition_type === "datatype") {
