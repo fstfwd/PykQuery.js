@@ -688,6 +688,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     //"NOT IN": ["blank"],
     //"next": "OR",
     //}]
+    var f_next = f["next"],
+        f_condition_type = f["condition_type"];
 
     if (Object.keys(f).length == 0) {
       errorHandling(14, "Empty filter object is not allowed");
@@ -697,7 +699,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       errorHandling(15, "'column_name' cannot be empty");
       return false;
     }
-    if(!util_is_blank(f["next"]) && f["next"] != "OR" && f["next"] != "AND"){
+    if(!util_is_blank(f_next) && f_next != "OR" && f_next != "AND"){
       errorHandling(16, "'next' must either be empty or OR or AND");
       return false;
     }
@@ -1403,17 +1405,19 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       for (var j = 0; j < keys_length; j++) {
         local_obj[processAlias(pykquery.dimensions[j])] = keys[j];
       }
-      for (var prop in metrics) {
-        var individual_metric = metrics[prop],
+      var prop = Object.keys(metrics);
+      var prop_length = prop.length;
+      for (var i=0; i<prop_length; i++) {
+        var individual_metric = metrics[prop[i]],
             individual_metric_length = individual_metric.length;
         for (var i = 0; i < individual_metric_length; i++) {
           switch (individual_metric[i]) {
             case "count":
-              local_obj[processAlias(prop,individual_metric[i])] = value.length;
+              local_obj[processAlias(prop[i],individual_metric[i])] = value.length;
               break;
             case "sum":
-              local_obj[processAlias(prop,individual_metric[i])] = _.sum(value, function (values) {
-                return parseInt(values[prop],10);
+              local_obj[processAlias(prop[i],individual_metric[i])] = _.sum(value, function (values) {
+                return parseInt(values[prop[i]],10);
               });
               break;
           }
