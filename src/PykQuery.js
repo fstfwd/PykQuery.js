@@ -635,6 +635,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     //"NOT IN": ["blank"],
     //"next": "OR",
     //}]
+    var f_next = f["next"],
+        f_condition_type = f["condition_type"];
 
     if (Object.keys(f).length == 0) {
       errorHandling(14, "Empty filter object is not allowed");
@@ -644,7 +646,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       errorHandling(15, "'column_name' cannot be empty");
       return false;
     }
-    if(!util_is_blank(f["next"]) && f["next"] != "OR" && f["next"] != "AND"){
+    if(!util_is_blank(f_next) && f_next != "OR" && f_next != "AND"){
       errorHandling(16, "'next' must either be empty or OR or AND");
       return false;
     }
