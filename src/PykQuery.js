@@ -19,10 +19,11 @@ var restoreFilters = function () {
       query_object.addFilter(saved_filters[i], is_interactive, query_object.localdividtriggeringevent, true);
     }
     if (saved_filters_length === 0) {
-      if(window[key].scope === "global"){
-        if (document.getElementsByClassName('filter_list').length > 0) {
-          var div = document.getElementsByClassName('filter_list')[0].parentNode.id;
-          window[key].listFilters(div);
+      if(query_object.scope === "global"){
+        var get_class_filter_list = document.getElementsByClassName('filter_list');
+        if (get_class_filter_list.length > 0) {
+          var div = get_class_filter_list[0].parentNode.id;
+          query_object.listFilters(div);
         }
       }
     }
@@ -479,9 +480,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   var removeFilterInQuery = function(name,caller_scope) {
     var column_name = name.column_name,
         condition_type = name.condition_type,
-        where_clause = caller_scope.filters,
-        where_clause_length = where_clause.length;
-    for (var x = 0; x < where_clause_length; x++) {
+        where_clause = caller_scope.filters;
+        // where_clause_length = where_clause.length;
+    for (var x = 0; x < where_clause.length; x++) {
       if (where_clause[x]['column_name'] === column_name && where_clause[x]['condition_type'] === condition_type) {
         if (condition_type === "values" || condition_type === "datatype") {
           if (_.difference(where_clause[x].in, name.in).length===0 && _.difference(where_clause[x].not_in, name.not_in).length===0) {
