@@ -740,7 +740,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     // if (_scope === "local") {
       var consolidated_filters = JSON.parse(JSON.stringify(window[div_id].filters)),
           len = __impactedby.length,
-          global_filter;
+          global_filter,
           global_filter_length;
 
       for(var i = 0; i < len; i++) {
