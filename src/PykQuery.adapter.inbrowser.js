@@ -74,6 +74,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
 
     var local_filter_array = [];
     _.map(local_data, function (value,key) {
+      // console.log(key,"key");
       var local_obj = {},
           keys = key.split("<>"),
           keys_length = keys.length;

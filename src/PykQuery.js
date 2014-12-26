@@ -1112,7 +1112,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var filter_remove = document.createElement("div");
       filter_remove.setAttribute("class","filter_remove");
       filter_remove.setAttribute("id","filter_remove_"+i);
-      filter_remove.innerHTML = "<b class='glyphicon glyphicon-trash' style='font-size: 11px;'></b>";
+      filter_remove.innerHTML = "Remove";
+      // filter_remove.innerHTML = "<b class='glyphicon glyphicon-trash' style='font-size: 11px;'></b>";
       document.getElementById('filter_block'+i).appendChild(filter_remove);
     }
     var divs = document.getElementsByClassName("filter_remove"),
