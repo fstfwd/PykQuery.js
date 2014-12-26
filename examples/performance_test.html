@@ -15,9 +15,11 @@
         <script src='../lib/d3.js'></script>
         <script src='../src/underscoreAddon.js'></script>
         <script type="text/javascript" src="performance.js"></script>
-        <script src="../src/PykUtil.js"></script>
-        <script src="../src/PykQuery.js"></script>
-        <script src="../src/PykQuery.adapter.inbrowser.js"></script>
+        <script type="text/javascript" src="../src/pykquery.0.0.1.js"></script>
+        <!-- // <script type="text/javascript" src="../dist/pykquery.0.0.1.js"></script> -->
+      <!--   // <script src="../src/PykUtil.js"></script>
+        // <script src="../src/PykQuery.js"></script>
+        // <script src="../src/PykQuery.adapter.inbrowser.js"></script> -->
         <script type="text/javascript">
         $(document).ready(function () {
 
@@ -82,23 +84,23 @@
             // console.log(d3.select("#table1 table"))
 
             $("#table1 td").click(function(){
-                // var date = new Date();
-                //     var i,avg =0;
-                //     var a = [];
-                //     for(i = 0;i<1000;i++) {
-                //         // console.log(i);
-                //         var start = new Date().getTime();
+                var date = new Date();
+                    var i,avg =0;
+                    var a = [];
+                    for(i = 0;i<100;i++) {
+                        // console.log(i);
+                        var start = new Date().getTime();
                         var value = $(this).html();
                             id = $(this).attr("data-id");
                         table1.addFilter({"column_name": "drinkingwatersource", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}, true);
-                //         var end = new Date().getTime();
-                //         // console.log("end",end);
-                //         // if (i%2 === 0) {
-                //             a[i] = end - start;
-                //             avg += a[i] 
-                //         // }                       
-                //     }
-                // console.log("Performance",a,avg/1000);
+                        var end = new Date().getTime();
+                        // console.log("end",end);
+                        // if (i%2 === 0) {
+                            a[i] = end - start;
+                            avg += a[i] 
+                        // }                       
+                    }
+                console.log("Performance",a,avg/100);
 
             });
 
