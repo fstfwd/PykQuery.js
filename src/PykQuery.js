@@ -437,7 +437,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
     }
 
-    if (is_new_filter == true){
+    if (is_new_filter === true){
       where_clause.push(new_filter);
       if (caller_scope && caller_scope.scope==="global") {
         caller_scope.call();
@@ -511,7 +511,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   var removeFilterPropagate = function(name,caller_scope) {
-    if(_scope == "local") {
+    if(_scope === "local") {
       var len = __impacts.length;
       for(var j =0;j<len;j++) {
         window[__impacts[j]].removeFilter(name,caller_scope);
@@ -520,7 +520,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   this.resetFilters = function(){
-    if(_scope == "global"){
+    console.log("resetFilters");
+    if(_scope === "global"){
       where_clause = [];
       this.call();
       query_restore = false;
@@ -547,7 +548,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   this.resetDatatypes = function(){
-    if(_scope == "local"){
+    if(_scope === "local"){
       while(this.datatype.length > 0) {
         this.datatype.pop();
       }
@@ -709,7 +710,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   this.flushToGet = function(){
-    if (_scope == "local") {
+    if (_scope === "local") {
       var t = filter_data;
       filter_data = "";
       return t;
@@ -813,7 +814,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   var invoke_call = function(query){
     consolidated_filters = generateConsolidatedFiltersArray();
     queryable_filters = generateQueryableFiltersArray();
-    if(adapter == "inbrowser"){
+    if(adapter === "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(query, queryable_filters);
       return filter_data = connector.call();
     }
@@ -930,8 +931,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
     //START -- SELECT COLUMN NAMES clause
     if (dimensions && mode === "aggregation") {
-      if (metrics && _.isEmpty(metrics) == false) {
-        for(var i in metrics){
+      if (metrics && !_.isEmpty(metrics)) {
+       for(var i in metrics){
           var len = metrics[i].length;
           for(var j = 0; j < len; j++){
             required_columns.push(metrics[i][j] + "("+ i +")")
@@ -939,7 +940,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         }
       }
 
-      if (_.isEmpty(dimensions) === false) {
+      if (!_.isEmpty(dimensions)) {
         var dimensions_length = dimensions.length;
         for(var i=0 ; i<dimensions_length ; i++) {
           if (_.has(metrics, dimensions[i]) === false) {
@@ -950,7 +951,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
     }
 
-    if (select && mode == "select") {
+    if (select && mode === "select") {
       if (_.intersection(columns,select).length !== 0 || select.toString() === ["*"].toString()) {
         _.each(select, function(d) {
           required_columns.push(d);
@@ -961,7 +962,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
     }
 
-    if(unique && mode == "unique") {
+    if(unique && mode === "unique") {
       if (_.intersection(columns,unique).length !== 0) {
         _.each(unique, function(d) {
           required_columns.push(d);
@@ -972,10 +973,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
     }
 
-    if (_.isEmpty(required_columns) === true && _.isEmpty(dimensions) === true && mode !== "unique") {
+    if (_.isEmpty(required_columns) && _.isEmpty(dimensions) && mode != "unique") {
       query_select = "SELECT * ";
     }
-    else if (mode == "unique") {
+    else if (mode === "unique") {
       query_select = "SELECT DISTINCT " + required_columns.join(", ") + " ";
     }
     else {
@@ -985,7 +986,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
 
     // START -- WHERE clause
-    if (filters && _.isEmpty(filters) === false) {
+    if (filters && !_.isEmpty(filters)) {
       // query_where = "WHERE ";
       next_op = false;
 
@@ -1028,7 +1029,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             break;
 
           case "range":
-            if (_.isEmpty(d["condition"]) === false) {
+            if (!_.isEmpty(d["condition"])) {
               query_where[i] += d["column_name"] + " ";
               if (d["condition"]["not"]) {
                 query_where[i] += "NOT ";
@@ -1061,7 +1062,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
 
     // START -- ORDER BY clause
-    if (sort && _.isEmpty(sort) === false) {
+    if (sort && !_.isEmpty(sort)) {
       query_order_by = "ORDER BY ";
       for (key in sort) {
         query_order_by += key + " " + sort[key] + ", ";
@@ -1091,9 +1092,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   };
 
   this.listFilters = function (div_element) {
-
-    document.getElementById(div_element).innerHTML = "";
-    document.getElementById(div_element).innerHTML = "<div class='filter_list'></div>";
+    var element = document.getElementById(div_element);
+    element.innerHTML = "";
+    element.innerHTML = "<div class='filter_list'></div>";
     showFilterList();
   }
   var showFilterList = function() {
@@ -1107,6 +1108,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       } else if (where_clause[i].condition) {
         var value = "<b>" + where_clause[i].column_name + " BETWEEN</b> " + where_clause[i].condition.min.toFixed(2)+" <b>AND</b> "+where_clause[i].condition.max.toFixed(2);
       }
+      var filterBlock = "<div id='filter_block'"+i+" class='filter_block' style='padding: 0px 10px;'></div>"
       var filter_block = document.createElement("div");
       filter_block.setAttribute("class","filter_block");
       filter_block.setAttribute("style","padding: 0px 10px;");
