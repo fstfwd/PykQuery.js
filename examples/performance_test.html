@@ -1,0 +1,89 @@
+<html>
+	<head>
+	</head>
+	<body>
+        <div id ="reset">reset all</div>
+		<div id="g1">
+            <div id = "table1" style="float:left;margin-right:50px;">
+            </div>
+            <div id="table2">
+            </div>         
+		</div>
+        <div id="list_of_filters"></div>
+        <script src="lib/jquery-1.11.1.min.js"></script>
+        <script src='../lib/underscore-min.js'></script>
+        <script src='../lib/d3.js'></script>
+        <script src='../src/underscoreAddon.js'></script>
+        <script type="text/javascript" src="performance.js"></script>
+        <script src="../src/PykUtil.js"></script>
+        <script src="../src/PykQuery.js"></script>
+        <script src="../src/PykQuery.adapter.inbrowser.js"></script>
+        <script type="text/javascript">
+
+            table1 = new PykQuery.init("aggregation", "local", "table1", "inbrowser"); 
+            table1.dimensions = ["drinkingwatersource"];
+            table1.metrics = {"drinkingwatersource_population":["sum"]};
+            table1.alias = {
+                "Drinking Water Source" : "name",
+                "Population" : "weight"
+            };
+
+            table2 = new PykQuery.init("aggregation", "local", "table2", "inbrowser"); 
+            table2.dimensions = ["area"];
+            table2.metrics = {"household_population":["sum"]};
+            table2.alias = {
+                "area": "name",
+                "household_population": "weight"
+            };
+
+            d3.csv("data/performace_test.csv", function (data) {
+                console.log(data.length)
+                window.g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
+                g1.rawdata = data;
+                g1.addImpacts(["table1","table2"],true);
+                g1.listFilters("list_of_filters");
+                $("#reset").click (function () {
+                    g1.resetFilters();
+                });
+
+
+
+            table1.call();
+            table2.call();
+
+            table1.executeOnFilter = function() {
+                var d = table1.flushToGet();
+                dataTable(d,table1.dimensions,table1.metrics,table1.alias,"#table1");
+
+            }
+
+            table2.executeOnFilter = function() {
+                var d = table2.flushToGet();
+                dataTable(d,table2.dimensions,table2.metrics,table2.alias,"#table2");
+            }
+
+            var data1 = table1.flushToGet();
+                data2 = table2.flushToGet();
+
+            dataTable(data1,table1.dimensions,table1.metrics,table1.alias,"#table1");
+            dataTable(data2,table2.dimensions,table2.metrics,table2.alias,"#table2");
+                        console.log(d3.select("#table1 table"))
+            $("#table1 td").click(function(){
+                console.log("heyyyyyyyyyy")
+                var value = $(this).html();
+                    id = $(this).attr("data-id");
+                table1.addFilter({"column_name": "drinkingwatersource", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}, true);
+            });
+
+            $("#table2 td").click(function(){
+                var value = $(this).html();
+                    id = $(this).attr("data-id");
+                table2.addFilter({"column_name": "area", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}, true);
+                
+            });
+
+        });
+        </script>
+    </body>
+</html>
+
