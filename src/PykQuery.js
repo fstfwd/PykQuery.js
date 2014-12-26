@@ -400,8 +400,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
     for (var i = 0; i < where_clause_length; i++) {
       var old_filter = where_clause[i];
-      if (old_filter['column_name'] === new_filter['column_name'] && old_filter['condition_type'] === new_filter['condition_type']){
-        if (old_filter['condition_type'] === "values" || old_filter['condition_type'] === "datatype") {
+      var old_filter_condition = old_filter['condition_type']
+      if (old_filter['column_name'] === new_filter['column_name'] && old_filter_condition === new_filter['condition_type']){
+        if (old_filter_condition === "values" || old_filter_condition === "datatype") {
           var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']),
               is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
           if (is_same2 === true && is_same1 === true) {
@@ -412,7 +413,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             is_new_filter = true;
             break;
           }
-        } else if(old_filter['condition_type'] === "range") {
+        } else if(old_filter_condition === "range") {
           var new_c = new_filter['condition'],
               old_c = old_filter['condition'];
           if(new_c['min'] === old_c['min'] && new_c['max'] === old_c['max']  && new_c['not'] === old_c['not']){
@@ -1088,6 +1089,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     element.innerHTML = "<div class='filter_list'></div>";
     showFilterList();
   }
+
   var showFilterList = function() {
     document.getElementsByClassName('filter_list')[0].innerHTML = "";
     var where_clause_length = where_clause.length;
