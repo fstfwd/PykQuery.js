@@ -124,10 +124,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   filter_data,
   raw_data,
   global_divid_for_rawdata,
-  execute_on_filter = function () {},
   data_format,
   data_type = [];
   // set the global data to pykquery
+  this.executeOnFilter = function () {}
 
   if(mode === "global" && _scope === "global" && adapter === "inbrowser") {
     Object.defineProperty(this, 'rawdata', {
@@ -368,15 +368,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     },
     set: function(new_where_clause){ //used only by the adaptors!
       where_clause = new_where_clause;
-    }
-  });
-
-  Object.defineProperty(this, 'executeOnFilter', {
-    get: function() {
-      return execute_on_filter();
-    },
-    set: function(callback) {
-      execute_on_filter = callback;
     }
   });
 
@@ -723,7 +714,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     var that = this;
     if (_scope === "local") {
       invoke_call(getConfig(that));
-      this.executeOnFilter;
+      this.executeOnFilter();
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
