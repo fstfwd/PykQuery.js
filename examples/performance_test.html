@@ -86,18 +86,18 @@
                     var i,avg =0;
                     var a = [];
                     for(i = 0;i<1000;i++) {
-                        console.log(i);
+                        // console.log(i);
                         var start = new Date().getTime();
                         var value = $(this).html();
                             id = $(this).attr("data-id");
                         table1.addFilter({"column_name": "drinkingwatersource", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}, true);
                         var end = new Date().getTime();
                         // console.log("end",end);
-                        a[i] = end - start;
-                        avg += a[i]
+                        // if (i%2 === 0) {
+                            a[i] = end - start;
+                            avg += a[i] 
+                        // }                       
                     }
-                // console.log("hey", value,id)
-                // table1.addFilter({"column_name": "drinkingwatersource", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}, true);
                 console.log("Performance",a,avg/1000);
 
             });
