@@ -1,4 +1,5 @@
 function dataTable(data,dimension,metric,alias,id) {
+	// console.log(data,"data");
 	var len = data.length;
 		metrics = _.keys(metric);
 		dimensions = dimension[0];

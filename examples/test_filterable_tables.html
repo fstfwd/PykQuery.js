@@ -88,7 +88,7 @@
         k.execute();
       }
 
-      a.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
+      // a.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
 
       b = new PykQuery.init("aggregation", "local", "b", "inbrowser");
       b.dimensions = ["zip"];
@@ -99,7 +99,7 @@
         l.execute();
       }
 
-      b.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
+      // b.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
 
       var xmlhttp = new XMLHttpRequest();
       var url = "data/test1data.json";
