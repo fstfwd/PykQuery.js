@@ -179,15 +179,26 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         not_in = filter_obj['not_in'],
         column_name = filter_obj['column_name'],
         col;
-    raw_data = _.filter(raw_data ,function (obj) {
-      // console.log(raw_data.length)
-      var obj_col_name = obj[column_name];
-      if(!not_in || not_in.indexOf(obj_col_name) < 0) {
-        if(_in && _in.indexOf(obj_col_name) > -1) {  
-          return obj;
+        var data = raw_data;
+        var raw_data_length = data.length;
+        raw_data = [];
+        for(var i = 0; i < raw_data_length; i++) {
+          var obj_col_name = data[i][column_name];          
+            if(!not_in || not_in.indexOf(obj_col_name) < 0) {
+              if(_in && _in.indexOf(obj_col_name) > -1) {  
+                raw_data.push(data[i])
+            }
+          }
         }
-      }
-    });
+    // raw_data = _.filter(raw_data ,function (obj) {
+    //   // console.log(raw_data.length)
+    //   var obj_col_name = obj[column_name];
+    //   if(!not_in || not_in.indexOf(obj_col_name) < 0) {
+    //     if(_in && _in.indexOf(obj_col_name) > -1) {  
+    //       return obj;
+    //     }
+    //   }
+    // }); 
     // Why is the below code written. It returns the data with only one column. Ideally, the where clause should return all the columns with aggregation hapenning later ---> AUTHOR RONAK
     if(columns.length != 0 && mode === "select") {
       raw_data = _.map(raw_data ,function (obj) {
