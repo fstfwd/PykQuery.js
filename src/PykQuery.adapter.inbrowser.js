@@ -181,15 +181,12 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         col;
         var data = raw_data;
         var raw_data_length = data.length;
-        raw_data = [];
-        var k = 0;
-        for(var i = raw_data_length - 1; i >= 0 ; i--) {
+        raw_data = []
+        for(var i = 0; i < raw_data_length; i++) {
           var obj_col_name = data[i][column_name];          
             if(!not_in || not_in.indexOf(obj_col_name) < 0) {
               if(_in && _in.indexOf(obj_col_name) > -1) {  
-                raw_data[k] = data[i];
-                k++;
-                // raw_data.push(data[i])
+                raw_data.push(data[i])
             }
           }
         }
