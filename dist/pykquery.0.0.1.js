@@ -1144,7 +1144,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   var showFilterList = function() {
-    document.getElementsByClassName('filter_list')[0].innerHTML = "";
+    var get_class_name_filter_list = document.getElementsByClassName('filter_list')[0];
+    get_class_name_filter_list.innerHTML = "";
     var where_clause_length = where_clause.length;
     for (var i = 0; i < where_clause_length; i++) {
       if (where_clause[i].in) {
@@ -1154,12 +1155,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       } else if (where_clause[i].condition) {
         var value = "<b>" + where_clause[i].column_name + " BETWEEN</b> " + where_clause[i].condition.min.toFixed(2)+" <b>AND</b> "+where_clause[i].condition.max.toFixed(2);
       }
-      var filterBlock = "<div id='filter_block'"+i+" class='filter_block' style='padding: 0px 10px;'></div>"
+      // var filterBlock = "<div id='filter_block'"+i+" class='filter_block' style='padding: 0px 10px;'></div>"
       var filter_block = document.createElement("div");
       filter_block.setAttribute("class","filter_block");
       filter_block.setAttribute("style","padding: 0px 10px;");
       filter_block.setAttribute("id","filter_block"+i);
-      document.getElementsByClassName('filter_list')[0].appendChild(filter_block);
+      get_class_name_filter_list.appendChild(filter_block);
       var filter_values = document.createElement("div");
       filter_values.setAttribute("class","filter_value");
       filter_values.innerHTML = value;
@@ -1167,7 +1168,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var filter_remove = document.createElement("div");
       filter_remove.setAttribute("class","filter_remove");
       filter_remove.setAttribute("id","filter_remove_"+i);
-      filter_remove.innerHTML = "<b class='glyphicon glyphicon-trash' style='font-size: 11px;'></b>";
+      filter_remove.innerHTML = "Remove";
+      // filter_remove.innerHTML = "<b class='glyphicon glyphicon-trash' style='font-size: 11px;'></b>";
       document.getElementById('filter_block'+i).appendChild(filter_remove);
     }
     var divs = document.getElementsByClassName("filter_remove"),
@@ -1399,6 +1401,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
 
     var local_filter_array = [];
     _.map(local_data, function (value,key) {
+      // console.log(key,"key");
       var local_obj = {},
           keys = key.split("<>"),
           keys_length = keys.length;
@@ -1503,14 +1506,26 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         not_in = filter_obj['not_in'],
         column_name = filter_obj['column_name'],
         col;
-    raw_data = _.filter(raw_data ,function (obj) {
-      // console.log(raw_data.length)
-      if(!not_in || not_in.indexOf(obj[column_name]) < 0) {
-        if(_in && _in.indexOf(obj[column_name]) > -1) {  
-          return obj;
+        var data = raw_data;
+        var raw_data_length = data.length;
+        raw_data = [];
+        for(var i = 0; i < raw_data_length; i++) {
+          var obj_col_name = data[i][column_name];          
+            if(!not_in || not_in.indexOf(obj_col_name) < 0) {
+              if(_in && _in.indexOf(obj_col_name) > -1) {  
+                raw_data.push(data[i])
+            }
+          }
         }
-      }
-    });
+    // raw_data = _.filter(raw_data ,function (obj) {
+    //   // console.log(raw_data.length)
+    //   var obj_col_name = obj[column_name];
+    //   if(!not_in || not_in.indexOf(obj_col_name) < 0) {
+    //     if(_in && _in.indexOf(obj_col_name) > -1) {  
+    //       return obj;
+    //     }
+    //   }
+    // }); 
     // Why is the below code written. It returns the data with only one column. Ideally, the where clause should return all the columns with aggregation hapenning later ---> AUTHOR RONAK
     if(columns.length != 0 && mode === "select") {
       raw_data = _.map(raw_data ,function (obj) {
