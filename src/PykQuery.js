@@ -1102,7 +1102,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       } else if (where_clause[i].condition) {
         var value = "<b>" + where_clause[i].column_name + " BETWEEN</b> " + where_clause[i].condition.min.toFixed(2)+" <b>AND</b> "+where_clause[i].condition.max.toFixed(2);
       }
-      var filterBlock = "<div id='filter_block'"+i+" class='filter_block' style='padding: 0px 10px;'></div>"
+      // var filterBlock = "<div id='filter_block'"+i+" class='filter_block' style='padding: 0px 10px;'></div>"
       var filter_block = document.createElement("div");
       filter_block.setAttribute("class","filter_block");
       filter_block.setAttribute("style","padding: 0px 10px;");
