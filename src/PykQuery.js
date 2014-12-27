@@ -54,8 +54,11 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       available_adapters = ["inbrowser", "rumi"],
       available_dataformat = ["csv","json","array"];
 
-  var util = new PykUtil.init();
-  var util_is_blank = util.isBlank;
+  var util = new PykUtil.init()
+    , util_is_blank = util.isBlank
+    , util_concat_and_uniq = util.concat_and_uniq
+    , util_subtract_array = util.subtract_array
+    , util_subtract_object_attribute = util.subtract_object_attribute;
 
   var errorHandling = function (error_code,error_message) {
     var visit = "";
@@ -200,7 +203,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           return dimensions;
         },
         set: function(name) {
-          dimensions = _.union(dimensions, name);
+          dimensions = util_concat_and_uniq(dimensions, name);
         }
       });
       Object.defineProperty(this, 'metrics', {
@@ -235,7 +238,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             return data_type;
           },
           set: function(type) {
-            data_type = _.union(data_type,type);
+            data_type = util_concat_and_uniq(data_type,type);
           }
         });
       }
@@ -356,7 +359,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           }
         }
         if (!sort_column_already_present) {
-          sort = _.union(sort, name);
+          sort = util_concat_and_uniq(sort, name);
         }
       }
     }
@@ -474,7 +477,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     var column_name = name.column_name,
         condition_type = name.condition_type,
         where_clause = caller_scope.filters;
-       
+
     for (var x = 0; x < where_clause.length; x++) {
       if (where_clause[x]['column_name'] === column_name && where_clause[x]['condition_type'] === condition_type) {
         if (condition_type === "values" || condition_type === "datatype") {
@@ -511,6 +514,17 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
+  var removeFiltersBasedOnColumns = function (columns, caller_scope) {
+    var len1 = where_clause.length
+      , len2 = columns.length;
+    for (var i = 0; i < len2; i++) {
+      where_clause = _.reject(where_clause, function (d) { return d.column_name==columns[i]; });
+    }
+    if (where_clause.length !== len1) {
+      caller_scope.call();
+    }
+  }
+
   this.resetFilters = function(){
     console.log("resetFilters");
     if(_scope === "global"){
@@ -544,7 +558,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       while(this.datatype.length > 0) {
         this.datatype.pop();
       }
-      // this.call();
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
@@ -557,12 +570,49 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       for (var key in this.metrics) {
         delete this.metrics[key];
       }
-      // this.call();
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
       errorHandling(12, "Globals do not have metrics. Please run it on a local");
     }
+  }
+
+  this.removeDimensions = function (columns) {
+    if (util_is_blank(columns) || columns.length === 0){
+      errorHandling(27, columns + ": Columns cannot be blank. Kindly pass an array of dimensions");
+      return;
+    }
+    if (_scope === "local") {
+      util_subtract_array(this.dimensions, columns);
+      removeFiltersBasedOnColumns(columns, this);
+      query_restore = false;
+      setQueryJSON(this.div_id,this.scope,this.filters);
+    } else {
+      errorHandling(10, "Globals do not have dimensions. Please run it on a local");
+    }
+  }
+
+  this.removeMetrics = function (columns) {
+    if (util_is_blank(columns) || column.length === 0){
+      errorHandling(27, columns + ": Columns cannot be blank. Kindly pass an array of metrics");
+      return;
+    }
+    if (_scope === "local") {
+      util_subtract_object_attribute(this.metrics, columns);
+      removeFiltersBasedOnColumns(columns, this);
+      query_restore = false;
+      setQueryJSON(this.div_id,this.scope,this.filters);
+    } else {
+      errorHandling(12, "Globals do not have metrics. Please run it on a local");
+    }
+  }
+
+  this.changeColumnName = function (column) {
+
+  }
+
+  this.destroyColumn = function (column) {
+
   }
 
   //g1.impacts(l1)
@@ -779,8 +829,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             var where_in = [],
                 where_not_in = [];
             for (var i = 0; i < each_filter_length; i++) {
-              where_in = each_filter[i].in ? _.union(where_in, each_filter[i].in) : where_in;
-              where_not_in = each_filter[i].not_in ? _.union(where_not_in, each_filter[i].not_in) : where_not_in;
+              where_in = each_filter[i].in ? util_concat_and_uniq(where_in, each_filter[i].in) : where_in;
+              where_not_in = each_filter[i].not_in ? util_concat_and_uniq(where_not_in, each_filter[i].not_in) : where_not_in;
             }
             obj.in = where_in;
             obj.not_in = where_not_in;

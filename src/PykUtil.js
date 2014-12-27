@@ -40,10 +40,26 @@ PykUtil.init = function() {
                 }
                 if (a1.length === 0) {
                   a1 = undefined;
+                  return a1;
                 }
             }
         }
         return a1;
+    }
+
+    this.subtract_object_attribute = function (a1, a2) {
+      if (a1 && a2) {
+        var a2_length = a2.length;
+        for (var i = 0; i < a2_length; i++) {
+          if (a1[a2[i]]) {
+            delete a1[a2[i]];
+          } else {
+            a1 = undefined;
+            return a1;
+          }
+        }
+      }
+      return a1;
     }
 
     this.isBlank = function(a) {
