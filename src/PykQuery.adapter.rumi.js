@@ -6,7 +6,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params, queryable_filte
   this.call = function(onComplete) {
     var xmlhttp, response;
     //console.log(pykquery_json,rumi_params)
-    if(rumiParameterValidation(rumi_params)) {
+    if(rumi_params) {
       pykquery_json["filters"] = queryable_filters;
       var data = {
         config: pykquery_json,
