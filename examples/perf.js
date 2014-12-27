@@ -71,7 +71,6 @@ $(document).ready(function () {
                             id = $(this).attr("data-id");
                         table1.addFilter({"column_name": "drinkingwatersource", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}, true);
                         var end = new Date().getTime();
-                        // console.log("end",end);
                         // if (i%2 === 0) {
                             a[i] = end - start;
                             avg += a[i] 
