@@ -10,6 +10,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params, queryable_filte
       pykquery_json["filters"] = queryable_filters;
       var data = {
         config: pykquery_json,
+        token: gon.token
       };
     } else {
       return false;
