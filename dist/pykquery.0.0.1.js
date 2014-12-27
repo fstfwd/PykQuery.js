@@ -859,8 +859,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   var invoke_call = function(query){
     consolidated_filters = generateConsolidatedFiltersArray();
     queryable_filters = generateQueryableFiltersArray();
-    // console.log(consolidated_filters,"consolidated_filters");
-    // console.log(queryable_filters,"queryable_filters");
     if(adapter === "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(query, queryable_filters);
       return filter_data = connector.call();
