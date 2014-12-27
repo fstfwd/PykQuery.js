@@ -78,6 +78,14 @@ var restoreFilters = function () {
       }
       query_object.addFilter(saved_filters[i], is_interactive, query_object.localdividtriggeringevent, true);
     }
+    if (saved_filters.length === 0) {
+      if(window[key].scope == "global"){
+        if (document.getElementsByClassName('filter_list').length > 0) {
+          var div = document.getElementsByClassName('filter_list')[0].parentNode.id;
+          window[key].listFilters(div);
+        }
+      }
+    }
   }
 }
 Object.defineProperty(PykQuery, 'query_json', {
@@ -93,18 +101,11 @@ Object.defineProperty(PykQuery, 'query_json', {
 });
 
 var setQueryJSON = function (id,scope,filters) {
-  // if (scope === "local") {
-    PykQuery.query_json[id] = filters;
-  // }
-  // var temp_query_json = {};
-  // for (var key in PykQuery.list_of_scopes) {
-  //   temp_query_json[key] = PykQuery.list_of_scopes[key][key].filters;
-  // }
-  // PykQuery.query_json = temp_query_json;
+  PykQuery.query_json[id] = filters;
 }
 
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
-  that = this;
+
   var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters, consolidated_filters = [],
       available_mode = ["aggregation", "unique", "select", "datatype", "global"],
       available_scope = ["local", "global"],
@@ -132,7 +133,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     div_id = (_scope == "local") ? divid_param.replace("#","") : divid_param;
     global_exists = (_scope == "global") ? _.find(PykQuery.global_names,function(d){ return (d == div_id); }) : null;
     local_exists = (_scope == "local") ? _.find(PykQuery.local_names,function(d){ return (d == div_id); }) : null;
-
+//    console.log(global_exists,local_exists)
     if (mode == "global" && _scope != "global"){
       errorHandling(1, div_id + ": scope and mode both should be global");
       return false;
@@ -180,10 +181,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   filter_data,
   raw_data,
   global_divid_for_rawdata,
-  execute_on_filter = function () {},
   data_format,
   data_type = [];
   // set the global data to pykquery
+  this.executeOnFilter = function () {}
 
   if(mode == "global" && _scope == "global" && adapter == "inbrowser") {
     Object.defineProperty(this, 'rawdata', {
@@ -393,7 +394,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     },
     set: function(name) { //"[{"col1": "asc"}, ]"
       for (var i = 0; i < name.length; i++) {
-        var prop = Object.keys(name[i])[0];
+        var prop = Object.keys(name[i])[0],
+            len2 = sort.length,
+            sort_column_already_present = false;
         if(util.isBlank(prop)){
           errorHandling(8, "Column name is undefined in sort");
           return;
@@ -401,7 +404,16 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         if (util.isBlank(name[i][prop]) || (name[i][prop] != "asc" && name[i][prop] != "desc")) {
           name[i][prop] = "asc";
         }
-        sort = _.union(sort, name);
+        for (var j = 0; j < len2; j++) {
+          if (sort[j][prop]) {
+            sort[j][prop] = name[i][prop];
+            sort_column_already_present = true;
+            break;
+          }
+        }
+        if (!sort_column_already_present) {
+          sort = _.union(sort, name);
+        }
       }
     }
   });
@@ -412,15 +424,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     },
     set: function(new_where_clause){ //used only by the adaptors!
       where_clause = new_where_clause;
-    }
-  });
-
-  Object.defineProperty(this, 'executeOnFilter', {
-    get: function() {
-      return execute_on_filter;
-    },
-    set: function(callback) {
-      execute_on_filter = callback;
     }
   });
 
@@ -525,7 +528,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         where_clause = caller_scope.filters;
     for (var x = 0; x < where_clause.length; x++) {
       if (where_clause[x]['column_name'] == column_name && where_clause[x]['condition_type'] == condition_type) {
-        if (condition_type == "values") {
+        if (condition_type == "values" || condition_type == "datatype") {
           if (_.difference(where_clause[x].in, name.in).length===0 && _.difference(where_clause[x].not_in, name.not_in).length===0) {
             where_clause.splice(x,1);
           }
@@ -533,8 +536,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             caller_scope.call();
           }
         } else if (condition_type == "range") {
-          var __min = name['min'];
-          var __max = name['max'];
+          var __min = name['condition']['min'];
+          var __max = name['condition']['max'];
           if(!util.isBlank(__min) && !util.isBlank(__max)) {
             if(__min == where_clause[x]['condition']['min'] && __max == where_clause[x]['condition']['max']) {
               where_clause.splice(x,1);
@@ -698,7 +701,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         }
       }
       return true;
-    } else if (f["condition_type"] == "values") {
+    } else if (f["condition_type"] == "values" || f["condition_type"] == "datatype") {
       if(util.isBlank(f["not_in"]) && util.isBlank(f["in"])){
         errorHandling(19, "Either 'in' or 'not_in' or both must always be present with array of some value");
         return false;
@@ -1131,24 +1134,25 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     document.getElementsByClassName('filter_list')[0].innerHTML = "";
     for (var i = 0; i < where_clause.length; i++) {
       if (where_clause[i].in) {
-        var value = where_clause[i].in+" in "+where_clause[i].column_name;
+        var value = "<b>" + where_clause[i].column_name + " IN</b> (" + where_clause[i].in+")";
       } else if (where_clause[i].not_in) {
-        var value = where_clause[i].not_in+" not in "+where_clause[i].column_name;
+        var value = "<b>" + where_clause[i].column_name + " NOT IN</b> (" + where_clause[i].not_in+")";
       } else if (where_clause[i].condition) {
-        var value = where_clause[i].min+" - "+where_clause[i].max+" of "+where_clause[i].column_name;
+        var value = "<b>" + where_clause[i].column_name + " BETWEEN</b> " + where_clause[i].condition.min.toFixed(2)+" <b>AND</b> "+where_clause[i].condition.max.toFixed(2);
       }
       var filter_block = document.createElement("div");
       filter_block.setAttribute("class","filter_block");
+      filter_block.setAttribute("style","padding: 0px 10px;");
       filter_block.setAttribute("id","filter_block"+i);
       document.getElementsByClassName('filter_list')[0].appendChild(filter_block);
       var filter_values = document.createElement("div");
       filter_values.setAttribute("class","filter_value");
-      filter_values.innerHTML = "Filter by "+value;
+      filter_values.innerHTML = value;
       document.getElementById('filter_block'+i).appendChild(filter_values);
       var filter_remove = document.createElement("div");
       filter_remove.setAttribute("class","filter_remove");
       filter_remove.setAttribute("id","filter_remove_"+i);
-      filter_remove.innerHTML = "Remove"
+      filter_remove.innerHTML = "<b class='glyphicon glyphicon-trash' style='font-size: 11px;'></b>";
       document.getElementById('filter_block'+i).appendChild(filter_remove);
     }
     var divs = document.getElementsByClassName("filter_remove");
@@ -1364,6 +1368,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
 
   var startAggregation = function (filter_obj){
     var metrics = filter_obj.metrics;
+
     // matrics_column_name = objectkeymatrics;
     local_data = _.groupBy(raw_data, function (d) {
       var groupby = "";
@@ -1371,16 +1376,18 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         if (k===0) {
           groupby = d[filter_obj.dimensions[k]];
         } else {
-          groupby = groupby + "-" + d[filter_obj.dimensions[k]];
+          groupby = groupby + "<>" + d[filter_obj.dimensions[k]];
         }
       }
       return groupby;
     });
+        // console.log(local_data)
 
     var local_filter_array = [];
     _.map(local_data, function (value,key) {
+      // console.log("inside")
       var local_obj = {},
-          keys = key.split("-");
+          keys = key.split("<>");
       for (var j = 0; j < keys.length; j++) {
         local_obj[processAlias(pykquery.dimensions[j])] = keys[j];
       }
@@ -1401,6 +1408,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       }
       local_filter_array.push(local_obj);
     });
+    // console.log("local_filter",local_filter_array)
     return local_filter_array;
   }
 
@@ -1528,8 +1536,12 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     alias = query_object.alias;
     if (typeof alias[colname] === "string") {
       return alias[colname];
-    } else if (typeof alias[colname] === "string") {
-      return alias[colname][aggregation_method];
+    } else if (typeof alias[colname] === "object") {
+      if (aggregation_method) {
+        return alias[colname][aggregation_method];
+      } else {
+        return alias[colname][colname];
+      }
     } else {
       return colname;
     }
