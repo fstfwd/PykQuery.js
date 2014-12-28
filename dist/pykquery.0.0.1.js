@@ -339,14 +339,14 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   });
 
-  Object.defineProperty(this, 'filterdata', {
-    get: function() {
-      return filter_data;
-    },
-    set: function(mydata) {
-      filter_data = mydata;
-    }
-  });
+  // Object.defineProperty(this, 'filterdata', {
+  //   get: function() {
+  //     return filter_data;
+  //   },
+  //   set: function(mydata) {
+  //     filter_data = mydata;
+  //   }
+  // });
 
   Object.defineProperty(this, 'limit', {
     get: function() {
@@ -501,7 +501,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             warningHandling(2, "Clean up your JS: Same filter cannot add");
             return false;
           } else {
-            if (name.override_filter) {
+            if (old_filter.override_filter) {
               where_clause.splice(i, 1);
             }
             is_new_filter = true;
