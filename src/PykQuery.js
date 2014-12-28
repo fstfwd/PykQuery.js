@@ -719,6 +719,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       for (var j = 0; j < len3; j++) {
         if (current_filters[j].column_name === old_column) {
           current_filters[j].column_name = new_column;
+          if (document.getElementsByClassName('filter_list').length > 0) {
+            showFilterList();
+          }
         }
       }
     }
