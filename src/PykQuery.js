@@ -518,8 +518,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     var len1 = where_clause.length
       , len2 = columns.length;
     for (var i = 0; i < len2; i++) {
-      where_clause = _.reject(where_clause, function (d) { return d.column_name==columns[i]; });
       removeIndividualAdditionalQueryParams(columns[i], caller_scope);
+      where_clause = _.reject(where_clause, function (d) { return d.column_name==columns[i]; });
     }
     if (where_clause.length !== len1) {
       caller_scope.call();
@@ -603,30 +603,42 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   this.removeDimensions = function (columns) {
     if (util_is_blank(columns) || columns.length === 0){
       errorHandling(27, columns + ": Columns cannot be blank. Kindly pass an array of dimensions");
-      return;
+      return false;
     }
     if (_scope === "local") {
+      var len = this.dimensions.length;
       util_subtract_array(this.dimensions, columns);
+      if (len === this.dimensions.length) {
+        return false;
+      }
       removeColumns(columns, this);
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,this.filters);
+      return true;
     } else {
       errorHandling(10, "Globals do not have dimensions. Please run it on a local");
+      return false;
     }
   }
 
   this.removeMetrics = function (columns) {
     if (util_is_blank(columns) || column.length === 0){
       errorHandling(27, columns + ": Columns cannot be blank. Kindly pass an array of metrics");
-      return;
+      return false;
     }
     if (_scope === "local") {
+      var len = Object.getOwnPropertyNames(this.metrics).length;
       util_subtract_object_attribute(this.metrics, columns);
+      if (len === Object.getOwnPropertyNames(this.metrics).length) {
+        return false;
+      }
       removeColumns(columns, this);
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,this.filters);
+      return true;
     } else {
       errorHandling(12, "Globals do not have metrics. Please run it on a local");
+      return false;
     }
   }
 
@@ -636,11 +648,17 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   this.destroyColumn = function (column) {
     if (_scope === "global") {
-      // var __impacts =
+      var len =  __impacts.length;
+      for (var i = 0; i < len; i++) {
+        if (!window[__impacts[i]].removeDimensions([column])) {
+          window[__impacts[i]].removeMetrics([column]);
+        }
+      }
     } else {
-
+      if (!this.removeDimensions([column])) {
+        this.removeMetrics([column]);
+      }
     }
-
   }
 
   //g1.impacts(l1)

@@ -32,7 +32,11 @@ PykUtil.init = function() {
 
     this.subtract_array = function(a1, a2) {
         if (a1 && a2){
-            var a2_length = a2.length;
+          if (a1.length === 0) {
+            a1 = undefined;
+            return a1;
+          }
+          var a2_length = a2.length;
             for (var i = 0; i < a2_length; i++) {
                 var index = a1.indexOf(a2[i]);
                 if (index > -1) {
@@ -49,11 +53,16 @@ PykUtil.init = function() {
 
     this.subtract_object_attribute = function (a1, a2) {
       if (a1 && a2) {
+        if (!Object.hasOwnProperty(a1)) {
+          a1 = undefined;
+          return a1;
+        }
         var a2_length = a2.length;
         for (var i = 0; i < a2_length; i++) {
           if (a1[a2[i]]) {
             delete a1[a2[i]];
-          } else {
+          }
+          if (Object.getOwnPropertyNames(a1).length === 0) {
             a1 = undefined;
             return a1;
           }
