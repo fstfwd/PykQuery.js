@@ -605,28 +605,43 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   var removeIndividualAdditionalQueryParams = function (column, caller_scope) {
-    delete caller_scope.alias[column];
-    var select = caller_scope.select
+    var alias = caller_scope.alias
+      , select = caller_scope.select
       , sort = caller_scope.sort;
+    if (alias) {
+      delete alias[column];
+    }
     if (select) {
       var index = select.indexOf(column);
       if (index > -1) {
         select.splice(index,1);
       }
     }
-    sort = _.reject(sort, function (d) { return Object.keys(d)[0]==column });
+    if (sort) {
+      sort = _.reject(sort, function (d) { return Object.keys(d)[0]==column });
+    }
   }
 
   var removeAllAdditionalQueryParams = function (caller_scope) {
     // remove filters pending...Also only params of either dimension or metrics should get cleared depending on callee.
-    var alias = caller_scope.alias;
-    for (var key in alias) {
-      delete alias[key];
+    var alias = caller_scope.alias
+      , select = caller_scope.select
+      , sort = caller_scope.sort;
+    if (alias) {
+      for (var key in alias) {
+        delete alias[key];
+      }
     }
-    while (caller_scope.select > 0) {
-      caller_scope.select.pop();
+    if (select) {
+      while (select.length > 0) {
+        select.pop();
+      }
     }
-    sort = {};
+    if (sort) {
+      for (var key in sort) {
+        delete sort[key];
+      }
+    }
   }
 
   this.resetFilters = function(){
@@ -686,22 +701,19 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       errorHandling(27, columns + ": Columns cannot be blank. Kindly pass an array of dimensions");
       return false;
     }
-    if (_scope === "local") {
-      if (this.dimensions) {
-        var len = this.dimensions.length;
+    if (this.dimensions) {
+      var len = this.dimensions.length;
+      if (len > 0) {
         util_subtract_array(this.dimensions, columns);
         if (len === this.dimensions.length) {
           return false;
         }
       }
-      removeColumns(columns, this);
-      query_restore = false;
-      setQueryJSON(this.div_id,this.scope,this.filters);
-      return true;
-    } else {
-      errorHandling(10, "Globals do not have dimensions. Please run it on a local");
-      return false;
     }
+    removeColumns(columns, this);
+    query_restore = false;
+    setQueryJSON(this.div_id,this.scope,this.filters);
+    return true;
   }
 
   this.removeMetrics = function (columns) {
@@ -709,21 +721,33 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       errorHandling(27, columns + ": Columns cannot be blank. Kindly pass an array of metrics");
       return false;
     }
-    if (_scope === "local") {
-      if (this.metrics) {
-        var len = Object.keys(this.metrics).length;
+    if (this.metrics) {
+      var len = Object.keys(this.metrics).length;
+      if (len > 0) {
         util_subtract_object_attribute(this.metrics, columns);
         if (len === Object.keys(this.metrics).length) {
           return false;
         }
       }
-      removeColumns(columns, this);
-      query_restore = false;
-      setQueryJSON(this.div_id,this.scope,this.filters);
-      return true;
+    }
+    removeColumns(columns, this);
+    query_restore = false;
+    setQueryJSON(this.div_id,this.scope,this.filters);
+    return true;
+  }
+
+  this.destroyColumn = function (column) {
+    if (_scope === "global") {
+      this.removeDimensions([column]);
+      this.removeMetrics([column]);
+      var len =  __impacts.length;
+      for (var i = 0; i < len; i++) {
+        window[__impacts[i]].removeDimensions([column]);
+        window[__impacts[i]].removeMetrics([column]);
+      }
     } else {
-      errorHandling(12, "Globals do not have metrics. Please run it on a local");
-      return false;
+      this.removeDimensions([column]);
+      this.removeMetrics([column]);
     }
   }
 
@@ -778,34 +802,17 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   this.changeColumnName = function (old_column, new_column, is_propogated) {
     if (_scope === "global") {
       changeColumnNameInternally(this, old_column, new_column);
-      if (!is_propogated) {
-        var len =  __impacts.length;
-        for (var i = 0; i < len; i++) {
-          window[__impacts[i]].changeColumnName(old_column, new_column, true);
-        }
+      var len =  __impacts.length;
+      for (var i = 0; i < len; i++) {
+        window[__impacts[i]].changeColumnName(old_column, new_column, true);
       }
     } else {
       changeColumnNameInternally(this, old_column, new_column);
       if (!is_propogated) {
         var len =  __impacts.length;
         for (var i = 0; i < len; i++) {
-          window[__impacts[i]].changeColumnName(old_column, new_column, true);
+          window[__impacts[i]].changeColumnName(old_column, new_column);
         }
-      }
-    }
-  }
-
-  this.destroyColumn = function (column) {
-    if (_scope === "global") {
-      var len =  __impacts.length;
-      for (var i = 0; i < len; i++) {
-        if (!window[__impacts[i]].removeDimensions([column])) {
-          window[__impacts[i]].removeMetrics([column]);
-        }
-      }
-    } else {
-      if (!this.removeDimensions([column])) {
-        this.removeMetrics([column]);
       }
     }
   }
