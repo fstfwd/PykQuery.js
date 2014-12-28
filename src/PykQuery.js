@@ -514,19 +514,41 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  var removeFiltersBasedOnColumns = function (columns, caller_scope) {
+  var removeColumns = function (columns, caller_scope) {
     var len1 = where_clause.length
       , len2 = columns.length;
     for (var i = 0; i < len2; i++) {
       where_clause = _.reject(where_clause, function (d) { return d.column_name==columns[i]; });
+      removeIndividualAdditionalQueryParams(columns[i], caller_scope);
     }
     if (where_clause.length !== len1) {
       caller_scope.call();
     }
   }
 
+  var removeIndividualAdditionalQueryParams = function (column, caller_scope) {
+    delete caller_scope.alias[column];
+    var select = caller_scope.select
+      , sort = caller_scope.sort;
+    if (select) {
+      var index = select.indexOf(column);
+      if (index > -1) {
+        select.splice(index,1);
+      }
+    }
+    sort = _.reject(sort, function (d) { return Object.keys(d)[0]==column });
+  }
+
+  var removeAllAdditionalQueryParams = function (caller_scope) {
+    // remove filters pending...Also only params of either dimension or metrics should get cleared depending on callee.
+    caller_scope.alias = {};
+    while (caller_scope.select > 0) {
+      caller_scope.select.pop();
+    }
+    sort = {};
+  }
+
   this.resetFilters = function(){
-    console.log("resetFilters");
     if(_scope === "global"){
       where_clause = [];
       this.call();
@@ -545,7 +567,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       while(this.dimensions.length > 0) {
         this.dimensions.pop();
       }
-      // this.call();
+      removeAllAdditionalQueryParams(this);
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
@@ -570,6 +592,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       for (var key in this.metrics) {
         delete this.metrics[key];
       }
+      removeAllAdditionalQueryParams(this);
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
@@ -584,7 +607,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
     if (_scope === "local") {
       util_subtract_array(this.dimensions, columns);
-      removeFiltersBasedOnColumns(columns, this);
+      removeColumns(columns, this);
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,this.filters);
     } else {
@@ -599,7 +622,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
     if (_scope === "local") {
       util_subtract_object_attribute(this.metrics, columns);
-      removeFiltersBasedOnColumns(columns, this);
+      removeColumns(columns, this);
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,this.filters);
     } else {
@@ -612,6 +635,11 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   this.destroyColumn = function (column) {
+    if (_scope === "global") {
+      // var __impacts =
+    } else {
+
+    }
 
   }
 
@@ -1165,8 +1193,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var filter_remove = document.createElement("div");
       filter_remove.setAttribute("class","filter_remove");
       filter_remove.setAttribute("id","filter_remove_"+i);
-      filter_remove.innerHTML = "Remove";
-      // filter_remove.innerHTML = "<b class='glyphicon glyphicon-trash' style='font-size: 11px;'></b>";
+      filter_remove.innerHTML = "<b class='glyphicon glyphicon-trash' style='font-size: 11px;'></b>";
       document.getElementById('filter_block'+i).appendChild(filter_remove);
     }
     var divs = document.getElementsByClassName("filter_remove"),
