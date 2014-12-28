@@ -522,6 +522,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       where_clause = _.reject(where_clause, function (d) { return d.column_name==columns[i]; });
     }
     if (where_clause.length !== len1) {
+      if (document.getElementsByClassName('filter_list').length > 0) {
+        showFilterList();
+      }
       caller_scope.call();
     }
   }
