@@ -53,7 +53,7 @@ PykUtil.init = function() {
 
     this.subtract_object_attribute = function (a1, a2) {
       if (a1 && a2) {
-        if (!Object.hasOwnProperty(a1)) {
+        if (Object.keys(a1).length === 0) {
           a1 = undefined;
           return a1;
         }
@@ -62,7 +62,7 @@ PykUtil.init = function() {
           if (a1[a2[i]]) {
             delete a1[a2[i]];
           }
-          if (Object.getOwnPropertyNames(a1).length === 0) {
+          if (Object.keys(a1).length === 0) {
             a1 = undefined;
             return a1;
           }
@@ -619,7 +619,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   var removeAllAdditionalQueryParams = function (caller_scope) {
     // remove filters pending...Also only params of either dimension or metrics should get cleared depending on callee.
-    caller_scope.alias = {};
+    var alias = caller_scope.alias;
+    for (var key in alias) {
+      delete alias[key];
+    }
     while (caller_scope.select > 0) {
       caller_scope.select.pop();
     }
@@ -684,15 +687,19 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       return false;
     }
     if (_scope === "local") {
-      var len = this.dimensions.length;
-      util_subtract_array(this.dimensions, columns);
-      if (len === this.dimensions.length) {
+      if (!this.dimensions) {
         return false;
+      } else {
+        var len = this.dimensions.length;
+        util_subtract_array(this.dimensions, columns);
+        if (len === this.dimensions.length) {
+          return false;
+        }
+        removeColumns(columns, this);
+        query_restore = false;
+        setQueryJSON(this.div_id,this.scope,this.filters);
+        return true;
       }
-      removeColumns(columns, this);
-      query_restore = false;
-      setQueryJSON(this.div_id,this.scope,this.filters);
-      return true;
     } else {
       errorHandling(10, "Globals do not have dimensions. Please run it on a local");
       return false;
@@ -700,28 +707,92 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   this.removeMetrics = function (columns) {
-    if (util_is_blank(columns) || column.length === 0){
+    if (util_is_blank(columns) || columns.length === 0){
       errorHandling(27, columns + ": Columns cannot be blank. Kindly pass an array of metrics");
       return false;
     }
     if (_scope === "local") {
-      var len = Object.getOwnPropertyNames(this.metrics).length;
-      util_subtract_object_attribute(this.metrics, columns);
-      if (len === Object.getOwnPropertyNames(this.metrics).length) {
+      if (!this.metrics) {
         return false;
+      } else {
+        var len = Object.keys(this.metrics).length;
+        util_subtract_object_attribute(this.metrics, columns);
+        if (len === Object.keys(this.metrics).length) {
+          return false;
+        }
+        removeColumns(columns, this);
+        query_restore = false;
+        setQueryJSON(this.div_id,this.scope,this.filters);
+        return true;
       }
-      removeColumns(columns, this);
-      query_restore = false;
-      setQueryJSON(this.div_id,this.scope,this.filters);
-      return true;
     } else {
       errorHandling(12, "Globals do not have metrics. Please run it on a local");
       return false;
     }
   }
 
-  this.changeColumnName = function (column) {
+  var changeColumnNameInternally = function (caller_scope, old_column, new_column) {
+    var current_filters = caller_scope.filters
+      , len3 = current_filters.length;
+    if (_scope === "local") {
+      var dimensions = caller_scope.dimensions
+        , metrics = caller_scope.metrics
+        , alias = caller_scope.alias
+        , select = caller_scope.select
+        , sort = caller_scope.sort
+      , len2 = sort.length;
+      if (dimensions) {
+        var dimension_index = dimensions.indexOf(old_column);
+        if (dimension_index > -1) {
+          dimensions[dimension_index] = new_column;
+        }
+      }
+      if (metrics[old_column]) {
+        metrics[new_column] = metrics[old_column];
+        delete metrics[old_column];
+      }
+      if (alias[old_column]) {
+        alias[old_column] = alias[new_column];
+        delete alias[old_column];
+      }
+      if (select) {
+        var select_index = select.indexOf(old_column);
+        if (select_index > -1) {
+          select[select_index] = new_column;
+        }
+      }
+      for (var j = 0; j < len2; j++){
+        if (sort[j][old_column]) {
+          sort[j][new_column] = sort[j][old_column];
+          delete sort[j][old_column];
+        }
+      }
+    }
+    for (var j = 0; j < len3; j++) {
+      if (current_filters[j].column_name === old_column) {
+        current_filters[j].column_name = new_column;
+      }
+    }
+  }
 
+  this.changeColumnName = function (old_column, new_column, is_propogated) {
+    if (_scope === "global") {
+      changeColumnNameInternally(this, old_column, new_column);
+      if (!is_propogated) {
+        var len =  __impacts.length;
+        for (var i = 0; i < len; i++) {
+          window[__impacts[i]].changeColumnName(old_column, new_column, true);
+        }
+      }
+    } else {
+      changeColumnNameInternally(this, old_column, new_column);
+      if (!is_propogated) {
+        var len =  __impacts.length;
+        for (var i = 0; i < len; i++) {
+          window[__impacts[i]].changeColumnName(old_column, new_column, true);
+        }
+      }
+    }
   }
 
   this.destroyColumn = function (column) {
@@ -1607,9 +1678,9 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         var raw_data_length = data.length;
         raw_data = []
         for(var i = 0; i < raw_data_length; i++) {
-          var obj_col_name = data[i][column_name];          
+          var obj_col_name = data[i][column_name];
             if(!not_in || not_in.indexOf(obj_col_name) < 0) {
-              if(_in && _in.indexOf(obj_col_name) > -1) {  
+              if(_in && _in.indexOf(obj_col_name) > -1) {
                 raw_data.push(data[i])
             }
           }
@@ -1618,11 +1689,11 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     //   // console.log(raw_data.length)
     //   var obj_col_name = obj[column_name];
     //   if(!not_in || not_in.indexOf(obj_col_name) < 0) {
-    //     if(_in && _in.indexOf(obj_col_name) > -1) {  
+    //     if(_in && _in.indexOf(obj_col_name) > -1) {
     //       return obj;
     //     }
     //   }
-    // }); 
+    // });
     // Why is the below code written. It returns the data with only one column. Ideally, the where clause should return all the columns with aggregation hapenning later ---> AUTHOR RONAK
     if(columns.length != 0 && mode === "select") {
       raw_data = _.map(raw_data ,function (obj) {
@@ -1631,7 +1702,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       });
     }
     //console.log("value filter completed");
-  }; 
+  };
 
   var rangeFilter = function (filter_obj,columns,mode){
     var min,
@@ -1656,7 +1727,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     }
     //console.log("rangeFilter done----");
   }
-  
+
   var processAlias = function(colname,aggregation_method) {
     var alias = query_object.alias;
     if (typeof alias[colname] === "string") {

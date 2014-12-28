@@ -53,7 +53,7 @@ PykUtil.init = function() {
 
     this.subtract_object_attribute = function (a1, a2) {
       if (a1 && a2) {
-        if (!Object.hasOwnProperty(a1)) {
+        if (Object.keys(a1).length === 0) {
           a1 = undefined;
           return a1;
         }
@@ -62,7 +62,7 @@ PykUtil.init = function() {
           if (a1[a2[i]]) {
             delete a1[a2[i]];
           }
-          if (Object.getOwnPropertyNames(a1).length === 0) {
+          if (Object.keys(a1).length === 0) {
             a1 = undefined;
             return a1;
           }

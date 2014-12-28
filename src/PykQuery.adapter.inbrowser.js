@@ -183,9 +183,9 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         var raw_data_length = data.length;
         raw_data = []
         for(var i = 0; i < raw_data_length; i++) {
-          var obj_col_name = data[i][column_name];          
+          var obj_col_name = data[i][column_name];
             if(!not_in || not_in.indexOf(obj_col_name) < 0) {
-              if(_in && _in.indexOf(obj_col_name) > -1) {  
+              if(_in && _in.indexOf(obj_col_name) > -1) {
                 raw_data.push(data[i])
             }
           }
@@ -194,11 +194,11 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     //   // console.log(raw_data.length)
     //   var obj_col_name = obj[column_name];
     //   if(!not_in || not_in.indexOf(obj_col_name) < 0) {
-    //     if(_in && _in.indexOf(obj_col_name) > -1) {  
+    //     if(_in && _in.indexOf(obj_col_name) > -1) {
     //       return obj;
     //     }
     //   }
-    // }); 
+    // });
     // Why is the below code written. It returns the data with only one column. Ideally, the where clause should return all the columns with aggregation hapenning later ---> AUTHOR RONAK
     if(columns.length != 0 && mode === "select") {
       raw_data = _.map(raw_data ,function (obj) {
@@ -207,7 +207,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       });
     }
     //console.log("value filter completed");
-  }; 
+  };
 
   var rangeFilter = function (filter_obj,columns,mode){
     var min,
@@ -232,7 +232,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     }
     //console.log("rangeFilter done----");
   }
-  
+
   var processAlias = function(colname,aggregation_method) {
     var alias = query_object.alias;
     if (typeof alias[colname] === "string") {
