@@ -26,7 +26,7 @@ PykUtil.init = function() {
             return is_same2;
         }
         else{
-            return true;
+            return false;
         }
     }
 
@@ -455,7 +455,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   this.addFilter = function(name, is_interactive, domid, restore){
     var element = document.querySelectorAll("[data-id='"+name.selected_dom_id+"']");
-    if (element.length>0 && element[0].classList.contains("pykquery-selected")) {
+    if (element.length>0 && element[0].classList.contains("pykquery-selected") && !name.override_filter) {
       this.removeFilter(name, is_interactive);
       return;
     }
@@ -494,7 +494,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           else {
             var is_same3 = util.is_exactly_same(new_filter['not_in'], old_filter['in'])
               , is_same4 = util.is_exactly_same(new_filter['in'], old_filter['not_in']);
-            if (old_filter.override_filter && (is_same3 || is_same4)) {
+            if (new_filter.override_filter && (is_same3 || is_same4)) {
               where_clause[i] = new_filter;
               is_new_filter = false;
               call_append_selected_class = false;
