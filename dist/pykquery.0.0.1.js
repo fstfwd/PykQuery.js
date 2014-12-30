@@ -206,7 +206,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   raw_data,
   global_divid_for_rawdata,
   data_format,
-  data_type = [];
+  data_type = [],
+  call_append_selected_class = true;
   // set the global data to pykquery
   this.executeOnFilter = function () {}
 
@@ -486,13 +487,22 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         if (old_filter_condition === "values" || old_filter_condition === "datatype") {
           var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']),
               is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
-          if (is_same2 === true && is_same1 === true) {
+          if (is_same2 && is_same1) {
             warningHandling(2, "Clean up your JS: Same filter cannot add");
             return false;
           }
           else {
-            is_new_filter = true;
-            break;
+            var is_same3 = util.is_exactly_same(new_filter['not_in'], old_filter['in'])
+              , is_same4 = util.is_exactly_same(new_filter['in'], old_filter['not_in']);
+            if (old_filter.override_filter && (is_same3 || is_same4)) {
+              where_clause[i] = new_filter;
+              is_new_filter = false;
+              call_append_selected_class = false;
+              break;
+            } else {
+              is_new_filter = true;
+              call_append_selected_class = true;
+            }
           }
         } else if(old_filter_condition === "range") {
           var new_c = new_filter['condition'],
@@ -502,9 +512,14 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             return false;
           } else {
             if (old_filter.override_filter) {
-              where_clause.splice(i, 1);
+              where_clause[i] = new_filter;
+              is_new_filter = false;
+              call_append_selected_class = false;
+              break;
+            } else {
+              is_new_filter = true;
+              call_append_selected_class = true;
             }
-            is_new_filter = true;
           }
         }
       }
@@ -980,7 +995,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         var local_filter = window[__impacts[j]];
         local_filter.filter_data = local_filter.call();
       }
-      this.appendClassSelected();
+      if (call_append_selected_class) {
+        this.appendClassSelected();
+      }
     }
     return true;
   }
