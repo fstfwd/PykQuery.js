@@ -530,6 +530,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       if (caller_scope && caller_scope.scope==="global") {
         caller_scope.call();
       }
+    } else {
+      if (!call_append_selected_class) {
+        caller_scope.call();
+      }
     }
 
     query_restore = restore;
