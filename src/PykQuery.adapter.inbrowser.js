@@ -181,28 +181,17 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         col;
         var data = raw_data;
         var raw_data_length = data.length;
-        raw_data = []
+        raw_data = [];
         for(var i = 0; i < raw_data_length; i++) {
           var obj_col_name = data[i][column_name];
-            if(!not_in || not_in.indexOf(obj_col_name) < 0) {
-              if(_in && _in.indexOf(obj_col_name) > -1) {
-                raw_data.push(data[i])
-            }
+          if(_in && _in.indexOf(obj_col_name) > -1) {
+            raw_data.push(data[i]);
+          } else if(not_in && not_in.length > 0 && not_in.indexOf(obj_col_name) === -1) {
+            raw_data.push(data[i]);
           }
         }
-    // raw_data = _.filter(raw_data ,function (obj) {
-    //   // console.log(raw_data.length)
-    //   var obj_col_name = obj[column_name];
-    //   if(!not_in || not_in.indexOf(obj_col_name) < 0) {
-    //     if(_in && _in.indexOf(obj_col_name) > -1) {
-    //       return obj;
-    //     }
-    //   }
-    // });
-    // Why is the below code written. It returns the data with only one column. Ideally, the where clause should return all the columns with aggregation hapenning later ---> AUTHOR RONAK
     if(columns.length != 0 && mode === "select") {
       raw_data = _.map(raw_data ,function (obj) {
-        // console.log(obj,columns);
         return _.pick(obj,columns);
       });
     }
@@ -212,6 +201,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
   var rangeFilter = function (filter_obj,columns,mode){
     var min,
         max,
+        not,
         column_name = filter_obj['column_name'],
         col,
         filter_obj_condition_length = filter_obj.condition.length;
@@ -219,7 +209,10 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       for (var i = 0; i < filter_obj_condition_length; i++) {
         min = filter_obj.condition[i]['min'];
         max = filter_obj.condition[i]['max'];
-        if(obj[column_name] <= max && obj[column_name] >=min){
+        not = filter_obj.condition[i]['not'];
+        if (not && (obj[column_name] > max || obj[column_name] < min)){
+          return obj;
+        } else if(!not && obj[column_name] <= max && obj[column_name] >=min){
           return obj;
         }
       }

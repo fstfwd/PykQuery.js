@@ -946,7 +946,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   var generateConsolidatedFiltersArray = function(){
-    // if (_scope === "local") {
       var consolidated_filters = JSON.parse(JSON.stringify(window[div_id].filters)),
           len = __impactedby.length,
           global_filter,
@@ -961,17 +960,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           }
         }
       }
-      //Loop over consolidated filters
-      //If my div == filter.where_i_came_from_div_id then remove me from consolidated filters
-      // for (var j = 0; j < consolidated_filters.length; j++) {
-      //   if (div_id === consolidated_filters[j].local_div_id_triggering_event) {
-      //     consolidated_filters.splice(j, 1);
-      //   }
-      // }
       return consolidated_filters;
-    // } else {
-    //   errorHandling(100, "Cannot call generateConsolidatedFiltersArray on a Global PykQuery");
-    // }
   }
 
   var generateQueryableFiltersArray = function(){
@@ -991,7 +980,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             "column_name": each_filter[0].column_name,
             "condition_type": each_filter[0].condition_type,
             "local_div_id_triggering_event": each_filter[0].local_div_id_triggering_event,
-            "next": each_filter[0]['next']
+            "next": each_filter[0]['next'],
+            "group": each_filter[0]['group']
           }
           if (each_filter[0].condition_type === "values" || each_filter[0].condition_type === "datatype") {
             var where_in = [],
