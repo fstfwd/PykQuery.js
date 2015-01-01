@@ -80,7 +80,7 @@
       });
 
       a = new PykQuery.init("aggregation", "local", "a", "inbrowser");
-      a.dimensions = ["city"];
+      a.dimensions = ["city","type"];
       a.metrics = {"city":["count"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
       a.alias = {"city": {"count":"weight","city":"name"}};
       // a.sort = [{"city":"asc"},{"type":"desc"}];
@@ -88,7 +88,7 @@
         k.execute();
       }
 
-      // a.addFilter({"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"}, false);
+      a.addFilter([{"column_name": "type", "condition_type": "values", "in": ["Residential", "Multi-Family"], "next": "OR"},{"column_name": "city", "condition_type": "values", "in": ["SACRAMENTO"], "next": "OR"}], false);
 
       b = new PykQuery.init("aggregation", "local", "b", "inbrowser");
       b.dimensions = ["zip"];
