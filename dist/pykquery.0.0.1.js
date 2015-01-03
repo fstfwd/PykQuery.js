@@ -8,7 +8,7 @@ PykUtil.init = function() {
     }
 
     //TODO - Change all _ ruby like names to CamelCase for all PykUtil Functions
-    this.concat_and_uniq = function(a1, a2) {
+    this.concatAndUniq = function(a1, a2) {
         if (a1 != undefined && a2 != undefined){
             a1 = a1.concat(a2)
                 .filter(function(item, i, ar) {
@@ -18,7 +18,7 @@ PykUtil.init = function() {
         return a1;
     }
 
-    this.is_exactly_same = function(a1, a2) {
+    this.isExactlySame = function(a1, a2) {
         if (a1 && a2){
             var is_same2 = (a1.length === a2.length) && a1.every(function(element, index) {
                 return element === a2[index];
@@ -30,7 +30,7 @@ PykUtil.init = function() {
         }
     }
 
-    this.subtract_array = function(a1, a2) {
+    this.subtractArray = function(a1, a2) {
         if (a1 && a2){
           if (a1.length === 0) {
             a1 = undefined;
@@ -51,7 +51,7 @@ PykUtil.init = function() {
         return a1;
     }
 
-    this.subtract_object_attribute = function (a1, a2) {
+    this.subtractObjectAttribute = function (a1, a2) {
       if (a1 && a2) {
         if (Object.keys(a1).length === 0) {
           a1 = undefined;
@@ -134,9 +134,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   var util = new PykUtil.init()
     , util_is_blank = util.isBlank
-    , util_concat_and_uniq = util.concat_and_uniq
-    , util_subtract_array = util.subtract_array
-    , util_subtract_object_attribute = util.subtract_object_attribute;
+    , util_concatAndUniq = util.concatAndUniq
+    , util_subtractArray = util.subtractArray
+    , util_subtractObjectAttribute = util.subtractObjectAttribute;
 
   var errorHandling = function (error_code,error_message) {
     var visit = "";
@@ -282,7 +282,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           return dimensions;
         },
         set: function(name) {
-          dimensions = util_concat_and_uniq(dimensions, name);
+          dimensions = util_concatAndUniq(dimensions, name);
         }
       });
       Object.defineProperty(this, 'metrics', {
@@ -317,7 +317,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             return data_type;
           },
           set: function(type) {
-            data_type = util_concat_and_uniq(data_type,type);
+            data_type = util_concatAndUniq(data_type,type);
           }
         });
       }
@@ -438,7 +438,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           }
         }
         if (!sort_column_already_present) {
-          sort = util_concat_and_uniq(sort, name);
+          sort = util_concatAndUniq(sort, name);
         }
       }
     }
@@ -485,15 +485,15 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var old_filter_condition = old_filter['condition_type']
       if (old_filter['column_name'] === new_filter['column_name'] && old_filter_condition === new_filter['condition_type']){
         if (old_filter_condition === "values" || old_filter_condition === "datatype") {
-          var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']),
-              is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
+          var is_same1 = util.isExactlySame(new_filter['in'], old_filter['in']),
+              is_same2 = util.isExactlySame(new_filter['not_in'], old_filter['not_in']);
           if (is_same2 && is_same1) {
             warningHandling(2, "Clean up your JS: Same filter cannot add");
             return false;
           }
           else {
-            var is_same3 = util.is_exactly_same(new_filter['not_in'], old_filter['in'])
-              , is_same4 = util.is_exactly_same(new_filter['in'], old_filter['not_in']);
+            var is_same3 = util.isExactlySame(new_filter['not_in'], old_filter['in'])
+              , is_same4 = util.isExactlySame(new_filter['in'], old_filter['not_in']);
             if (new_filter.override_filter && (is_same3 || is_same4)) {
               where_clause[i] = new_filter;
               is_new_filter = false;
@@ -726,7 +726,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     if (this.dimensions) {
       var len = this.dimensions.length;
       if (len > 0) {
-        util_subtract_array(this.dimensions, columns);
+        util_subtractArray(this.dimensions, columns);
         if (len === this.dimensions.length) {
           return false;
         }
@@ -746,7 +746,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     if (this.metrics) {
       var len = Object.keys(this.metrics).length;
       if (len > 0) {
-        util_subtract_object_attribute(this.metrics, columns);
+        util_subtractObjectAttribute(this.metrics, columns);
         if (len === Object.keys(this.metrics).length) {
           return false;
         }
@@ -1058,8 +1058,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             var where_in = [],
                 where_not_in = [];
             for (var i = 0; i < each_filter_length; i++) {
-              where_in = each_filter[i].in ? util_concat_and_uniq(where_in, each_filter[i].in) : where_in;
-              where_not_in = each_filter[i].not_in ? util_concat_and_uniq(where_not_in, each_filter[i].not_in) : where_not_in;
+              where_in = each_filter[i].in ? util_concatAndUniq(where_in, each_filter[i].in) : where_in;
+              where_not_in = each_filter[i].not_in ? util_concatAndUniq(where_not_in, each_filter[i].not_in) : where_not_in;
             }
             obj.in = where_in;
             obj.not_in = where_not_in;

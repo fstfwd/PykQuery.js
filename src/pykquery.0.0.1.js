@@ -13,7 +13,7 @@ PykUtil.init = function() {
     }
 
     //TODO - Change all _ ruby like names to CamelCase for all PykUtil Functions
-    this.concat_and_uniq = function(a1, a2) {
+    this.concatAndUniq = function(a1, a2) {
         if (a1 != undefined && a2 != undefined){
             a1 = a1.concat(a2)
                 .filter(function(item, i, ar) {
@@ -23,7 +23,7 @@ PykUtil.init = function() {
         return a1;
     }
 
-    this.is_exactly_same = function(a1, a2) {
+    this.isExactlySame = function(a1, a2) {
         if (a1 != undefined && a2 != undefined){
             var is_same2 = (a1.length == a2.length) && a1.every(function(element, index) {
                 return element === a2[index];
@@ -35,7 +35,7 @@ PykUtil.init = function() {
         }
     }
 
-    this.subtract_array = function(a1, a2) {
+    this.subtractArray = function(a1, a2) {
         if (a1 != undefined && a2 != undefined){
             for (var i = 0; i < a2.length; i++) {
                 var index = a1.indexOf(a2[i]);
@@ -456,8 +456,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var old_filter = where_clause[i];
       if (old_filter['column_name'] == new_filter['column_name'] && old_filter['condition_type'] == new_filter['condition_type']){
         if (old_filter['condition_type'] == "values" || old_filter['condition_type'] == "datatype") {
-          var is_same1 = util.is_exactly_same(new_filter['in'], old_filter['in']),
-              is_same2 = util.is_exactly_same(new_filter['not_in'], old_filter['not_in']);
+          var is_same1 = util.isExactlySame(new_filter['in'], old_filter['in']),
+              is_same2 = util.isExactlySame(new_filter['not_in'], old_filter['not_in']);
           if (is_same2 == true && is_same1 == true) {
             warningHandling(2, "Clean up your JS: Same filter cannot add");
             return false;
