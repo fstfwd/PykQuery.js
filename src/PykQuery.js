@@ -475,7 +475,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             }
             duplicate_filter = false;
           }
-          if (filter_group_processed) {
+          if (!filter_group_processed) {
             where_clause.push(new_filter_j);
             is_new_filter = true;
           }
