@@ -1422,7 +1422,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   var removeFilterFromList = function (filter_to_be_removed) {
-    var key = filter_to_be_removed.local_div_id_triggering_event;
-    window[key].removeFilter([[filter_to_be_removed]], true);
+    var key = filter_to_be_removed[0].local_div_id_triggering_event;
+    window[key].removeFilter([filter_to_be_removed], true);
   }
 };
