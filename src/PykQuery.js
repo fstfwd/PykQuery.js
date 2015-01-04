@@ -382,8 +382,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         showFilterList();
       }
     } else if(is_interactive && _scope === "local"){
-      name.local_div_id_triggering_event = div_id;
-      addFilterPropagate(name,this,restore);
+      addFilterPropagate(name);
     } else if(!is_interactive && _scope === "local"){ //onload
       addFilterInQuery(name,is_interactive,this,restore);
     } else if(!is_interactive && _scope === "global"){
@@ -506,6 +505,14 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   // If a local filter is changed and it impacts a global then append to global
   var addFilterPropagate = function(new_filter) {
+    var new_filter_length = new_filter.length;
+    for (var i = 0; i < new_filter_length; i++) {
+      var new_filter_i = new_filter[i]
+        , new_filter_i_len = new_filter_i.length;
+      for (var j = 0; j < new_filter_i_len; j++) {
+        new_filter_i[j].local_div_id_triggering_event = div_id;
+      }
+    }
     if (_scope === "local") {
       var len = __impacts.length;
       for (var j = 0; j < len; j++) {
@@ -1368,17 +1375,26 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   var showFilterList = function() {
-    var get_class_name_filter_list = document.getElementsByClassName('filter_list')[0];
+    var get_class_name_filter_list = document.getElementsByClassName('filter_list')[0]
+      , where_clause_length = where_clause.length
+      , value = ""
+      , next = "";
     get_class_name_filter_list.innerHTML = "";
-    var where_clause_length = where_clause.length;
     for (var i = 0; i < where_clause_length; i++) {
-      if (where_clause[i].in) {
-        var value = "<b>" + where_clause[i].column_name + " IN</b> (" + where_clause[i].in+")";
-      } else if (where_clause[i].not_in) {
-        var value = "<b>" + where_clause[i].column_name + " NOT IN</b> (" + where_clause[i].not_in+")";
-      } else if (where_clause[i].condition) {
-        var value = "<b>" + where_clause[i].column_name + " BETWEEN</b> " + where_clause[i].condition.min.toFixed(2)+" <b>AND</b> "+where_clause[i].condition.max.toFixed(2);
+      var where_clause_i = where_clause[i]
+        , where_clause_i_len = where_clause_i.length;
+      for (var j = 0; j < where_clause_i_len; j++) {
+        var where_clause_j = where_clause_i[j];
+        next = j !== where_clause_i_len-1 ? where_clause_j['next'] : "";
+        if (where_clause_j.in) {
+          value = " IN</b> (" + where_clause_j.in+") <i>" + next + " </i>";
+        } else if (where_clause_j.not_in) {
+          value = " NOT IN</b> (" + where_clause_j.not_in+")";
+        } else if (where_clause_j.condition) {
+          value = " BETWEEN</b> " + where_clause_j.condition.min.toFixed(2)+" <b>AND</b> "+where_clause_j.condition.max.toFixed(2);
+        }
       }
+      value = "<b>" + where_clause_i[0].column_name + value;
       // var filterBlock = "<div id='filter_block'"+i+" class='filter_block' style='padding: 0px 10px;'></div>"
       var filter_block = document.createElement("div");
       filter_block.setAttribute("class","filter_block");
