@@ -16,7 +16,7 @@ var restoreFilters = function () {
 
     for (var  i = 0; i < saved_filters_length; i++) {
       is_interactive = (query_object.scope === "local") ? false : true;
-      query_object.addFilter(saved_filters[i], is_interactive, query_object.localdividtriggeringevent, true);
+      query_object.addFilter([saved_filters[i]], is_interactive, query_object.localdividtriggeringevent, true);
     }
     if (saved_filters_length === 0) {
       if(query_object.scope === "global"){
