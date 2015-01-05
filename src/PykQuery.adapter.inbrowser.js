@@ -8,6 +8,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       global_divid_for_raw_data = pykquery.global_divid_for_raw_data,
   global_divid_for_raw_data = window[global_divid_for_raw_data];
   raw_data = global_divid_for_raw_data.rawdata;
+  console.log(raw_data);
 
   query_object.filters = queryable_filters;
 
@@ -150,80 +151,73 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
   }
 
   var startFilterData = function (filter_obj) {
-    var mode = filter_obj.mode,
-        filters_array = filter_obj.filters,
-        len = filters_array.length, columns;
-    mode === 'select' ? columns = filter_obj.select : columns = [];
+    var data = raw_data.slice(0)
+      , raw_data_length = data.length
+      , filters_array = filter_obj.filters
+      , filter_array_length = filters_array.length
+      , mode = filter_obj.mode
+      , columns = mode === 'select' ? filter_obj.select : [];
 
-    for(var i = 0; i < len; i++) {
-      //var obj = {columnname:['count']}
-      //checking condition_type of filter exit
-      switch(filters_array[i]["condition_type"]) {
-        case "values":
-          valueFilter(filters_array[i],columns,mode); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
+    while (raw_data.length > 0) {
+      raw_data.pop();
+    }
+
+    for (var i = 0; i < raw_data_length; i++) {
+      for (var j = 0; j < filter_array_length; j++) {
+        switch (filters_array[j].condition_type) {
+          case "values":
+            valueFilter(filters_array[j],columns,mode, data[i], data[i-1])
           break;
-        case "range":
-          rangeFilter(filters_array[i],columns); // Changed the passing paramenter from filter_obj.select to filter_obj.dimensions as select is not applicable to filters ---> AUTHOR RONAK
+
+          case "range":
+            rangeFilter(filters_array[j],columns,mode, data[i], data[i-1])
           break;
-        case "datatype":
+
+          case "datatype":
           break;
-        default:
-          //console.log('wrong condition type');
+        }
       }
     }
-    return raw_data;
-  }
 
-  var valueFilter = function (filter_obj,columns,mode) {
-    var _in = filter_obj['in'],
-        not_in = filter_obj['not_in'],
-        column_name = filter_obj['column_name'],
-        col;
-        var data = raw_data;
-        var raw_data_length = data.length;
-        raw_data = [];
-        for(var i = 0; i < raw_data_length; i++) {
-          var obj_col_name = data[i][column_name];
-          if(_in && _in.indexOf(obj_col_name) > -1) {
-            raw_data.push(data[i]);
-          } else if(not_in && not_in.length > 0 && not_in.indexOf(obj_col_name) === -1) {
-            raw_data.push(data[i]);
-          }
-        }
     if(columns.length != 0 && mode === "select") {
       raw_data = _.map(raw_data ,function (obj) {
         return _.pick(obj,columns);
       });
     }
-    //console.log("value filter completed");
+    return raw_data;
+  }
+
+  var valueFilter = function (filter_obj, columns, mode, current_data, previous_data) {
+    var _in = filter_obj['in']
+      , not_in = filter_obj['not_in']
+      , column_name = filter_obj['column_name']
+      , col
+      , obj_col_name = current_data[column_name];
+    if((_in && _in.indexOf(obj_col_name) > -1) || (not_in && not_in.length > 0 && not_in.indexOf(obj_col_name) === -1)) {
+      raw_data.push(current_data);
+    }
+    // if (previous_data) {
+    //   if (previous_data.group) {
+    //
+    //   }
+    // }
   };
 
-  var rangeFilter = function (filter_obj,columns,mode){
+  var rangeFilter = function (filter_obj, columns, mode, current_data, previous_data) {
     var min,
         max,
         not,
         column_name = filter_obj['column_name'],
         col,
         filter_obj_condition_length = filter_obj.condition.length;
-    raw_data = _.filter(raw_data ,function (obj){
-      for (var i = 0; i < filter_obj_condition_length; i++) {
-        min = filter_obj.condition[i]['min'];
-        max = filter_obj.condition[i]['max'];
-        not = filter_obj.condition[i]['not'];
-        if (not && (obj[column_name] > max || obj[column_name] < min)){
-          return obj;
-        } else if(!not && obj[column_name] <= max && obj[column_name] >=min){
-          return obj;
-        }
+    for (var i = 0; i < filter_obj_condition_length; i++) {
+      min = filter_obj.condition[i]['min'];
+      max = filter_obj.condition[i]['max'];
+      not = filter_obj.condition[i]['not'];
+      if ((not && (current_data[column_name] > max || current_data[column_name] < min)) || (!not && current_data[column_name] <= max && current_data[column_name] >=min)) {
+        raw_data.push(current_data);
       }
-    });
-    //return perticular columns data
-    if(columns.length != 0 && mode === "select"){
-      raw_data = _.map(raw_data ,function (obj){
-        return _.pick(obj,columns);
-      });
     }
-    //console.log("rangeFilter done----");
   }
 
   var processAlias = function(colname,aggregation_method) {

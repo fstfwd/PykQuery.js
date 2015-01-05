@@ -401,9 +401,8 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         , element = document.querySelectorAll("[data-id='"+new_filter_j[0].selected_dom_id+"']");
 
       if (new_filter_j_len > 1) {
-        for (var k = 0; k < new_filter_j_len; k++) {
-          new_filter_j[k].group = true;
-        }
+        new_filter_j[0].group = true;
+        new_filter_j[new_filter_j_len-1].group = false;
       }
       if (where_clause_length === 0) {
         where_clause.push(new_filter_j);
@@ -1052,8 +1051,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             "column_name": each_filter[0].column_name,
             "condition_type": each_filter[0].condition_type,
             "local_div_id_triggering_event": each_filter[0].local_div_id_triggering_event,
-            "next": each_filter[0]['next'],
-            "group": each_filter[0]['group']
+            "next": each_filter[0]['next']
+          }
+          if (each_filter[0].hasOwnProperty('group')) {
+            obj.group = each_filter[0]['group'];
           }
           if (each_filter[0].condition_type === "values" || each_filter[0].condition_type === "datatype") {
             var where_in = [],
