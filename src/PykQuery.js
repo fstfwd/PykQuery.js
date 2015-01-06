@@ -1377,25 +1377,24 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   var showFilterList = function() {
     var get_class_name_filter_list = document.getElementsByClassName('filter_list')[0]
-      , where_clause_length = where_clause.length
-      , value = ""
-      , next = "";
+    , where_clause_length = where_clause.length
+    , next = "";
     get_class_name_filter_list.innerHTML = "";
     for (var i = 0; i < where_clause_length; i++) {
       var where_clause_i = where_clause[i]
-        , where_clause_i_len = where_clause_i.length;
+      , where_clause_i_len = where_clause_i.length
+      , value = "";
       for (var j = 0; j < where_clause_i_len; j++) {
         var where_clause_j = where_clause_i[j];
         next = j !== where_clause_i_len-1 ? where_clause_j['next'] : "";
         if (where_clause_j.in) {
-          value = " IN</b> (" + where_clause_j.in+") <i>" + next + " </i>";
+          value += "<b>" + where_clause_i[j].column_name + " IN</b> (" + where_clause_j.in+") <i>" + next + " </i>";
         } else if (where_clause_j.not_in) {
-          value = " NOT IN</b> (" + where_clause_j.not_in+")";
+          value += "<b>" + where_clause_i[j].column_name + " NOT IN</b> (" + where_clause_j.not_in+")";
         } else if (where_clause_j.condition) {
-          value = " BETWEEN</b> " + where_clause_j.condition.min.toFixed(2)+" <b>AND</b> "+where_clause_j.condition.max.toFixed(2);
+          value += "<b>" + where_clause_i[j].column_name + " BETWEEN</b> " + where_clause_j.condition.min.toFixed(2)+" <b>AND</b> "+where_clause_j.condition.max.toFixed(2);
         }
       }
-      value = "<b>" + where_clause_i[0].column_name + value;
       // var filterBlock = "<div id='filter_block'"+i+" class='filter_block' style='padding: 0px 10px;'></div>"
       var filter_block = document.createElement("div");
       filter_block.setAttribute("class","filter_block");
@@ -1409,7 +1408,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var filter_remove = document.createElement("div");
       filter_remove.setAttribute("class","filter_remove");
       filter_remove.setAttribute("id","filter_remove_"+i);
-      filter_remove.innerHTML = "<b class='glyphicon glyphicon-trash' style='font-size: 11px;'></b>";
+      filter_remove.innerHTML = "<b class='glyphicon glyphicon-trash' style='font-size: 11px;cursor:pointer'></b>";
       document.getElementById('filter_block'+i).appendChild(filter_remove);
     }
     var divs = document.getElementsByClassName("filter_remove"),
