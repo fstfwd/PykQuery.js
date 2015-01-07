@@ -694,7 +694,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       , len2 = columns.length;
     for (var i = 0; i < len2; i++) {
       removeIndividualAdditionalQueryParams(columns[i], caller_scope);
-      where_clause = _.reject(where_clause, function (d) { return d.column_name==columns[i]; });
+      where_clause = _.reject(where_clause, function (d) {
+        var len3 = d.length;
+        for (var j = 0; j < len3; j++) {
+          return d[j].column_name==columns[i];
+        }
+      });
     }
     if (where_clause.length !== len1) {
       if (document.getElementsByClassName('filter_list').length > 0) {
@@ -1168,7 +1173,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         queryable_filters.push(obj);
       }
     }
-    console.log(group,filters_with_group,queryable_filters,filters_with_group.concat(queryable_filters));
     return filters_with_group.concat(queryable_filters);
     // } else {
     //   errorHandling(101, "Cannot call generateQueryableFiltersArray on a Global PykQuery");
