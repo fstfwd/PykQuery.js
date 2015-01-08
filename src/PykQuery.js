@@ -401,7 +401,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         , element = document.querySelectorAll("[data-id='"+new_filter_j[0].selected_dom_id+"']");
 
       if (new_filter_j_len > 1) {
-        new_filter_j[0].group = true;
+        for (var n = 0; n < new_filter_j_len - 1; n++) {
+          new_filter_j[n].group = true;
+        }
         new_filter_j[new_filter_j_len-1].group = false;
       }
       if (where_clause_length === 0) {
