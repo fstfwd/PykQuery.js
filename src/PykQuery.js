@@ -1411,7 +1411,11 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         } else if (where_clause_j.not_in) {
           value += "<b>" + where_clause_i[j].column_name + " NOT IN</b> (" + where_clause_j.not_in+")";
         } else if (where_clause_j.condition) {
-          value += "<b>" + where_clause_i[j].column_name + " BETWEEN</b> " + where_clause_j.condition.min.toFixed(2)+" <b>AND</b> "+where_clause_j.condition.max.toFixed(2);
+          var not_between = "";
+          if (where_clause_j.condition.not) {
+            not_between = "NOT";
+          }
+          value += "<b>" + where_clause_i[j].column_name + " " + not_between + " BETWEEN</b> " + where_clause_j.condition.min.toFixed(2)+" <b>AND</b> "+where_clause_j.condition.max.toFixed(2);
         }
       }
       // var filterBlock = "<div id='filter_block'"+i+" class='filter_block' style='padding: 0px 10px;'></div>"
