@@ -770,9 +770,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   this.resetDimensions = function(){
     if(_scope === "local"){
       while(this.dimensions.length > 0) {
+        removeIndividualAdditionalQueryParams(this.dimensions[this.dimensions.length-1], this);
         this.dimensions.pop();
       }
-      removeAllAdditionalQueryParams(this);
+      // removeAllAdditionalQueryParams(this);
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
@@ -795,9 +796,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   this.resetMetrics = function(){
     if(_scope === "local"){
       for (var key in this.metrics) {
+        removeIndividualAdditionalQueryParams(key, this);
         delete this.metrics[key];
       }
-      removeAllAdditionalQueryParams(this);
+      // removeAllAdditionalQueryParams(this);
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
