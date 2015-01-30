@@ -1046,8 +1046,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   var generateQueryableFiltersArray = function(){
     // if (_scope === "local") {
     var consolidated_filters_length = consolidated_filters.length
-    , filters_with_group = []
-    , filters_without_group = [];
+      , filters_with_group = []
+      , filters_without_group = []
+      , queryable_filters = [];
     if (Object.keys(PykQuery.query_json).length > 0) {
       queryable_filters = [];
     }
