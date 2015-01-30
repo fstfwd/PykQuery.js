@@ -199,7 +199,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
   };
 
   var rangeFilter = function (filter_obj,columns,mode){
-    var min,
+    var min
       , max
       , not
       , column_name = filter_obj['column_name']
