@@ -1733,13 +1733,13 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       for (var i=0; i<prop_length; i++) {
         var individual_metric = metrics[prop[i]],
             individual_metric_length = individual_metric.length;
-        for (var i = 0; i < individual_metric_length; i++) {
-          switch (individual_metric[i]) {
+        for (var j = 0; j < individual_metric_length; j++) {
+          switch (individual_metric[j]) {
             case "count":
-              local_obj[processAlias(prop[i],individual_metric[i])] = value.length;
+              local_obj[processAlias(prop[i],individual_metric[j])] = value.length;
               break;
             case "sum":
-              local_obj[processAlias(prop[i],individual_metric[i])] = _.sum(value, function (values) {
+              local_obj[processAlias(prop[i],individual_metric[j])] = _.sum(value, function (values) {
                 return parseInt(values[prop[i]],10);
               });
               break;
