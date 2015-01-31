@@ -1679,7 +1679,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         // key: "value",
         //console.log('wrong condition type');
     }
-    if (query_object['sort']) {
+    if (query_object['sort'] && query_object['sort'] > 0) {
       filtered_data = startSorting(filtered_data);
     }
     return filtered_data;
