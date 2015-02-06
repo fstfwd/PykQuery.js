@@ -76,7 +76,7 @@ var restoreFilters = function () {
       } else {
         is_interactive = true;
       }
-      query_object.addFilter(saved_filters[i], is_interactive, query_object.localdividtriggeringevent, true);
+      query_object.addFilter(saved_filters[i], is_interactive, query_object.localdividtriggeringevent, true,true);
     }
     if (saved_filters.length === 0) {
       if(window[key].scope == "global"){
@@ -427,7 +427,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   });
 
-  this.addFilter = function(name, is_interactive, domid, restore){
+  this.addFilter = function(name, is_interactive, domid, restore,call_to_filter){
     var element = document.querySelectorAll("[data-id='"+name.selected_dom_id+"']");
     if (element.length>0 && element[0].classList.contains("pykquery-selected")) {
       this.removeFilter(name, is_interactive);
@@ -435,22 +435,22 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
     if (filterValidation(name)) {
       if(is_interactive && _scope == "global"){
-        addFilterInQuery(name,this,restore);
+        addFilterInQuery(name,this,restore,call_to_filter);
         if (document.getElementsByClassName('filter_list').length > 0) {
           showFilterList();
         }
       } else if(is_interactive && _scope == "local"){
         name.local_div_id_triggering_event = div_id;
-        addFilterPropagate(name,this,restore);
+        addFilterPropagate(name,this,restore,call_to_filter);
       } else if(!is_interactive && _scope == "global"){
         //not possible
       } else if(!is_interactive && _scope == "local"){ //onload
-        addFilterInQuery(name,this,restore);
+        addFilterInQuery(name,this,restore,call_to_filter);
       }
     }
   }
 
-  var addFilterInQuery = function(new_filter,caller_scope,restore) {
+  var addFilterInQuery = function(new_filter,caller_scope,restore,call_to_filter) {
     var is_new_filter = true;
     for (var i = 0; i < where_clause.length; i++) {
       var old_filter = where_clause[i];
@@ -481,9 +481,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         }
       }
     }
+
     if (is_new_filter == true){
       where_clause.push(new_filter);
-      if (caller_scope && caller_scope.scope==="global") {
+      if (caller_scope && caller_scope.scope==="global" && call_to_filter) {
         caller_scope.call();
       }
     }
@@ -496,33 +497,33 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   // If a local filter is changed and it impacts a global then append to global
-  var addFilterPropagate = function(new_filter) {
+  var addFilterPropagate = function(new_filter,call_to_filter) {
     if (_scope == "local") {
       var len = __impacts.length;
       for (var j = 0; j < len; j++) {
-        window[__impacts[j]].addFilter(new_filter, true, div_id);
+        window[__impacts[j]].addFilter(new_filter, true, div_id,call_to_filter);
       }
     }
   }
 
-  this.removeFilter = function(name, is_interactive){
+  this.removeFilter = function(name, is_interactive,call_to_filter){
     if (filterValidation(name)) {
       if(is_interactive && _scope == "global"){
-        removeFilterInQuery(name,this);
+        removeFilterInQuery(name,this,call_to_filter);
         if (document.getElementsByClassName('filter_list').length > 0) {
           showFilterList();
         }
       } else if(is_interactive && _scope == "local"){
-        removeFilterPropagate(name,this);
+        removeFilterPropagate(name,this,call_to_filter);
       } else if(!is_interactive && _scope == "global"){
         //not possible
       } else if(!is_interactive && _scope == "local"){ //onload
-        removeFilterInQuery(name,this);
+        removeFilterInQuery(name,this,call_to_filter);
       }
     }
   }
 
-  var removeFilterInQuery = function(name,caller_scope) {
+  var removeFilterInQuery = function(name,caller_scope,call_to_filter) {
     var column_name = name.column_name,
         condition_type = name.condition_type,
         where_clause = caller_scope.filters;
@@ -532,7 +533,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           if (_.difference(where_clause[x].in, name.in).length===0 && _.difference(where_clause[x].not_in, name.not_in).length===0) {
             where_clause.splice(x,1);
           }
-          if (caller_scope) {
+          if (caller_scope && call_to_filter) {
             caller_scope.call();
           }
         } else if (condition_type == "range") {
@@ -541,7 +542,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           if(!util.isBlank(__min) && !util.isBlank(__max)) {
             if(__min == where_clause[x]['condition']['min'] && __max == where_clause[x]['condition']['max']) {
               where_clause.splice(x,1);
-              if (caller_scope) {
+              if (caller_scope  && call_to_filter) {
                 caller_scope.call();
               }
             }
@@ -553,11 +554,11 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     setQueryJSON(caller_scope.div_id,caller_scope.scope,where_clause);
   }
 
-  var removeFilterPropagate = function(name,caller_scope) {
+  var removeFilterPropagate = function(name,caller_scope,call_to_filter) {
     if(_scope == "local") {
       var len = __impacts.length;
       for(var j =0;j<len;j++) {
-        window[__impacts[j]].removeFilter(name,caller_scope);
+        window[__impacts[j]].removeFilter(name,caller_scope,call_to_filter);
       }
     }
   }
@@ -1166,7 +1167,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   var removeFilterFromList = function (filter_to_be_removed) {
     var key = filter_to_be_removed.local_div_id_triggering_event;
-    window[key].removeFilter(filter_to_be_removed, true);
+    window[key].removeFilter(filter_to_be_removed, true,true);
   }
 };
 
