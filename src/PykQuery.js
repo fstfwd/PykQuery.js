@@ -47,7 +47,7 @@ var setQueryJSON = function (id,scope,filters) {
 }
 
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
-
+  var self = this;
   var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters, consolidated_filters = [],
       available_mode = ["aggregation", "unique", "select", "datatype", "global"],
       available_scope = ["local", "global"],
@@ -1113,8 +1113,9 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var connector = new PykQuery.adapter.inbrowser.init(query, queryable_filters);
       filter_data = connector.call();
       if(_scope === "local") {
-        this.executeOnFilter();
+        self.executeOnFilter();
       }
+
       return filter_data;
     }
     else{
@@ -1122,7 +1123,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       return connector.call(function (response) {
         filter_data = response;
         if(_scope === "local") {
-          this.executeOnFilter();
+          self.executeOnFilter();
         }
         return filter_data;
       });
