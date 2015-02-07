@@ -1081,7 +1081,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     var that = this;
     if (_scope === "local") {
       invoke_call(getConfig(that));
-      this.executeOnFilter();
+      // this.executeOnFilter();
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
@@ -1189,12 +1189,20 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     queryable_filters = generateQueryableFiltersArray();
     if(adapter === "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(query, queryable_filters);
-      return filter_data = connector.call();
+      filter_data = connector.call();
+      if(_scope === "local") {
+        this.executeOnFilter();
+      }
+      return filter_data;
     }
     else{
       var connector = new PykQuery.adapter.rumi.init(query, rumi_params, queryable_filters);
       return connector.call(function (response) {
-        return filter_data = response;
+        filter_data = response;
+        if(_scope === "local") {
+          this.executeOnFilter();
+        }
+        return filter_data;
       });
     }
     //TODO to delete instance of adapter adapter.delete();
@@ -1554,7 +1562,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params, queryable_filte
       data: data, //return  data
       dataType: 'json',
       type: 'POST',
-      async: false,
+      async: true,
       success: function (res) {
         onComplete(res);
       },

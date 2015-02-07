@@ -21,7 +21,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params, queryable_filte
       data: data, //return  data
       dataType: 'json',
       type: 'POST',
-      async: false,
+      async: true,
       success: function (res) {
         onComplete(res);
       },
