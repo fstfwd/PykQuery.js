@@ -378,7 +378,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   this.addFilter = function(name, is_interactive, call_to_filter, domid, restore){
     if(is_interactive && _scope === "global"){
       addFilterInQuery(name,is_interactive, call_to_filter,this,restore);
-      if (document.getElementsByClassName('filter_list').length > 0) {
+      if (document.getElementsByClassName(div_id+'-filter_list').length > 0) {
         showFilterList();
       }
     } else if(is_interactive && _scope === "local"){
@@ -525,7 +525,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   this.removeFilter = function(name, is_interactive,call_to_filter){
     if(is_interactive && _scope === "global"){
       removeFilterInQuery(name,this,call_to_filter);
-      if (document.getElementsByClassName('filter_list').length > 0) {
+      if (document.getElementsByClassName(div_id+'-filter_list').length > 0) {
         showFilterList();
       }
     } else if(is_interactive && _scope === "local"){
@@ -626,7 +626,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       });
     }
     if (where_clause.length !== len1) {
-      if (document.getElementsByClassName('filter_list').length > 0) {
+      if (document.getElementsByClassName(div_id+'-filter_list').length > 0) {
         showFilterList();
       }
       caller_scope.call();
@@ -681,7 +681,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       this.call();
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,where_clause);
-      if (document.getElementsByClassName('filter_list').length > 0) {
+      if (document.getElementsByClassName(div_id+'-filter_list').length > 0) {
         showFilterList();
       }
     } else {
@@ -827,7 +827,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       for (var j = 0; j < len3; j++) {
         if (current_filters[j].column_name === old_column) {
           current_filters[j].column_name = new_column;
-          if (document.getElementsByClassName('filter_list').length > 0) {
+          if (document.getElementsByClassName(div_id+'-filter_list').length > 0) {
             showFilterList();
           }
         }
@@ -1402,12 +1402,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   this.listFilters = function (div_element) {
     var element = document.getElementById(div_element);
     element.innerHTML = "";
-    element.innerHTML = "<div class='filter_list'></div>";
+    element.innerHTML = "<div class='"+div_id+"-filter_list'></div>";
     showFilterList();
   }
 
   var showFilterList = function() {
-    var get_class_name_filter_list = document.getElementsByClassName('filter_list')[0]
+    var get_class_name_filter_list = document.getElementsByClassName(div_id+'-filter_list')[0]
     , where_clause_length = where_clause.length
     , next = "";
     get_class_name_filter_list.innerHTML = "";
@@ -1432,26 +1432,26 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
       // var filterBlock = "<div id='filter_block'"+i+" class='filter_block' style='padding: 0px 10px;'></div>"
       var filter_block = document.createElement("div");
-      filter_block.setAttribute("class","filter_block");
+      filter_block.setAttribute("class",div_id+"-filter_block");
       filter_block.setAttribute("style","padding: 0px 10px;");
-      filter_block.setAttribute("id","filter_block"+i);
+      filter_block.setAttribute("id",div_id+"_filter_block"+i);
       get_class_name_filter_list.appendChild(filter_block);
       var filter_values = document.createElement("div");
-      filter_values.setAttribute("class","filter_value");
+      filter_values.setAttribute("class",div_id+"-filter_value");
       filter_values.innerHTML = value;
-      document.getElementById('filter_block'+i).appendChild(filter_values);
+      document.getElementById(div_id+'_filter_block'+i).appendChild(filter_values);
       var filter_remove = document.createElement("div");
-      filter_remove.setAttribute("class","filter_remove");
-      filter_remove.setAttribute("id","filter_remove_"+i);
+      filter_remove.setAttribute("class",div_id+"-filter_remove");
+      filter_remove.setAttribute("id",div_id+"_filter_remove_"+i);
       filter_remove.innerHTML = "<b class='glyphicon glyphicon-trash' style='font-size: 11px;cursor:pointer'></b>";
-      document.getElementById('filter_block'+i).appendChild(filter_remove);
+      document.getElementById(div_id+'_filter_block'+i).appendChild(filter_remove);
     }
-    var divs = document.getElementsByClassName("filter_remove"),
+    var divs = document.getElementsByClassName(div_id+"-filter_remove"),
         divs_length = divs.length;
     for (var i = 0; i< divs_length; i++) {
       divs[i].onclick = function () {
         var index = this.id.split("_")
-        removeFilterFromList(where_clause[index[2]]);
+        removeFilterFromList(where_clause[index[3]]);
       }
     }
   }
