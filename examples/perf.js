@@ -26,31 +26,31 @@ $(document).ready(function () {
                     g1.resetFilters();
                 });
 
-            table1.call();
-            table2.call();
+              table1.call();
+              table2.call();
 
-            table1.executeOnFilter = function() {
+              table1.executeOnFilter = function() {
                 var d = table1.flushToGet();
                 // console.log("table1")
                 dataTable(d,table1.dimensions,table1.metrics,table1.alias,"#table1");
-                $("#table1 td").click(function(){
-                var value = $(this).html();
-                    id = $(this).attr("data-id");
+                // $("#table1 td").click(function(){
+                // var value = $(this).html();
+                //     id = $(this).attr("data-id");
                 // console.log("hey", value,id)
-                table1.addFilter({"column_name": "drinkingwatersource", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}, true);
+                // table1.addFilter([[{"column_name": "drinkingwatersource", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}]], true,true);
                 
-                });
+              // });
             }
 
             table2.executeOnFilter = function() {
                 var d = table2.flushToGet();
                 dataTable(d,table2.dimensions,table2.metrics,table2.alias,"#table2");
-                $("#table2 td").click(function(){
-                var value = $(this).html();
-                    id = $(this).attr("data-id");
-                table2.addFilter({"column_name": "area", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}, true);
+                // $("#table2 td").click(function(){
+                 // var value = $(this).html();
+                //     id = $(this).attr("data-id");
+                // table2.addFilter([[{"column_name": "area", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}]], true,true);
                 
-                });
+                // });
             }
 
             var data1 = table1.flushToGet();
@@ -61,22 +61,26 @@ $(document).ready(function () {
             // console.log(d3.select("#table1 table"))
 
             $("#table1 td").click(function(){
-                var date = new Date();
+                var date = new Date(), perf = performance;
                     var i,avg =0;
                     var a = [];
-                    for(i = 0;i<100;i++) {
-                        // console.log(i);
-                        var start = new Date().getTime();
-                        var value = $(this).html();
-                            id = $(this).attr("data-id");
-                        table1.addFilter({"column_name": "drinkingwatersource", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}, true);
-                        var end = new Date().getTime();
-                        // if (i%2 === 0) {
-                            a[i] = end - start;
-                            avg += a[i] 
-                        // }                       
-                    }
-                console.log("Performance",a,avg/100);
+                table1.executeOnFilter = function(){
+                  var end =perf.now();  
+                  var avg = end - start;  
+                  console.log("Performance  ",avg/100);
+                }
+                  for(i = 0;i<1;i++) {
+                    // console.log(i);
+                    var start = perf.now();
+                    var value = $(this).html();
+                        id = $(this).attr("data-id");
+                    table1.addFilter([[{"column_name": "drinkingwatersource", "condition_type": "values", "in": [value],"next": "OR", "selected_dom_id" : id}]], true,true);
+                    
+                    // if (i%2 === 0) {
+                        // a[i] = end - start;
+                        // avg += a[i] 
+                    // }                       
+                  }
 
             });
 
