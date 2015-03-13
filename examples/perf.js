@@ -19,7 +19,7 @@ $(document).ready(function () {
             d3.csv("data/ePaymentOffices.csv", function (data) {
                 // console.log(data.length)
                 window.g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
-                console.log("helloooooo",data)
+                // console.log("helloooooo",data)
                 // console.log(data)
                 g1.rawdata = data;
                 g1.addImpacts(["table1","table2"],true);
@@ -31,7 +31,7 @@ $(document).ready(function () {
 
               table1.executeOnFilter = function() {
                 var d = table1.flushToGet();
-                console.log("table1")
+                // console.log("table1")
                 dataTable(d,table1.dimensions,table1.metrics,table1.alias,"#table1");
                 $("#table1 td").click(function(){
                 // var value = $(this).html();
@@ -67,7 +67,7 @@ $(document).ready(function () {
                 table1.executeOnFilter = function(){
                   var end =perf.now();  
                   var avg = end - start;  
-                  console.log("Performance  ",avg/100);
+                  // console.log("Performance  ",avg/100);
                 }
                   for(i = 0;i<1;i++) {
                     // console.log(i);

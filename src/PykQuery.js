@@ -390,7 +390,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  var addFilterInQuery = function(new_filter,is_interactive, call_to_filter,caller_scope,restore) {
+  function addFilterInQuery(new_filter,is_interactive, call_to_filter,caller_scope,restore) {
     var is_new_filter = false
       , where_clause_length = where_clause.length
       , new_filter_length = new_filter.length
@@ -502,6 +502,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     } else {
       caller_scope.removeFilter(new_filter, is_interactive,call_to_filter);
     }
+   is_new_filter = where_clause_length = new_filter_length = duplicate_filter = null;
   }
 
   // If a local filter is changed and it impacts a global then append to global

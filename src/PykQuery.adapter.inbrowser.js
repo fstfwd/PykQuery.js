@@ -8,7 +8,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       global_divid_for_raw_data = pykquery.global_divid_for_raw_data,
   global_divid_for_raw_data = window[global_divid_for_raw_data];
   raw_data = global_divid_for_raw_data.rawdata;
-
   query_object.filters = queryable_filters;
 
   // function call by adapter from pykquery.js
@@ -36,9 +35,11 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       filtered_data = startSorting(filtered_data);
     }
     return filtered_data;
+    query_object = raw_data = global_divid_for_raw_data =global_divid_for_raw_data = raw_data = null; 
+    query_object.filters = null;
   }
 
-  var startSorting = function (data) {
+  function startSorting(data) {
     var sort_object = query_object['sort'],
         sort_object_length = sort_object.length;
     return data.sort(function (a, b) {
@@ -51,7 +52,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       }
     });
   }
-  var processSorting = function (a, b, alias, order) {
+  function processSorting(a, b, alias, order) {
     if (order === "asc") {
       return a[alias] < b[alias] ? -1 : (a[alias] > b[alias] ? 1 : 0);
     } else {
@@ -59,7 +60,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     }
   }
 
-  var startAggregation = function (filter_obj){
+  function startAggregation(filter_obj){
     var metrics = filter_obj.metrics
       , filter_obj_dimension = filter_obj.dimensions
       , filter_obj_dimensions_length = filter_obj_dimension.length;
@@ -99,12 +100,13 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
           }
         }
       }
+      prop = null;
       local_filter_array.push(local_obj);
     });
     return local_filter_array;
   }
 
-  var metricsMin = function (local_data,column_name) {
+  function metricsMin(local_data,column_name) {
     var local_filter_array = []
     _.map(local_data, function (values,key) {
       var local_obj = {};
@@ -119,7 +121,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     return local_filter_array;
   }
 
-  var metricsMax = function (local_data,column_name) {
+  function metricsMax(local_data,column_name) {
     var local_filter_array = []
     _.map(local_data, function (values,key) {
       var local_obj = {};
@@ -134,7 +136,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     return local_filter_array;
   }
 
-  var metricsExtent = function (local_data,column_name) {
+  function metricsExtent(local_data,column_name) {
     var local_filter_array = []
     _.map(local_data, function (values,key) {
       var local_obj = {};
@@ -149,7 +151,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     return local_filter_array;
   }
 
-  var startFilterData = function (filter_obj) {
+  function tartFilterData(filter_obj) {
     var mode = filter_obj.mode,
         filters_array = filter_obj.filters,
         len = filters_array.length, columns;
@@ -171,10 +173,11 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
           //console.log('wrong condition type');
       }
     }
+    filters_array = null;
     return raw_data;
   }
 
-  var valueFilter = function (filter_obj,columns,mode) {
+  function valueFilter(filter_obj,columns,mode) {
     var _in = filter_obj['in']
       , not_in = filter_obj['not_in']
       , column_name = filter_obj['column_name']
@@ -195,10 +198,11 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         return _.pick(obj,columns);
       });
     }
+    _in = not_in = column_name = data = raw_data_length = null;
     //console.log("value filter completed");
   };
 
-  var rangeFilter = function (filter_obj,columns,mode){
+  function rangeFilter(filter_obj,columns,mode){
     var min
       , max
       , not
@@ -226,7 +230,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     //console.log("rangeFilter done----");
   }
 
-  var processAlias = function(colname,aggregation_method) {
+  function processAlias(colname,aggregation_method) {
     var alias = query_object.alias;
     if (typeof alias[colname] === "string") {
       return alias[colname];
