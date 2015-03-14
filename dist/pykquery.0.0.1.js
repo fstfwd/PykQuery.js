@@ -468,7 +468,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  var addFilterInQuery = function(new_filter,is_interactive, call_to_filter,caller_scope,restore) {
+  function addFilterInQuery(new_filter,is_interactive, call_to_filter,caller_scope,restore) {
     var is_new_filter = false
       , where_clause_length = where_clause.length
       , new_filter_length = new_filter.length
@@ -503,7 +503,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           break;
         }
         if (element.length>0 && element[0].classList.contains("pykquery-selected") && !new_filter_j.override_filter) {
-        } else {
+        } else {  
           var filter_group_processed = false;
           for (var k = 0; k < new_filter_j_len; k++) { // Iterate over internal loop of new filter
             var new_filter_k = new_filter_j[k]
@@ -580,10 +580,11 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     } else {
       caller_scope.removeFilter(new_filter, is_interactive,call_to_filter);
     }
+   is_new_filter = where_clause_length = new_filter_length = duplicate_filter = null;
   }
 
   // If a local filter is changed and it impacts a global then append to global
-  var addFilterPropagate = function(new_filter,call_to_filter) {
+  function addFilterPropagate(new_filter,call_to_filter) {
     var new_filter_length = new_filter.length;
     for (var i = 0; i < new_filter_length; i++) {
       var new_filter_i = new_filter[i]
@@ -615,7 +616,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  var removeFilterInQuery = function(name,caller_scope,call_to_filter) {
+  function removeFilterInQuery(name,caller_scope,call_to_filter) {
     var where_clause = caller_scope.filters,
         where_clause_length = where_clause.length,
         name_length = name.length,
@@ -682,16 +683,17 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     setQueryJSON(caller_scope.div_id,caller_scope.scope,where_clause);
   }
 
-  var removeFilterPropagate = function(name,caller_scope,call_to_filter) {
+  function removeFilterPropagate(name,caller_scope,call_to_filter) {
     if(_scope === "local") {
       var len = __impacts.length;
       for(var j =0;j<len;j++) {
         window[__impacts[j]].removeFilter(name,caller_scope,call_to_filter);
       }
+      len = null;
     }
   }
 
-  var removeColumns = function (columns, caller_scope) {
+  function removeColumns(columns, caller_scope) {
     var len1 = where_clause.length
       , len2 = columns.length;
     for (var i = 0; i < len2; i++) {
@@ -709,9 +711,10 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
       caller_scope.call();
     }
+    len1 = len2 = null;
   }
 
-  var removeIndividualAdditionalQueryParams = function (column, caller_scope) {
+  function removeIndividualAdditionalQueryParams(column, caller_scope) {
     var alias = caller_scope.alias
       , select = caller_scope.select
       , sort = caller_scope.sort;
@@ -729,7 +732,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  var removeAllAdditionalQueryParams = function (caller_scope) {
+  function removeAllAdditionalQueryParams (caller_scope) {
     // remove filters pending...Also only params of either dimension or metrics should get cleared depending on callee.
     var alias = caller_scope.alias
       , select = caller_scope.select
@@ -862,7 +865,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  var changeColumnNameInternally = function (caller_scope, old_column, new_column) {
+  function changeColumnNameInternally(caller_scope, old_column, new_column) {
     var current_filters = caller_scope.filters;
     if (_scope === "local") {
       var dimensions = caller_scope.dimensions
@@ -955,13 +958,13 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  var setGlobalDivIdForRawData = function (that,id) {
+  function setGlobalDivIdForRawData(that,id) {
     if (!that.global_divid_for_raw_data) {
       that.global_divid_for_raw_data = id;
     }
   }
 
-  var impactValidation = function(array_of_div_ids){
+  function impactValidation(array_of_div_ids){
     var len = array_of_div_ids.length,
         impacts_allowed_on,
         query_object;
@@ -983,7 +986,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   //code for validation before adding filter
-  var filterValidation = function(f) {
+  function filterValidation(f) {
     //var filter1 = [{
     //}, {
     //"column_name": "col1",
@@ -1039,7 +1042,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   //[{"col1": ["min", "max"]}]
-  var metricsValidation = function(m) {
+  function metricsValidation(m) {
     var metric_functions = ['min', 'max', 'avg', 'sum', 'median', 'count'];
     if (Object.keys(m).length === 0) {
       errorHandling(21, "'metrics' object cannot be empty");
@@ -1095,7 +1098,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     return true;
   }
 
-  var generateConsolidatedFiltersArray = function(){
+  function generateConsolidatedFiltersArray(){
       // var consolidated_filters = JSON.parse(JSON.stringify(window[div_id].filters)),
       var consolidated_filters = _.flatten(window[div_id].filters),
           consolidated_filters_length = consolidated_filters.length,
@@ -1121,7 +1124,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       return consolidated_filters;
   }
 
-  var generateQueryableFiltersArray = function(){
+  function generateQueryableFiltersArray(){
     // if (_scope === "local") {
     var consolidated_filters_length = consolidated_filters.length
       , filters_with_group = []
@@ -1210,7 +1213,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   // getConfig is use generate whole query
-  var getConfig = function(that) {
+  function getConfig(that) {
     var filter_obj = {};
     var querydata;
     var arr = Object.getOwnPropertyNames(that);
@@ -1225,7 +1228,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   /* -------------- URL params ------------ */
   // var filters = ["Pykih","mumbai","startup"];
-  var urlParams = function (attr,filter,the_change) {
+  function urlParams(attr,filter,the_change) {
     // console.log(url,"***",params,"***",filters,filters.length);
     var url_params = "", index;
 
@@ -1484,7 +1487,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     showFilterList();
   }
 
-  var showFilterList = function() {
+  function showFilterList() {
     var get_class_name_filter_list = document.getElementsByClassName(div_id+'-filter_list')[0]
     , where_clause_length = where_clause.length
     , next = "";
@@ -1534,7 +1537,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   }
 
-  var removeFilterFromList = function (filter_to_be_removed) {
+  function removeFilterFromList(filter_to_be_removed) {
     var key = filter_to_be_removed[0].local_div_id_triggering_event;
     window[key].removeFilter([filter_to_be_removed], true,true);
   }
@@ -1664,7 +1667,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       global_divid_for_raw_data = pykquery.global_divid_for_raw_data,
   global_divid_for_raw_data = window[global_divid_for_raw_data];
   raw_data = global_divid_for_raw_data.rawdata;
-
   query_object.filters = queryable_filters;
 
   // function call by adapter from pykquery.js
@@ -1692,9 +1694,11 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       filtered_data = startSorting(filtered_data);
     }
     return filtered_data;
+    query_object = raw_data = global_divid_for_raw_data = raw_data = null; 
+    query_object.filters = null;
   }
 
-  var startSorting = function (data) {
+  function startSorting(data) {
     var sort_object = query_object['sort'],
         sort_object_length = sort_object.length;
     return data.sort(function (a, b) {
@@ -1707,7 +1711,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       }
     });
   }
-  var processSorting = function (a, b, alias, order) {
+  function processSorting(a, b, alias, order) {
     if (order === "asc") {
       return a[alias] < b[alias] ? -1 : (a[alias] > b[alias] ? 1 : 0);
     } else {
@@ -1715,7 +1719,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     }
   }
 
-  var startAggregation = function (filter_obj){
+  function startAggregation(filter_obj){
     var metrics = filter_obj.metrics
       , filter_obj_dimension = filter_obj.dimensions
       , filter_obj_dimensions_length = filter_obj_dimension.length;
@@ -1755,12 +1759,13 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
           }
         }
       }
+      prop = null;
       local_filter_array.push(local_obj);
     });
     return local_filter_array;
   }
 
-  var metricsMin = function (local_data,column_name) {
+  function metricsMin(local_data,column_name) {
     var local_filter_array = []
     _.map(local_data, function (values,key) {
       var local_obj = {};
@@ -1775,7 +1780,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     return local_filter_array;
   }
 
-  var metricsMax = function (local_data,column_name) {
+  function metricsMax(local_data,column_name) {
     var local_filter_array = []
     _.map(local_data, function (values,key) {
       var local_obj = {};
@@ -1790,7 +1795,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     return local_filter_array;
   }
 
-  var metricsExtent = function (local_data,column_name) {
+  function metricsExtent(local_data,column_name) {
     var local_filter_array = []
     _.map(local_data, function (values,key) {
       var local_obj = {};
@@ -1805,7 +1810,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     return local_filter_array;
   }
 
-  var startFilterData = function (filter_obj) {
+  function tartFilterData(filter_obj) {
     var mode = filter_obj.mode,
         filters_array = filter_obj.filters,
         len = filters_array.length, columns;
@@ -1827,10 +1832,11 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
           //console.log('wrong condition type');
       }
     }
+    filters_array = null;
     return raw_data;
   }
 
-  var valueFilter = function (filter_obj,columns,mode) {
+  function valueFilter(filter_obj,columns,mode) {
     var _in = filter_obj['in']
       , not_in = filter_obj['not_in']
       , column_name = filter_obj['column_name']
@@ -1851,10 +1857,11 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
         return _.pick(obj,columns);
       });
     }
+    _in = not_in = column_name = data = raw_data_length = null;
     //console.log("value filter completed");
   };
 
-  var rangeFilter = function (filter_obj,columns,mode){
+  function rangeFilter(filter_obj,columns,mode){
     var min
       , max
       , not
@@ -1882,7 +1889,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     //console.log("rangeFilter done----");
   }
 
-  var processAlias = function(colname,aggregation_method) {
+  function processAlias(colname,aggregation_method) {
     var alias = query_object.alias;
     if (typeof alias[colname] === "string") {
       return alias[colname];

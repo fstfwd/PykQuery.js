@@ -35,7 +35,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       filtered_data = startSorting(filtered_data);
     }
     return filtered_data;
-    query_object = raw_data = global_divid_for_raw_data =global_divid_for_raw_data = raw_data = null; 
+    query_object = raw_data = global_divid_for_raw_data = raw_data = null; 
     query_object.filters = null;
   }
 
