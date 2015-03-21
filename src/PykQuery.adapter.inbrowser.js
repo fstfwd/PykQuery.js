@@ -151,7 +151,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
     return local_filter_array;
   }
 
-  function tartFilterData(filter_obj) {
+  function startFilterData(filter_obj) {
     var mode = filter_obj.mode,
         filters_array = filter_obj.filters,
         len = filters_array.length, columns;

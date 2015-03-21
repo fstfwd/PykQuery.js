@@ -1,11 +1,11 @@
 $(document).ready(function () {
 
             table1 = new PykQuery.init("aggregation", "local", "table1", "inbrowser"); 
-            table1.dimensions = ["circlename"];
-            table1.metrics = {"pincode":["sum"]};
+            table1.dimensions = ["Area"];
+            table1.metrics = {"Data Value":["sum"]};
             table1.alias = {
-                "circlename" : "name",
-                "pincode" : "weight"
+                "Area" : "name",
+                "Data Value" : "weight"
             };
 
             table2 = new PykQuery.init("aggregation", "local", "table2", "inbrowser"); 
@@ -16,7 +16,7 @@ $(document).ready(function () {
                 "household_population": "weight"
             };
 
-            d3.csv("data/ePaymentOffices.csv", function (data) {
+            d3.csv("data/testing.csv", function (data) {
                 // console.log(data.length)
                 window.g1 = new PykQuery.init("global", "global", "g1", "inbrowser");
                 // console.log("helloooooo",data)
@@ -31,7 +31,7 @@ $(document).ready(function () {
 
               table1.executeOnFilter = function() {
                 var d = table1.flushToGet();
-                // console.log("table1")
+                 console.log(d)
                 dataTable(d,table1.dimensions,table1.metrics,table1.alias,"#table1");
                 $("#table1 td").click(function(){
                 // var value = $(this).html();
