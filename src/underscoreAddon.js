@@ -22,7 +22,7 @@ _.mixin({
 
   // Return aritmethic mean of the elements
   // if an iterator function is given, it is applied before
-  mean : function(obj, iterator, context) {
+  average : function(obj, iterator, context) {
     if (!iterator && _.isEmpty(obj)) return Infinity;
     if (!iterator && _.isArray(obj)) return _.sum(obj)/obj.length;
     if (_.isArray(obj) && !_.isEmpty(obj)) return _.sum(obj, iterator, context)/obj.length;
@@ -41,7 +41,7 @@ _.mixin({
       tmpObj = _.clone(obj);
       tmpObj.sort(function(f,s){return f-s;});
     }else{
-      _.isArray(obj) && each(obj, function(value, index, list) {
+      _.isArray(obj) && _.each(obj, function(value, index, list) {
         tmpObj.push(iterator ? iterator.call(context, value, index, list) : value);
         tmpObj.sort();
       });
@@ -75,5 +75,4 @@ _.mixin({
 
     return range;
   }
-
 })

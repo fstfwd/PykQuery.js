@@ -35,7 +35,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       filtered_data = startSorting(filtered_data);
     }
     return filtered_data;
-    query_object = raw_data = global_divid_for_raw_data = raw_data = null; 
+    query_object = raw_data = global_divid_for_raw_data = raw_data = null;
     query_object.filters = null;
   }
 
@@ -89,11 +89,32 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
             individual_metric_length = individual_metric.length;
         for (var j = 0; j < individual_metric_length; j++) {
           switch (individual_metric[j]) {
+            case "sum":
+              local_obj[processAlias(prop[i],individual_metric[j])] = _.sum(value, function (values) {
+                return parseInt(values[prop[i]],10);
+              });
+              break;
             case "count":
               local_obj[processAlias(prop[i],individual_metric[j])] = value.length;
               break;
-            case "sum":
-              local_obj[processAlias(prop[i],individual_metric[j])] = _.sum(value, function (values) {
+            case "min":
+              local_obj[processAlias(prop[i],individual_metric[j])] = _.min(value, function (values) {
+                return parseInt(values[prop[i]],10);
+              })[prop[i]];
+              break;
+            case "max":
+              local_obj[processAlias(prop[i],individual_metric[j])] = _.max(value, function (values) {
+                return parseInt(values[prop[i]],10);
+              })[prop[i]];
+              break;
+            case "average":
+              local_obj[processAlias(prop[i],individual_metric[j])] = _.average(value, function (values) {
+                return parseInt(values[prop[i]],10);
+              });
+              break;
+            case "median":
+              console.log(value,prop)
+              local_obj[processAlias(prop[i],individual_metric[j])] = _.median(value, function (values) {
                 return parseInt(values[prop[i]],10);
               });
               break;
@@ -103,51 +124,6 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       prop = null;
       local_filter_array.push(local_obj);
     });
-    return local_filter_array;
-  }
-
-  function metricsMin(local_data,column_name) {
-    var local_filter_array = []
-    _.map(local_data, function (values,key) {
-      var local_obj = {};
-      local_obj[column_name] = key;
-      local_filter_array.push(local_obj);
-      local_obj["min"] = _.min(values, function (value) {
-        return value[column_name];
-      });
-      local_filter_array.push(local_obj);
-    });
-    //console.log(local_filter_array);
-    return local_filter_array;
-  }
-
-  function metricsMax(local_data,column_name) {
-    var local_filter_array = []
-    _.map(local_data, function (values,key) {
-      var local_obj = {};
-      local_obj[column_name] = key;
-      local_filter_array.push(local_obj);
-      local_obj["max"] = _.max(values, function (value) {
-        return value[column_name];
-      });
-      local_filter_array.push(local_obj);
-    });
-    //console.log(local_filter_array);
-    return local_filter_array;
-  }
-
-  function metricsExtent(local_data,column_name) {
-    var local_filter_array = []
-    _.map(local_data, function (values,key) {
-      var local_obj = {};
-      local_obj[column_name] = key;
-      local_filter_array.push(local_obj);
-      local_obj["extent"] = _.extent(values, function (value) {
-        return value[column_name];
-      });
-      local_filter_array.push(local_obj);
-    });
-    //console.log(local_filter_array);
     return local_filter_array;
   }
 

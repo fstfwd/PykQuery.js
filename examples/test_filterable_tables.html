@@ -56,9 +56,10 @@
         var that = this;
         this.execute = function () {
           var obj2 = b.flushToGet();
-          var html2 = "<table><tr><td>Zip</td><td>Beds</td></tr>";
+          var html2 = "<table><tr><td>Zip</td><td>Beds 1</td><td>Beds 2</td></tr>";
+          console.log(obj2);
           for (var i = 0; i< obj2.length; i++) {
-            html2 += "<tr><td><a data-id='"+obj2[i].name+"' class='filter2'>"+obj2[i].name+"</a></td><td>"+obj2[i].weight+"</td></tr>"
+            html2 += "<tr><td><a data-id='"+obj2[i].name+"' class='filter2'>"+obj2[i].name+"</a></td><td>"+obj2[i].size+"</td><td>"+obj2[i].weight+"</td></tr>"
           }
           html2 += "</table>";
           document.getElementById(options.selector).innerHTML = html2;
@@ -92,8 +93,8 @@
 
       b = new PykQuery.init("aggregation", "local", "b", "inbrowser");
       b.dimensions = ["zip"];
-      b.metrics = {"beds":["count","sum"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
-      b.alias = {"zip": "name","beds": {"sum": "bed_sum", "count": "weight"}};
+      b.metrics = {"beds":["average","count"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+      b.alias = {"zip": "name","beds": {"count": "size", "average": "weight"}};
       b.sort = [{"zip":"asc"}];
       b.executeOnFilter = function() {
         l.execute();

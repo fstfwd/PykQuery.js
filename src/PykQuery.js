@@ -425,7 +425,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
           break;
         }
         if (element.length>0 && element[0].classList.contains("pykquery-selected") && !new_filter_j.override_filter) {
-        } else {  
+        } else {
           var filter_group_processed = false;
           for (var k = 0; k < new_filter_j_len; k++) { // Iterate over internal loop of new filter
             var new_filter_k = new_filter_j[k]
@@ -965,7 +965,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   //[{"col1": ["min", "max"]}]
   function metricsValidation(m) {
-    var metric_functions = ['min', 'max', 'avg', 'sum', 'median', 'count'];
+    var metric_functions = ['sum', 'count', 'min', 'max', 'average', 'median'];
     if (Object.keys(m).length === 0) {
       errorHandling(21, "'metrics' object cannot be empty");
       return false;
