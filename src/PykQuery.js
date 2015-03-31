@@ -965,7 +965,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   //[{"col1": ["min", "max"]}]
   function metricsValidation(m) {
-    var metric_functions = ['sum', 'count', 'min', 'max', 'average', 'median'];
+    var metric_functions = ['sum', 'count', 'min', 'max', 'avg', 'median'];
     if (Object.keys(m).length === 0) {
       errorHandling(21, "'metrics' object cannot be empty");
       return false;

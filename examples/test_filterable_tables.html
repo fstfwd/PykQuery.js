@@ -93,8 +93,8 @@
 
       b = new PykQuery.init("aggregation", "local", "b", "inbrowser");
       b.dimensions = ["zip"];
-      b.metrics = {"beds":["average","count"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
-      b.alias = {"zip": "name","beds": {"count": "size", "average": "weight"}};
+      b.metrics = {"beds":["avg","count"]}//, {"sd": ["min"]}, {"sd": ["min"]}];
+      b.alias = {"zip": "name","beds": {"count": "size", "avg": "weight"}};
       b.sort = [{"zip":"asc"}];
       b.executeOnFilter = function() {
         l.execute();

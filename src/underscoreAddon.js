@@ -22,7 +22,7 @@ _.mixin({
 
   // Return aritmethic mean of the elements
   // if an iterator function is given, it is applied before
-  average : function(obj, iterator, context) {
+  avg : function(obj, iterator, context) {
     if (!iterator && _.isEmpty(obj)) return Infinity;
     if (!iterator && _.isArray(obj)) return _.sum(obj)/obj.length;
     if (_.isArray(obj) && !_.isEmpty(obj)) return _.sum(obj, iterator, context)/obj.length;

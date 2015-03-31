@@ -107,8 +107,8 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
                 return parseInt(values[prop[i]],10);
               })[prop[i]];
               break;
-            case "average":
-              local_obj[processAlias(prop[i],individual_metric[j])] = _.average(value, function (values) {
+            case "avg":
+              local_obj[processAlias(prop[i],individual_metric[j])] = _.avg(value, function (values) {
                 return parseInt(values[prop[i]],10);
               });
               break;
