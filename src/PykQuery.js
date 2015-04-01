@@ -564,28 +564,32 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
             column_name = new_filter_k.column_name,
             condition_type = new_filter_k.condition_type;
           if (filterValidation(new_filter_k)) {
-            for (var l = 0; l < where_clause_length; l++) { // Iterate over external array of old filter
+            for (var l = where_clause_length-1; l >= 0; l--) { // Iterate over external array of old filter
               var old_filter = where_clause[l]
                 , old_filter_length = old_filter.length
-                , temp_where_clause_to_remove_filter = where_clause.slice(0);
               if (old_filter_length === 1) {
-                for (var x = 0; x < where_clause_length; x++) { // Iterate over internal array of old filter
+                for (var x = old_filter_length-1; x >= 0; x--) { // Iterate over internal array of old filter
                   var old_filter_x = old_filter[x]
                     , old_filter_x_colname = old_filter_x['column_name']
                     , old_filter_x_condition = old_filter_x['condition_type']
-                    , where_clause_x = temp_where_clause_to_remove_filter[x];
-                  if (where_clause_x['column_name'] === column_name && where_clause_x['condition_type'] === condition_type) {
+                  if (old_filter_x_colname === column_name && old_filter_x_condition === condition_type) {
                     if (condition_type === "values" || condition_type === "datatype") {
-                      if (_.difference(where_clause_x.in, name_j.in).length===0 && _.difference(where_clause_x.not_in, name_j.not_in).length===0) {
-                        where_clause.splice(x,1);
+                      if (_.difference(old_filter_x.in, new_filter_k.in).length===0 && _.difference(old_filter_x.not_in, new_filter_k.not_in).length===0) {
+                        old_filter.splice(x,1);
+                        if (old_filter.length === 0) {
+                          where_clause.splice(l,1);
+                        }
                         is_deleted = true;
                       }
                     } else if (condition_type === "range") {
-                      var __min = name_j['condition']['min'];
-                      var __max = name_j['condition']['max'];
+                      var __min = new_filter_k['condition']['min'];
+                      var __max = new_filter_k['condition']['max'];
                       if(!util_is_blank(__min) && !util_is_blank(__max)) {
-                        if(__min === where_clause_x['condition']['min'] && __max === where_clause_x['condition']['max']) {
-                          where_clause.splice(x,1);
+                        if(__min === old_filter_x['condition']['min'] && __max === old_filter_x['condition']['max']) {
+                          old_filter.splice(x,1);
+                          if (old_filter.length === 0) {
+                            where_clause.splice(l,1);
+                          }
                           is_deleted = true;
                         }
                       }
@@ -598,6 +602,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         }
       }
     }
+
     if (caller_scope && is_deleted && call_to_filter) {
       caller_scope.call();
     }
@@ -606,6 +611,14 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   function removeFilterPropagate(name,caller_scope,call_to_filter) {
+    var new_filter_length = name.length;
+    for (var i = 0; i < new_filter_length; i++) {
+      var new_filter_i = name[i]
+        , new_filter_i_len = new_filter_i.length;
+      for (var j = 0; j < new_filter_i_len; j++) {
+        new_filter_i[j].node_div_id_triggering_event = div_id;
+      }
+    }
     if(_scope === "node") {
       var len = __impacts.length;
       for(var j =0;j<len;j++) {
