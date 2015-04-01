@@ -23,7 +23,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       case "aggregation":
         filtered_data = startAggregation(query_object);
         break;
-      case "unique":
+      case "select":
         break;
       case "datatype":
         break;
