@@ -2,12 +2,12 @@ PykQuery.adapter = PykQuery.adapter || {};
 PykQuery.adapter.inbrowser = {};
 //PykQuery.adapter.inbrowser.init(query);
 PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
-  // data which is used for filtering data is in global_divid_for_raw_data
+  // data which is used for filtering data is in connector_divid_for_raw_data
   var query_object = pykquery,
       raw_data,
-      global_divid_for_raw_data = pykquery.global_divid_for_raw_data,
-  global_divid_for_raw_data = window[global_divid_for_raw_data];
-  raw_data = global_divid_for_raw_data.rawdata;
+      connector_divid_for_raw_data = pykquery.connector_divid_for_raw_data,
+  connector_divid_for_raw_data = window[connector_divid_for_raw_data];
+  raw_data = connector_divid_for_raw_data.rawdata;
   query_object.filters = queryable_filters;
 
   // function call by adapter from pykquery.js
@@ -35,7 +35,7 @@ PykQuery.adapter.inbrowser.init = function (pykquery, queryable_filters){
       filtered_data = startSorting(filtered_data);
     }
     return filtered_data;
-    query_object = raw_data = global_divid_for_raw_data = raw_data = null;
+    query_object = raw_data = connector_divid_for_raw_data = raw_data = null;
     query_object.filters = null;
   }
 

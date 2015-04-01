@@ -1,6 +1,6 @@
 var PykQuery = {};
-PykQuery.global_names = [];
-PykQuery.local_names = [];
+PykQuery.connector_names = [];
+PykQuery.node_names = [];
 PykQuery.query_json = {};
 
 var queryjson = {},
@@ -15,11 +15,11 @@ var restoreFilters = function () {
         saved_filters_length = saved_filters.length;
 
     for (var  i = 0; i < saved_filters_length; i++) {
-      is_interactive = (query_object.scope === "local") ? false : true;
-      query_object.addFilter([saved_filters[i]], is_interactive, true,query_object.localdividtriggeringevent, true);
+      is_interactive = (query_object.scope === "node") ? false : true;
+      query_object.addFilter([saved_filters[i]], is_interactive, true,query_object.nodedividtriggeringevent, true);
     }
     if (saved_filters_length === 0) {
-      if(query_object.scope === "global"){
+      if(query_object.scope === "connector"){
         var get_class_filter_list = document.getElementsByClassName('filter_list');
         if (get_class_filter_list.length > 0) {
           var div = get_class_filter_list[0].parentNode.id;
@@ -48,9 +48,9 @@ var setQueryJSON = function (id,scope,filters) {
 
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   var self = this;
-  var div_id, mode, _scope, adapter, global_exists, local_exists, local_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters, consolidated_filters = [],
-      available_mode = ["aggregation", "unique", "select", "datatype", "global"],
-      available_scope = ["local", "global"],
+  var div_id, mode, _scope, adapter, connector_exists, node_exists, node_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters, consolidated_filters = [],
+      available_mode = ["aggregation", "unique", "select", "datatype", "connector"],
+      available_scope = ["node", "connector"],
       available_adapters = ["inbrowser", "rumi"],
       available_dataformat = ["csv","json","array"];
 
@@ -76,22 +76,22 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     mode = mode_param;
     _scope = _scope_param;
     adapter = adapter_param;
-    div_id = (_scope === "local") ? divid_param.replace("#","") : divid_param;
-    global_exists = (_scope === "global") ? _.find(PykQuery.global_names,function(d){ return (d === div_id); }) : null;
-    local_exists = (_scope === "local") ? _.find(PykQuery.local_names,function(d){ return (d === div_id); }) : null;
+    div_id = (_scope === "node") ? divid_param.replace("#","") : divid_param;
+    connector_exists = (_scope === "connector") ? _.find(PykQuery.connector_names,function(d){ return (d === div_id); }) : null;
+    node_exists = (_scope === "node") ? _.find(PykQuery.node_names,function(d){ return (d === div_id); }) : null;
 
-    if (mode == "global" && _scope != "global"){
-      errorHandling(1, div_id + ": scope and mode both should be global");
+    if (mode == "connector" && _scope != "connector"){
+      errorHandling(1, div_id + ": scope and mode both should be connector");
       return false;
     }
 
     //Checks if div_id exists in DOM
-    if(global_exists == undefined && _scope == "global") {
-      PykQuery.global_names.push(div_id);
+    if(connector_exists == undefined && _scope == "connector") {
+      PykQuery.connector_names.push(div_id);
       flag = true;
     }
-    else if (local_exists == undefined && _scope == "local") {
-      PykQuery.local_names.push(div_id);
+    else if (node_exists == undefined && _scope == "node") {
+      PykQuery.node_names.push(div_id);
       flag = true;
     }
     else {
@@ -126,14 +126,14 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   alias = {},
   filter_data,
   raw_data,
-  global_divid_for_rawdata,
+  connector_divid_for_rawdata,
   data_format,
   data_type = [],
   call_append_selected_class = true;
-  // set the global data to pykquery
+  // set the connector data to pykquery
   this.executeOnFilter = function () {}
 
-  if(mode === "global" && _scope === "global" && adapter === "inbrowser") {
+  if(mode === "connector" && _scope === "connector" && adapter === "inbrowser") {
     Object.defineProperty(this, 'rawdata', {
       get: function() {
         return raw_data;
@@ -143,13 +143,13 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
     });
   }
-  if(_scope === "local" && adapter === "inbrowser") {
-    Object.defineProperty(this, 'global_divid_for_raw_data', {
+  if(_scope === "node" && adapter === "inbrowser") {
+    Object.defineProperty(this, 'connector_divid_for_raw_data', {
       get: function() {
-        return global_divid_for_rawdata;
+        return connector_divid_for_rawdata;
       },
-      set: function(my_global_div_id) {
-        global_divid_for_rawdata = my_global_div_id;
+      set: function(my_connector_div_id) {
+        connector_divid_for_rawdata = my_connector_div_id;
       }
     });
   }
@@ -233,7 +233,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       });
       break;
     case "datatype":
-      if (mode === "datatype" && _scope === "local" && adapter === "rumi") {
+      if (mode === "datatype" && _scope === "node" && adapter === "rumi") {
         Object.defineProperty(this, 'datatype', {
           get: function() {
             return data_type;
@@ -253,12 +253,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   });
 
-  Object.defineProperty(this, 'localdividtriggeringevent', {
+  Object.defineProperty(this, 'nodedividtriggeringevent', {
     get: function() {
-      return local_div_id_triggering_event;
+      return node_div_id_triggering_event;
     },
     set: function(id) {
-      local_div_id_triggering_event = id;
+      node_div_id_triggering_event = id;
     }
   });
 
@@ -295,7 +295,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
   });
 
-  // The end user must not be using it. Its used internally to set the impact of another global for handling cyclical loops.
+  // The end user must not be using it. Its used internally to set the impact of another connector for handling cyclical loops.
   Object.defineProperty(this, 'impacts', {
     get: function() {
       return __impacts;
@@ -376,16 +376,16 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   });
 
   this.addFilter = function(name, is_interactive, call_to_filter, domid, restore){
-    if(is_interactive && _scope === "global"){
+    if(is_interactive && _scope === "connector"){
       addFilterInQuery(name,is_interactive, call_to_filter,this,restore);
       if (document.getElementsByClassName(div_id+'-filter_list').length > 0) {
         showFilterList();
       }
-    } else if(is_interactive && _scope === "local"){
+    } else if(is_interactive && _scope === "node"){
       addFilterPropagate(name, call_to_filter);
-    } else if(!is_interactive && _scope === "local"){ //onload
+    } else if(!is_interactive && _scope === "node"){ //onload
       addFilterInQuery(name,is_interactive, call_to_filter,this,restore);
-    } else if(!is_interactive && _scope === "global"){
+    } else if(!is_interactive && _scope === "connector"){
       //not possible
     }
   }
@@ -485,7 +485,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
     if (!duplicate_filter) {
       if (is_new_filter === true){
-        if (caller_scope && caller_scope.scope==="global" && call_to_filter) {
+        if (caller_scope && caller_scope.scope==="connector" && call_to_filter) {
           caller_scope.call();
         }
       } else {
@@ -505,17 +505,17 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
    is_new_filter = where_clause_length = new_filter_length = duplicate_filter = null;
   }
 
-  // If a local filter is changed and it impacts a global then append to global
+  // If a node filter is changed and it impacts a connector then append to connector
   function addFilterPropagate(new_filter,call_to_filter) {
     var new_filter_length = new_filter.length;
     for (var i = 0; i < new_filter_length; i++) {
       var new_filter_i = new_filter[i]
         , new_filter_i_len = new_filter_i.length;
       for (var j = 0; j < new_filter_i_len; j++) {
-        new_filter_i[j].local_div_id_triggering_event = div_id;
+        new_filter_i[j].node_div_id_triggering_event = div_id;
       }
     }
-    if (_scope === "local") {
+    if (_scope === "node") {
       var len = __impacts.length;
       for (var j = 0; j < len; j++) {
         window[__impacts[j]].addFilter(new_filter, true,call_to_filter, div_id);
@@ -524,16 +524,16 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   this.removeFilter = function(name, is_interactive,call_to_filter){
-    if(is_interactive && _scope === "global"){
+    if(is_interactive && _scope === "connector"){
       removeFilterInQuery(name,this,call_to_filter);
       if (document.getElementsByClassName(div_id+'-filter_list').length > 0) {
         showFilterList();
       }
-    } else if(is_interactive && _scope === "local"){
+    } else if(is_interactive && _scope === "node"){
       removeFilterPropagate(name,this,call_to_filter);
-    } else if(!is_interactive && _scope === "local"){ //onload
+    } else if(!is_interactive && _scope === "node"){ //onload
       removeFilterInQuery(name,this,call_to_filter);
-    } else if(!is_interactive && _scope === "global"){
+    } else if(!is_interactive && _scope === "connector"){
       //not possible
     }
   }
@@ -606,7 +606,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   function removeFilterPropagate(name,caller_scope,call_to_filter) {
-    if(_scope === "local") {
+    if(_scope === "node") {
       var len = __impacts.length;
       for(var j =0;j<len;j++) {
         window[__impacts[j]].removeFilter(name,caller_scope,call_to_filter);
@@ -677,7 +677,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   this.resetFilters = function(){
-    if(_scope === "global"){
+    if(_scope === "connector"){
       while (where_clause.length>0) {
         where_clause.pop();
       }
@@ -688,12 +688,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         showFilterList();
       }
     } else {
-      errorHandling(9, "You cannot run resetFilters on local. Please run it on a Global");
+      errorHandling(9, "You cannot run resetFilters on node. Please run it on a Connector");
     }
   }
 
   this.resetDimensions = function(){
-    if(_scope === "local"){
+    if(_scope === "node"){
       while(this.dimensions.length > 0) {
         removeIndividualAdditionalQueryParams(this.dimensions[this.dimensions.length-1], this);
         this.dimensions.pop();
@@ -702,24 +702,24 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
-      errorHandling(10, "Globals do not have dimensions. Please run it on a local");
+      errorHandling(10, "Connectors do not have dimensions. Please run it on a node");
     }
   }
 
   this.resetDatatypes = function(){
-    if(_scope === "local"){
+    if(_scope === "node"){
       while(this.datatype.length > 0) {
         this.datatype.pop();
       }
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
-      errorHandling(11, "Globals do not have datatypes. Please run it on a local");
+      errorHandling(11, "Connectors do not have datatypes. Please run it on a node");
     }
   }
 
   this.resetMetrics = function(){
-    if(_scope === "local"){
+    if(_scope === "node"){
       for (var key in this.metrics) {
         removeIndividualAdditionalQueryParams(key, this);
         delete this.metrics[key];
@@ -728,7 +728,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       query_restore = false;
       setQueryJSON(this.div_id,this.scope,[]);
     } else {
-      errorHandling(12, "Globals do not have metrics. Please run it on a local");
+      errorHandling(12, "Connectors do not have metrics. Please run it on a node");
     }
   }
 
@@ -773,7 +773,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   this.destroyColumn = function (column) {
-    if (_scope === "global") {
+    if (_scope === "connector") {
       this.removeDimensions([column]);
       this.removeMetrics([column]);
       var len =  __impacts.length;
@@ -789,7 +789,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   function changeColumnNameInternally(caller_scope, old_column, new_column) {
     var current_filters = caller_scope.filters;
-    if (_scope === "local") {
+    if (_scope === "node") {
       var dimensions = caller_scope.dimensions
         , metrics = caller_scope.metrics
         , alias = caller_scope.alias
@@ -839,7 +839,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   this.changeColumnName = function (old_column, new_column, is_propogated) {
-    if (_scope === "global") {
+    if (_scope === "connector") {
       changeColumnNameInternally(this, old_column, new_column);
       var len =  __impacts.length;
       for (var i = 0; i < len; i++) {
@@ -866,23 +866,23 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         //loop on array_of_div_ids for each d
         var query_object = window[array_of_div_ids[i]];
         query_object.impactedby = this.div_id;//d.impacted_by(this)
-        if (this.scope ==="local") {
-          setGlobalDivIdForRawData(this,array_of_div_ids[i]);
+        if (this.scope ==="node") {
+          setConnectorDivIdForRawData(this,array_of_div_ids[i]);
         } else {
-          setGlobalDivIdForRawData(query_object,this.div_id);
+          setConnectorDivIdForRawData(query_object,this.div_id);
         }
         if(is_cyclical){
           __impactedby.push(array_of_div_ids[i]);
           query_object.impacts.push(this.div_id);
-          setGlobalDivIdForRawData(query_object,this.div_id);
+          setConnectorDivIdForRawData(query_object,this.div_id);
         }
       }
     }
   }
 
-  function setGlobalDivIdForRawData(that,id) {
-    if (!that.global_divid_for_raw_data) {
-      that.global_divid_for_raw_data = id;
+  function setConnectorDivIdForRawData(that,id) {
+    if (!that.connector_divid_for_raw_data) {
+      that.connector_divid_for_raw_data = id;
     }
   }
 
@@ -890,12 +890,12 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     var len = array_of_div_ids.length,
         impacts_allowed_on,
         query_object;
-    if (_scope === "local") {
+    if (_scope === "node") {
       error_code = 13;
-      impacts_allowed_on = "global";
+      impacts_allowed_on = "connector";
     } else {
       error_code = 7;
-      impacts_allowed_on = "local";
+      impacts_allowed_on = "node";
     }
     for (var i = 0; i < len; i++) {
       query_object = window[array_of_div_ids[i]];
@@ -993,25 +993,25 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   this.flushToGet = function(){
-    if (_scope === "local") {
+    if (_scope === "node") {
       var t = filter_data;
       filter_data = "";
       return t;
     } else {
-      errorHandling(25, "Cannot call flushToGet to on a Global PykQuery");
+      errorHandling(25, "Cannot call flushToGet to on a Connector PykQuery");
     }
   }
 
   this.call = function() {
     var that = this;
-    if (_scope === "local") {
+    if (_scope === "node") {
       invoke_call(getConfig(that));
       // this.executeOnFilter();
     } else {
       var len = __impacts.length;
       for(var j = 0; j < len; j++) {
-        var local_filter = window[__impacts[j]];
-        local_filter.filter_data = local_filter.call();
+        var node_filter = window[__impacts[j]];
+        node_filter.filter_data = node_filter.call();
       }
       if (call_append_selected_class) {
         this.appendClassSelected();
@@ -1025,19 +1025,19 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var consolidated_filters = _.flatten(window[div_id].filters),
           consolidated_filters_length = consolidated_filters.length,
           len = __impactedby.length,
-          global_filter,
-          global_filter_length,
+          connector_filter,
+          connector_filter_length,
           each_filter,
           each_filter_length;
 
       for(var i = 0; i < len; i++) {
-        global_filter = window[__impactedby[i]].filters;
-        global_filter_length  = global_filter.length;
-        for (var j = 0; j < global_filter_length; j++) {
-          each_filter = global_filter[j];
+        connector_filter = window[__impactedby[i]].filters;
+        connector_filter_length  = connector_filter.length;
+        for (var j = 0; j < connector_filter_length; j++) {
+          each_filter = connector_filter[j];
           each_filter_length = each_filter.length;
           for (var k = 0; k < each_filter_length; k++) {
-            if (each_filter[k] && each_filter[k].local_div_id_triggering_event !== div_id) {
+            if (each_filter[k] && each_filter[k].node_div_id_triggering_event !== div_id) {
               consolidated_filters.push(each_filter[k]);
             }
           }
@@ -1047,7 +1047,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   function generateQueryableFiltersArray(){
-    // if (_scope === "local") {
+    // if (_scope === "node") {
     var consolidated_filters_length = consolidated_filters.length
       , filters_with_group = []
       , filters_without_group = []
@@ -1075,7 +1075,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         var obj = {
           "column_name": each_filter[0].column_name,
           "condition_type": each_filter[0].condition_type,
-          "local_div_id_triggering_event": each_filter[0].local_div_id_triggering_event,
+          "node_div_id_triggering_event": each_filter[0].node_div_id_triggering_event,
           "next": each_filter[0]['next']
         }
         if (each_filter[0].hasOwnProperty('group')) {
@@ -1105,7 +1105,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     }
     return filters_with_group.concat(queryable_filters);
     // } else {
-    //   errorHandling(101, "Cannot call generateQueryableFiltersArray on a Global PykQuery");
+    //   errorHandling(101, "Cannot call generateQueryableFiltersArray on a Connector PykQuery");
     // }
   }
 
@@ -1115,7 +1115,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
     if(adapter === "inbrowser"){
       var connector = new PykQuery.adapter.inbrowser.init(query, queryable_filters);
       filter_data = connector.call();
-      if(_scope === "local") {
+      if(_scope === "node") {
         self.executeOnFilter();
       }
 
@@ -1125,7 +1125,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       var connector = new PykQuery.adapter.rumi.init(query, rumi_params, queryable_filters);
       return connector.call(function (response) {
         filter_data = response;
-        if(_scope === "local") {
+        if(_scope === "node") {
           self.executeOnFilter();
         }
         return filter_data;
@@ -1181,7 +1181,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   // urlParams("type","startup",1);
 
   this.appendClassSelected = function () {
-    if (this.scope === "global") {
+    if (this.scope === "connector") {
       if (where_clause) {
         var divs = document.querySelectorAll(".pykquery-selected"),
             divs_length = divs.length,
@@ -1203,7 +1203,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         }
       }
     } else {
-      errorHandling(26,"Cannot call appendClassSelected() on local")
+      errorHandling(26,"Cannot call appendClassSelected() on node")
     }
   }
 
@@ -1460,7 +1460,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   }
 
   function removeFilterFromList(filter_to_be_removed) {
-    var key = filter_to_be_removed[0].local_div_id_triggering_event;
+    var key = filter_to_be_removed[0].node_div_id_triggering_event;
     window[key].removeFilter([filter_to_be_removed], true,true);
   }
 };
