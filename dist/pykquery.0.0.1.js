@@ -126,10 +126,10 @@ var setQueryJSON = function (id,scope,filters) {
 
 PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   var self = this;
-  var div_id, mode, _scope, adapter, connector_exists, node_exists, node_div_id_triggering_event, rumi_params = adapter_param,  queryable_filters, consolidated_filters = [],
+  var div_id, mode, _scope, adapter, connector_exists, node_exists, node_div_id_triggering_event, table_name = adapter_param,  queryable_filters, consolidated_filters = [],
       available_mode = ["aggregation", "unique", "select", "datatype", "connector"],
       available_scope = ["node", "connector"],
-      available_adapters = ["inbrowser", "rumi"],
+      available_adapters = ["inbrowser", "db"],
       available_dataformat = ["csv","json","array"];
 
   var util = new PykUtil.init()
@@ -231,13 +231,13 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       }
     });
   }
-  if(adapter === "rumi") {
-    Object.defineProperty(this, 'rumiparams', {
+  if(adapter === "db") {
+    Object.defineProperty(this, 'tablename', {
       get: function() {
-        return rumi_params;
+        return table_name;
       },
       set: function(params) {
-        rumi_params = params;
+        table_name = params;
       }
     });
 
@@ -311,7 +311,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       });
       break;
     case "datatype":
-      if (mode === "datatype" && _scope === "node" && adapter === "rumi") {
+      if (mode === "datatype" && _scope === "node" && adapter === "db") {
         Object.defineProperty(this, 'datatype', {
           get: function() {
             return data_type;
@@ -1213,7 +1213,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       return filter_data;
     }
     else{
-      var connector = new PykQuery.adapter.rumi.init(query, rumi_params, queryable_filters);
+      var connector = new PykQuery.adapter.db.init(query, table_name, queryable_filters);
       return connector.call(function (response) {
         filter_data = response;
         if(_scope === "node") {
@@ -1240,7 +1240,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   };
 
   /* -------------- URL params ------------ */
-  // var filters = ["Pykih","mumbai","startup"];
   function urlParams(attr,filter,the_change) {
     var url_params = "", index;
 
@@ -1262,12 +1261,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       filters.splice(index,1);
     };
   };
-  // urlParams("name","Pykih",0);
-  // urlParams("location","Mumbai",0);
-  // urlParams("type","startup",0);
-  // urlParams("location","Mumbai",1);
-  // urlParams("name","Pykih",1);
-  // urlParams("type","startup",1);
 
   this.appendClassSelected = function () {
     if (this.scope === "connector") {
@@ -1555,18 +1548,17 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 };
 
 PykQuery.adapter = PykQuery.adapter || {};
-PykQuery.adapter.rumi = {};
+PykQuery.adapter.db = {};
 
-PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params, queryable_filters) {
+PykQuery.adapter.db.init = function(pykquery_json,table_name, queryable_filters) {
 
   this.call = function(onComplete) {
     var xmlhttp;
 
-    if(rumi_params) {
+    if(table_name) {
       pykquery_json["filters"] = queryable_filters;
       var data = {
-        config: pykquery_json,
-        token: gon.token
+        config: pykquery_json
       };
     } else {
       return false;
@@ -1582,7 +1574,7 @@ PykQuery.adapter.rumi.init = function(pykquery_json,rumi_params, queryable_filte
         onComplete(JSON.parse(xmlhttp.response));
       }
     }
-    xmlhttp.open("POST",rumi_api_endpoint + rumi_params + "filter/show",true);
+    xmlhttp.open("POST",db_api_endpoint + table_name + "filter/show",true);
     xmlhttp.send(JSON.stringify(data));
   }
 }
