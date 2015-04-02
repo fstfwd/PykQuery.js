@@ -978,7 +978,7 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
 
   //[{"col1": ["min", "max"]}]
   function metricsValidation(m) {
-    var metric_functions = ['sum', 'count', 'min', 'max', 'avg', 'median'];
+    var metric_functions = ['sum', 'count', 'min', 'max', 'avg', 'median','countOfUnique'];
     if (Object.keys(m).length === 0) {
       errorHandling(21, "'metrics' object cannot be empty");
       return false;
@@ -1164,7 +1164,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
   /* -------------- URL params ------------ */
   // var filters = ["Pykih","mumbai","startup"];
   function urlParams(attr,filter,the_change) {
-    // console.log(url,"***",params,"***",filters,filters.length);
     var url_params = "", index;
 
     if(the_change === 0) { // Add to URL
@@ -1184,7 +1183,6 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
       index = _.indexOf(filters,filter);
       filters.splice(index,1);
     };
-    // console.log("URL STring: ",url_params,"****"/*,filters,params*/);
   };
   // urlParams("name","Pykih",0);
   // urlParams("location","Mumbai",0);
