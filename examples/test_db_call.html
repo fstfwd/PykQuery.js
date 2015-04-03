@@ -3,7 +3,7 @@
     <script src='../lib/underscore-min.js'></script>
     <script src="../src/PykUtil.js"></script>
     <script src="../src/PykQuery.js"></script>
-    <script src="../src/PykQuery.adapter.rumi.js"></script>
+    <script src="../src/PykQuery.adapter.db.js"></script>
   </head>
   <body>
     <div id="g1">
@@ -12,18 +12,18 @@
     </div>
     <script type="text/javascript">
 
-      var a = new PykQuery.init("unique", "local", "a", "rumi");
+      var a = new PykQuery.init("unique", "local", "a", "db");
       a.unique = ["District"]
       a.datastoreurl = "darpan/pykquery-testing/helloworld"
       a.storeObjectInMemory('a');
 
-      var b = new PykQuery.init("aggregation", "local", "b", "rumi");
+      var b = new PykQuery.init("aggregation", "local", "b", "db");
       b.dimensions = ["Block"];
       b.metrics = [{"Kharif": ["count"]}, {"Rabi": ["sum"]}];
       b.datastoreurl = "darpan/pykquery-testing/helloworld"
       b.storeObjectInMemory('b');
 
-      var g1 = new PykQuery.init("global", "global", "g1", "rumi");
+      var g1 = new PykQuery.init("global", "global", "g1", "db");
       g1.storeObjectInMemory('g1');
       g1.datastoreurl = "darpan/pykquery-testing/helloworld"
       g1.addImpacts(["a", "b"], true);
