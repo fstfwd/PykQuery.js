@@ -46,7 +46,7 @@
           $(".filter1").click(function () {
             var value = $(this).html(),
                 id = $(this).attr('data-id');
-            a.addFilter([[{"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}]], true);
+            a.addFilter([[{"column_name": "city", "condition_type": "values", "in": [value], "next": "OR", "selected_dom_id": id}]], true, true);
             $("#filters_json").html(JSON.stringify(PykQuery.query_json,"null", "\t"));
           });
         }
@@ -67,7 +67,7 @@
           $(".filter2").click(function () {
             var value = $(this).html(),
                 id = $(this).attr('data-id');
-            b.addFilter([[{"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR", "selected_dom_id": id}]], true);
+            b.addFilter([[{"column_name": "zip", "condition_type": "values", "in": [parseInt(value,10)], "next": "OR", "selected_dom_id": id}]], true, true);
             $("#filters_json").html(JSON.stringify(PykQuery.query_json,"null", "\t"));
           });
         }
