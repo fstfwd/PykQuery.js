@@ -1654,6 +1654,7 @@ PykQuery.adapter.db.init = function(pykquery_json,table_name, queryable_filters)
       }
     }
     xmlhttp.open("POST",db_api_endpoint + table_name + "filter/show",true);
+    xmlhttp.setRequestHeader("Content-Type","text/plain; charset=utf-8")
     xmlhttp.send(JSON.stringify(data));
   }
 }
