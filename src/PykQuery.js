@@ -877,17 +877,18 @@ PykQuery.init = function(mode_param, _scope_param, divid_param, adapter_param) {
         __impacts.push(array_of_div_ids[i]);
 
         //loop on array_of_div_ids for each d
-        var query_object = window[array_of_div_ids[i]];
+        var query_object = window[array_of_div_ids[i]]
+          , scope = this.scope;
         query_object.impactedby = this.div_id;//d.impacted_by(this)
-        if (this.scope ==="node") {
-          setConnectorDivIdForRawData(this,array_of_div_ids[i]);
-        } else {
+        if (scope === "connector") {
           setConnectorDivIdForRawData(query_object,this.div_id);
         }
         if(is_cyclical){
           __impactedby.push(array_of_div_ids[i]);
           query_object.impacts.push(this.div_id);
-          setConnectorDivIdForRawData(query_object,this.div_id);
+          if (scope === "node") {
+            setConnectorDivIdForRawData(this,array_of_div_ids[i]);
+          }
         }
       }
     }
